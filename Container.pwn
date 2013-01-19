@@ -175,6 +175,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+
 		native OnPlayerAddToContainer(playerid, containerid, itemid);
 		{
 			Called:
@@ -187,7 +188,31 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				-
 		}
 
+		native OnPlayerAddedToContainer(playerid, containerid, itemid);
+		{
+			Called:
+				-
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
 		native OnPlayerTakeFromContainer(playerid, containerid, slotid);
+		{
+			Called:
+				-
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native OnPlayerTakenFromContainer(playerid, containerid, slotid);
 		{
 			Called:
 				-
@@ -525,7 +550,9 @@ static
 forward OnPlayerOpenContainer(playerid, containerid);
 forward OnPlayerCloseContainer(playerid, containerid);
 forward OnPlayerAddToContainer(playerid, containerid, itemid);
+forward OnPlayerAddedToContainer(playerid, containerid, itemid);
 forward OnPlayerTakeFromContainer(playerid, containerid, slotid);
+forward OnPlayerTakenFromContainer(playerid, containerid, slotid);
 forward OnPlayerViewContainerOpt(playerid, containerid);
 forward OnPlayerSelectContainerOpt(playerid, containerid, option);
 
@@ -622,6 +649,9 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 
 	RemoveItemFromWorld(itemid);
 
+	if(playerid != INVALID_PLAYER_ID)
+		CallLocalFunction("OnPlayerAddedToContainer", "ddd", playerid, containerid, itemid);
+	
 	return 1;
 }
 
@@ -646,6 +676,8 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
 		cnt_Items[containerid][(cnt_Data[containerid][cnt_size] - 1)] = INVALID_ITEM_ID;
 	}
 	
+	CallLocalFunction("OnPlayerTakenFromContainer", "ddd", playerid, containerid, slotid);
+
 	return 1;
 }
 
