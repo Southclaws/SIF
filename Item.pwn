@@ -56,7 +56,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native SIF/Item/Core
 		native -
 
-		native CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
+		native CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
 		{
 			Description:
 				Creates an item in the game world at the specified coordinates
@@ -883,14 +883,27 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if !defined _SIF_CORE_INCLUDED
+	#include <SIF/Core.pwn>
+#endif
+
+#if !defined _SIF_BUTTON_INCLUDED
+	#include <SIF/Button.pwn>
+#endif
+
+#include <YSI\y_iterate>
+#include <YSI\y_timers>
+#include <YSI\y_hooks>
+#include <streamer>
+
+#define _SIF_ITEM_INCLUDED
+
+
 /*==============================================================================
 
 	Setup
 
 ==============================================================================*/
-
-
-#include <YSI\y_hooks>
 
 
 #define ITM_MAX				(10000)
@@ -1012,7 +1025,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
+stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
 {
 	new id = Iter_Free(itm_Index);
 
@@ -1369,7 +1382,7 @@ stock RemoveCurrentItem(playerid)
 
 CreateItemInWorld(itemid,
 	Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
-	Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0,
+	Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0,
 	Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
 {
 	if(!Iter_Contains(itm_Index, itemid))return 0;
@@ -1377,6 +1390,15 @@ CreateItemInWorld(itemid,
 	new ItemType:itemtype = itm_Data[itemid][itm_type];
 
 	if(!IsValidItemType(itemtype))return 0;
+
+	if(rx == 1000.0)
+		rx = itm_TypeData[itemtype][itm_rotX];
+
+	if(ry == 1000.0)
+		ry = itm_TypeData[itemtype][itm_rotY];
+
+	if(rz == 1000.0)
+		rz = itm_TypeData[itemtype][itm_rotZ];
 
 	itm_Data[itemid][itm_posX]					= x;
 	itm_Data[itemid][itm_posY]					= y;
@@ -1402,7 +1424,7 @@ CreateItemInWorld(itemid,
 	return 1;
 }
 
-RemoveItemFromWorld(itemid)
+stock RemoveItemFromWorld(itemid)
 {
 	if(!Iter_Contains(itm_Index, _:itemid))return 0;
 
@@ -1446,7 +1468,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				if(i == playerid || itm_Holding[i] != INVALID_ITEM_ID || itm_Interacting[i] != INVALID_ITEM_ID)
 					continue;
 
-				if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]))
+				if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]) && !IsPlayerInAnyVehicle(i))
 				{
 					PlayerGiveItem(playerid, i, 1);
 					return 1;

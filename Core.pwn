@@ -121,14 +121,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#include <YSI\y_iterate>
+#include <YSI\y_timers>
+#include <YSI\y_hooks>
+#include <streamer>
+
+#define _SIF_CORE_INCLUDED
+
+
 /*==============================================================================
 
 	Setup
 
 ==============================================================================*/
-
-
-#include <YSI\y_hooks>
 
 
 new
@@ -140,6 +145,13 @@ Timer:		gPlayerMsgBoxTimer	[MAX_PLAYERS];
 
 forward OnPlayerEnterPlayerArea(playerid, targetid);
 forward OnPlayerLeavePlayerArea(playerid, targetid);
+
+
+/*==============================================================================
+
+	Connection
+
+==============================================================================*/
 
 
 hook OnPlayerConnect(playerid)
@@ -166,9 +178,15 @@ hook OnPlayerDisconnect(playerid)
 
 hook OnPlayerSpawn(playerid)
 {
-
 	AttachDynamicAreaToPlayer(gPlayerArea[playerid], playerid);
 }
+
+
+/*==============================================================================
+
+	Player Area
+
+==============================================================================*/
 
 
 public OnPlayerEnterDynamicArea(playerid, areaid)
@@ -191,7 +209,6 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 #define OnPlayerEnterDynamicArea SIF_OnPlayerEnterDynamicArea
 forward SIF_OnPlayerEnterDynamicArea(playerid, areaid);
 
-
 public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
 	foreach(new i : Character)
@@ -211,6 +228,18 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 #endif
 #define OnPlayerLeaveDynamicArea SIF_OnPlayerLeaveDynamicArea
 forward SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
+
+stock IsPlayerInPlayerArea(playerid, targetid)
+{
+	return IsPlayerInDynamicArea(playerid, gPlayerArea[targetid]);
+}
+
+
+/*==============================================================================
+
+	Message Box
+
+==============================================================================*/
 
 
 stock ShowMsgBox(playerid, message[], time=0, width=200)
@@ -244,6 +273,14 @@ stock bool:IsPlayerViewingMsgBox(playerid)
 
 	return gViewingMsgBox[playerid];
 }
+
+
+/*==============================================================================
+
+	Utils
+
+==============================================================================*/
+
 
 /*
 	Returns the absolute value of an angle

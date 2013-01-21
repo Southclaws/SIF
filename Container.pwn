@@ -503,6 +503,22 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if !defined _SIF_ITEM_INCLUDED
+	#include <SIF/Item.pwn>
+#endif
+
+#if !defined _SIF_INVENTORY_INCLUDED
+	#include <SIF/Inventory.pwn>
+#endif
+
+#include <YSI\y_iterate>
+#include <YSI\y_timers>
+#include <YSI\y_hooks>
+#include <streamer>
+
+#define _SIF_CONTAINER_INCLUDED
+
+
 /*==============================================================================
 
 	Setup
@@ -510,12 +526,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#include <YSI\y_hooks>
-
-
 #define CNT_MAX						(3000)
 #define CNT_MAX_NAME				(32)
-#define CNT_MAX_SLOTS				(12)
+#define CNT_MAX_SLOTS				(24)
 #define DIALOG_CONTAINER_LIST		(9002)
 #define DIALOG_CONTAINER_OPTIONS	(9003)
 #define INVALID_CONTAINER_ID		(-1)
@@ -582,7 +595,10 @@ stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	new id = Iter_Free(cnt_Index);
 
 	if(id == -1)
+	{
+		print("ERROR: Container limit reached.");
 		return INVALID_CONTAINER_ID;
+	}
 
 	if(!virtual)
 		cnt_Data[id][cnt_button] = CreateButton(x, y, z, "Press F to open", world, interior, 1.0, label, name);
@@ -628,6 +644,9 @@ stock DestroyContainer(containerid)
 
 stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 {
+	if(!Iter_Contains(cnt_Index, containerid))
+		return 0;
+
 	if(!IsValidItem(itemid))
 		return 0;
 
