@@ -2,7 +2,7 @@
 
 
 new stock gHolsterWeaponData[MAX_PLAYERS][2];
-
+new tick_LastHolstered[MAX_PLAYERS];
 
 stock GetPlayerHolsteredWeapon(playerid)
 {
@@ -23,6 +23,17 @@ stock ClearPlayerHolsterWeapon(playerid)
 	if(!(0 <= playerid < MAX_PLAYERS))
 		return 0;
 
+	gHolsterWeaponData[playerid][0] = 0;
+	gHolsterWeaponData[playerid][1] = 0;
+
+	return 1;
+}
+stock RemoveHolsterWeapon(playerid)
+{
+	if(!(0 <= playerid < MAX_PLAYERS))
+		return 0;
+
+	RemovePlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER);
 	gHolsterWeaponData[playerid][0] = 0;
 	gHolsterWeaponData[playerid][1] = 0;
 
@@ -55,6 +66,35 @@ hook OnGameModeInit()
 	return 1;
 }
 
+hook OnPlayerConnect(playerid)
+{
+	gHolsterWeaponData[playerid][0] = 0;
+	gHolsterWeaponData[playerid][1] = 0;
+	return 1;
+}
+
+public OnPlayerPickUpItem(playerid, itemid)
+{
+	new ItemType:type = GetItemType(itemid);
+
+	if(0 < _:type <= WEAPON_PARACHUTE)
+	{
+		new weaponid = GetPlayerWeapon(playerid);
+		if(weaponid != 0)
+		{
+			if(weaponid != _:type)
+				return 1;
+		}
+	}
+	return CallLocalFunction("wep_OnPlayerPickUpItem", "dd", playerid, itemid);
+}
+#if defined _ALS_OnPlayerPickUpItem
+	#undef OnPlayerPickUpItem
+#else
+	#define _ALS_OnPlayerPickUpItem
+#endif
+#define OnPlayerPickUpItem wep_OnPlayerPickUpItem
+forward wep_OnPlayerPickUpItem(playerid, itemid);
 
 public OnPlayerPickedUpItem(playerid, itemid)
 {
@@ -160,6 +200,9 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	}
 	if(newkeys & KEY_YES)
 	{
+		if(tickcount() - tick_LastHolstered[playerid] < 1000)
+			return 1;
+
 		new ItemType:type = ItemType:GetPlayerWeapon(playerid);
 
 		if(0 < _:type <= WEAPON_PARACHUTE)
@@ -194,14 +237,16 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 					case 2, 3, 5, 6, 7, 8, 15, 1, 4, 16..18, 22..24, 10..13, 26, 28, 32, 39..41, 43, 44, 45:
 					{
 						SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLD, WepData[_:type][WepModel], 6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
-						ApplyAnimation(playerid, "PED", "PHONE_IN", 1.7, 0, 0, 0, 0, 300);
+						ApplyAnimation(playerid, "PED", "PHONE_IN", 1.7, 0, 0, 0, 0, 700);
 						defer HolsterWeapon(playerid, _:type, ammo, 300);
+						tick_LastHolstered[playerid] = tickcount();
 					}
 					case 25, 27, 29, 30, 31, 33, 34, 35, 36:
 					{
 						SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLD, WepData[_:type][WepModel], 6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 						ApplyAnimation(playerid, "GOGGLES", "GOGGLES_PUT_ON", 1.7, 0, 0, 0, 0, 0);
 						defer HolsterWeapon(playerid, _:type, ammo, 800);
+						tick_LastHolstered[playerid] = tickcount();
 					}
 					default:
 					{
@@ -219,13 +264,15 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				{
 					case 2, 3, 5, 6, 7, 8, 15, 1, 4, 16..18, 22..24, 10..13, 26, 28, 32, 39..41, 43, 44, 45:
 					{
-						ApplyAnimation(playerid, "PED", "PHONE_IN", 1.7, 0, 0, 0, 0, 0);
+						ApplyAnimation(playerid, "PED", "PHONE_IN", 1.7, 0, 0, 0, 0, 700);
 						defer UnholsterWeapon(playerid, 300);
+						tick_LastHolstered[playerid] = tickcount();
 					}
 					case 25, 27, 29, 30, 31, 33, 34, 35, 36:
 					{
 						ApplyAnimation(playerid, "GOGGLES", "GOGGLES_PUT_ON", 1.7, 0, 0, 0, 0, 0);
 						defer UnholsterWeapon(playerid, 800);
+						tick_LastHolstered[playerid] = tickcount();
 					}
 				}
 			}

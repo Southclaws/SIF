@@ -231,6 +231,9 @@ forward SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
 
 stock IsPlayerInPlayerArea(playerid, targetid)
 {
+	if(playerid == targetid)
+		return 0;
+
 	return IsPlayerInDynamicArea(playerid, gPlayerArea[targetid]);
 }
 

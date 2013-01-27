@@ -312,6 +312,21 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				(nothing)
 		}
 
+		native OnItemCreateInWorld(itemid)
+		{
+			Called:
+				After an existing (already created with CreateItem) item is
+				created in the game world (for instance, after a player drops
+				the item, or directly after it is created with CreateItem)
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID handle of the created item.
+
+			Returns:
+				(nothing)
+		}
+
 		native OnPlayerUseItem(playerid, itemid)
 		{
 			Called:
@@ -974,6 +989,7 @@ Timer:		itm_InteractTimer	[MAX_PLAYERS];
 
 
 forward OnItemCreate(itemid);
+forward OnItemCreateInWorld(itemid);
 forward OnPlayerUseItem(playerid, itemid);
 forward OnPlayerUseItemWithItem(playerid, itemid, withitemid);
 forward OnPlayerUseItemWithButton(playerid, buttonid, itemid);
@@ -1034,7 +1050,7 @@ stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Fl
 		print("ERROR: ITM_MAX reached, please increase this constant!");
 		return INVALID_ITEM_ID;
 	}
-	
+
 	if(!IsValidItemType(type))
 		return printf("ERROR: Item creation with undefined typeid (%d) failed.", _:type);
 
@@ -1042,14 +1058,12 @@ stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Fl
 
 	itm_Data[id][itm_type] = type;
 
+	CallRemoteFunction("OnItemCreate", "d", id);
+
 	CreateItemInWorld(id,
 		Float:x, Float:y, Float:z,
 		Float:rx, Float:ry, Float:rz,
 		Float:zoffset, world, interior, label);
-
-	CallRemoteFunction("OnItemCreate", "d", id);
-
-	Iter_Add(itm_WorldIndex, id);
 
 	return id;
 }
@@ -1060,6 +1074,9 @@ stock DestroyItem(itemid)
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
+		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] == ITEM_SIZE_CARRY)
+			SetPlayerSpecialAction(itm_Holder[itemid], SPECIAL_ACTION_NONE);
+
 		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
 	    itm_Holding[itm_Holder[itemid]] = INVALID_ITEM_ID;
 	    itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
@@ -1100,8 +1117,6 @@ stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty 
 		print("ERROR: Reached item type limit.");
 		return INVALID_ITEM_TYPE;
 	}
-
-//	printf("Defining Item: (%d) '%s'", _:id, name);
 
 	itm_TypeData[id][itm_used]			= true;
 	format(itm_TypeData[id][itm_name], ITM_MAX_NAME, name);
@@ -1186,9 +1201,6 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 
 stock PlayerPickUpItem(playerid, itemid, animtype)
 {
-
-	printf("item: %d, type: %d, size: %d", itemid, _:itm_Data[itemid][itm_type], itm_TypeData[itm_Data[itemid][itm_type]][itm_size]);
-
 	if(animtype == 0)
 	{
 		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] == ITEM_SIZE_CARRY)
@@ -1284,10 +1296,13 @@ PlayerUseItem(playerid)
 
 GiveWorldItemToPlayer(playerid, itemid, call)
 {
-	if(!Iter_Contains(itm_Index, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
 	if(Iter_Contains(itm_WorldIndex, itemid))
 	{
-		if(itm_Holder[itemid] != INVALID_PLAYER_ID)return 0;
+		if(itm_Holder[itemid] != INVALID_PLAYER_ID)
+			return 0;
 	}
 
 	new
@@ -1413,13 +1428,14 @@ CreateItemInWorld(itemid,
     itm_Holder[itemid]							= INVALID_PLAYER_ID;
 
 	itm_Data[itemid][itm_objId]					= CreateDynamicObject(itm_TypeData[itemtype][itm_model], x, y, z, rx, ry, rz, world, interior);
-
 	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + zoffset, "Press F to pick up", world, interior, 1.0);
 
 	if(label)
-		SetButtonLabel(itm_Data[itemid][itm_button], itm_TypeData[itemtype][itm_name]);
+		SetButtonLabel(itm_Data[itemid][itm_button], itm_TypeData[itemtype][itm_name], .range = 2.0);
 
 	Iter_Add(itm_WorldIndex, itemid);
+
+	CallRemoteFunction("OnItemCreateInWorld", "d", itemid);
 
 	return 1;
 }
@@ -1468,7 +1484,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				if(i == playerid || itm_Holding[i] != INVALID_ITEM_ID || itm_Interacting[i] != INVALID_ITEM_ID)
 					continue;
 
-				if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]) && !IsPlayerInAnyVehicle(i))
+				if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]) && !IsPlayerInAnyVehicle(i) && GetPlayerWeapon(i) == 0)
 				{
 					PlayerGiveItem(playerid, i, 1);
 					return 1;

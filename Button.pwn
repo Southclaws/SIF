@@ -632,6 +632,7 @@ stock LinkTP(buttonid1, buttonid2)
 
 	return 1;
 }
+
 stock UnLinkTP(buttonid1, buttonid2)
 {
 	if(!Iter_Contains(btn_Index, buttonid1) || !Iter_Contains(btn_Index, buttonid2))
@@ -770,7 +771,8 @@ Internal_OnButtonPress(playerid, buttonid)
 		return 0;
 
 	new id = btn_Data[buttonid][btn_link];
-	
+
+
 	if(Iter_Contains(btn_Index, id))
 	{
 		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))

@@ -794,6 +794,9 @@ stock GetPlayerSelectedInventorySlot(playerid)
 
 stock IsPlayerInventoryFull(playerid)
 {
+	if(!(0 <= playerid < MAX_PLAYERS))
+		return 0;
+
 	return IsValidItem(inv_Data[playerid][INV_MAX_SLOTS-1]);
 }
 
@@ -817,4 +820,12 @@ stock AddInventoryOption(playerid, option[])
 	strcat(inv_OptionsList[playerid], "\n");
 
 	return inv_OptionsCount[playerid]++;
+}
+
+stock IsPlayerViewingInventory(playerid)
+{
+	if(!(0 <= playerid < MAX_PLAYERS))
+		return 0;
+
+	return inv_ViewingInventory[playerid];
 }

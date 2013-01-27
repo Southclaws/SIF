@@ -493,11 +493,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Reason:
 				-
 		}
-		SIF/Inventory/OnPlayerAddToInventory
-		{
-			Reason:
-				-
-		}
 	}
 
 ==============================================================================*/
@@ -526,7 +521,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#define CNT_MAX						(3000)
+#define CNT_MAX						(4096)
 #define CNT_MAX_NAME				(32)
 #define CNT_MAX_SLOTS				(24)
 #define DIALOG_CONTAINER_LIST		(9002)
@@ -556,7 +551,6 @@ static
 			cnt_CurrentContainer		[MAX_PLAYERS],
 			cnt_SelectedSlot			[MAX_PLAYERS],
 			cnt_InventoryContainerItem	[MAX_PLAYERS],
-			cnt_ContainerOptions		[MAX_PLAYERS],
 			cnt_InventoryOptionID		[MAX_PLAYERS];
 
 
@@ -594,6 +588,8 @@ stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 {
 	new id = Iter_Free(cnt_Index);
 
+	printf("CONTAINER CREATE %d", id);
+
 	if(id == -1)
 	{
 		print("ERROR: Container limit reached.");
@@ -603,6 +599,9 @@ stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	if(!virtual)
 		cnt_Data[id][cnt_button] = CreateButton(x, y, z, "Press F to open", world, interior, 1.0, label, name);
 
+	else
+		cnt_Data[id][cnt_button] = INVALID_BUTTON_ID;
+
 	strcpy(cnt_Data[id][cnt_name], name, CNT_MAX_NAME);
 	cnt_Data[id][cnt_posX]		= x;
 	cnt_Data[id][cnt_posY]		= y;
@@ -611,7 +610,7 @@ stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	cnt_Data[id][cnt_world]		= world;
 	cnt_Data[id][cnt_interior]	= interior;
 
-	for(new i; i < size; i++)
+	for(new i; i < CNT_MAX_SLOTS; i++)
 		cnt_Items[id][i] = INVALID_ITEM_ID;
 
 	Iter_Add(cnt_Index, id);
@@ -624,7 +623,10 @@ stock DestroyContainer(containerid)
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
+	printf("CONTAINER DELETE %d", containerid);
+
 	DestroyButton(cnt_Data[containerid][cnt_button]);
+	cnt_Data[containerid][cnt_button] = INVALID_BUTTON_ID;
 
 	for(new i; i < cnt_Data[containerid][cnt_size]; i++)
 		DestroyItem(cnt_Items[containerid][i]);
@@ -700,11 +702,16 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
 	return 1;
 }
 
-stock DisplayContainerInventory(playerid, containerid, showoptions = 0)
+stock DisplayContainerInventory(playerid, containerid)
 {
+	if(!Iter_Contains(cnt_Index, containerid))
+		return 0;
+
 	new
 		list[CNT_MAX_SLOTS * (ITM_MAX_NAME + 1)],
 		tmp[ITM_MAX_NAME];
+
+	printf("CONTAINER VIEW %d", containerid);
 
 	for(new i; i < cnt_Data[containerid][cnt_size]; i++)
 	{
@@ -720,16 +727,11 @@ stock DisplayContainerInventory(playerid, containerid, showoptions = 0)
 	strcat(list, "My Inventory >");
 
 	cnt_CurrentContainer[playerid] = containerid;
-	cnt_ContainerOptions[playerid] = showoptions;
 
 	if(CallLocalFunction("OnPlayerOpenContainer", "dd", playerid, containerid))
 		return 0;
 
-	if(!showoptions)
-		ShowPlayerDialog(playerid, DIALOG_CONTAINER_LIST, DIALOG_STYLE_LIST, cnt_Data[containerid][cnt_name], list, "Take", "Close");
-
-	else
-		ShowPlayerDialog(playerid, DIALOG_CONTAINER_LIST, DIALOG_STYLE_LIST, cnt_Data[containerid][cnt_name], list, "Options", "Close");
+	ShowPlayerDialog(playerid, DIALOG_CONTAINER_LIST, DIALOG_STYLE_LIST, cnt_Data[containerid][cnt_name], list, "Options", "Close");
 
 	SelectTextDraw(playerid, 0xFFFF00FF);
 
@@ -759,7 +761,7 @@ DisplayContainerOptions(playerid, slotid)
 	CallLocalFunction("OnPlayerViewContainerOpt", "dd", playerid, cnt_CurrentContainer[playerid]);
 
 	if(GetItemTypeSize(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][slotid])) == ITEM_SIZE_SMALL)
-		ShowPlayerDialog(playerid, DIALOG_CONTAINER_OPTIONS, DIALOG_STYLE_LIST, tmp, "Equip\nTake", "Accept", "Back");
+		ShowPlayerDialog(playerid, DIALOG_CONTAINER_OPTIONS, DIALOG_STYLE_LIST, tmp, "Equip\nMove to inventory", "Accept", "Back");
 
 	else
 		ShowPlayerDialog(playerid, DIALOG_CONTAINER_OPTIONS, DIALOG_STYLE_LIST, tmp, "Equip", "Accept", "Back");
@@ -797,30 +799,14 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			else
 			{
-				new id = cnt_Items[cnt_CurrentContainer[playerid]][listitem];
-				if(!IsValidItem(id))
+				if(!IsValidItem(cnt_Items[cnt_CurrentContainer[playerid]][listitem]))
 				{
-					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid], cnt_ContainerOptions[playerid]);
-					return 0;
-				}
-
-				if(cnt_ContainerOptions[playerid])
-				{
-					cnt_SelectedSlot[playerid] = listitem;
-					DisplayContainerOptions(playerid, listitem);
+					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 				}
 				else
 				{
-
-					if(IsPlayerInventoryFull(playerid) || !IsValidItem(id))
-					{
-						DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid], cnt_ContainerOptions[playerid]);
-						return 0;
-					}
-
-					RemoveItemFromContainer(cnt_CurrentContainer[playerid], listitem, playerid);
-					AddItemToInventory(playerid, id);
-					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid], cnt_ContainerOptions[playerid]);
+					cnt_SelectedSlot[playerid] = listitem;
+					DisplayContainerOptions(playerid, listitem);
 				}
 			}
 		}
@@ -834,6 +820,11 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 	if(dialogid == DIALOG_CONTAINER_OPTIONS)
 	{
+		if(!response)
+		{
+			DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
+			return 1;
+		}
 		switch(listitem)
 		{
 			case 0:
@@ -845,12 +836,12 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					RemoveItemFromContainer(cnt_CurrentContainer[playerid], cnt_SelectedSlot[playerid], playerid);
 					CreateItemInWorld(id);
 					GiveWorldItemToPlayer(playerid, id, 1);
-					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid], cnt_ContainerOptions[playerid]);
+					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 				}
 				else
 				{
 					ShowMsgBox(playerid, "You are already holding something", 3000, 200);
-					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid], cnt_ContainerOptions[playerid]);
+					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 				}
 			}
 			case 1:
@@ -860,13 +851,13 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				if(IsPlayerInventoryFull(playerid) || !IsValidItem(id))
 				{
 					ShowMsgBox(playerid, "Inventory full", 3000, 100);
-					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid], cnt_ContainerOptions[playerid]);
+					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 					return 0;
 				}
 
 				RemoveItemFromContainer(cnt_CurrentContainer[playerid], cnt_SelectedSlot[playerid], playerid);
 				AddItemToInventory(playerid, id);
-				DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid], cnt_ContainerOptions[playerid]);
+				DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 			}
 			case 2:
 			{
@@ -878,47 +869,14 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return 1;
 }
 
-public OnPlayerAddToInventory(playerid, itemid)
-{
-	if(IsPlayerInAnyDynamicArea(playerid))
-	{
-		foreach(new i : cnt_Index)
-		{
-			if(GetPlayerButtonID(playerid) == cnt_Data[i][cnt_button])
-			{
-				if(AddItemToContainer(i, itemid, playerid))
-				{
-					new str[32];
-					format(str, 32, "Item added to %s", cnt_Data[i][cnt_name]);
-					ShowMsgBox(playerid, str, 3000, 150);
-					return 1;
-				}
-				else
-				{
-					new str[32];
-					format(str, 32, "%s full", cnt_Data[i][cnt_name]);
-					ShowMsgBox(playerid, str, 3000, 100);
-					return 1;
-				}
-			}
-		}
-	}
-	
-	return CallLocalFunction("cnt_OnPlayerAddToInventory", "dd", playerid, itemid);
-}
-#if defined _ALS_OnPlayerAddToInventory
-	#undef OnPlayerAddToInventory
-#else
-	#define _ALS_OnPlayerAddToInventory
-#endif
-#define OnPlayerAddToInventory cnt_OnPlayerAddToInventory
-forward OnPlayerAddToInventory(playerid, itemid);
-
 public OnPlayerViewInventoryOpt(playerid)
 {
 	if(cnt_CurrentContainer[playerid] != INVALID_CONTAINER_ID)
 	{
-		cnt_InventoryOptionID[playerid] = AddInventoryOption(playerid, "Remove");
+		new str[8 + CNT_MAX_NAME];
+		str = "Move to ";
+		strcat(str, cnt_Data[cnt_CurrentContainer[playerid]][cnt_name]);
+		cnt_InventoryOptionID[playerid] = AddInventoryOption(playerid, str);
 	}
 
 	return CallLocalFunction("cnt_OnPlayerViewInventoryOpt", "d", playerid);
@@ -992,7 +950,7 @@ public OnPlayerSelectExtraItem(playerid, item)
 	{
 		if(item == cnt_InventoryContainerItem[playerid])
 		{
-			DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid], cnt_ContainerOptions[playerid]);
+			DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 		}
 	}
 

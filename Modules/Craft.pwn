@@ -131,7 +131,8 @@ ItemType:	cft_Data[CFT_MAX_COMBO][E_CRAFT_COMBO_DATA],
 Iterator:	cft_Index<CFT_MAX_COMBO>;
 
 static
-			cft_SelectedInvSlot[MAX_PLAYERS];
+			cft_SelectedInvSlot[MAX_PLAYERS],
+			cft_InventoryOptionID[MAX_PLAYERS];
 
 
 forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2);
@@ -169,7 +170,7 @@ stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result)
 
 public OnPlayerViewInventoryOpt(playerid)
 {
-	AddInventoryOption(playerid, "Combine");
+	cft_InventoryOptionID[playerid] = AddInventoryOption(playerid, "Combine");
 
 	return CallLocalFunction("cft_OnPlayerViewInventoryOpt", "d", playerid);
 }
@@ -183,7 +184,7 @@ forward OnPlayerViewInventoryOpt(playerid);
 
 public OnPlayerSelectInventoryOpt(playerid, option)
 {
-	if(option == 0)
+	if(option == cft_InventoryOptionID[playerid])
 	{
 		cft_SelectedInvSlot[playerid] = GetPlayerSelectedInventorySlot(playerid);
 
