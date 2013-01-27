@@ -588,8 +588,6 @@ stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 {
 	new id = Iter_Free(cnt_Index);
 
-	printf("CONTAINER CREATE %d", id);
-
 	if(id == -1)
 	{
 		print("ERROR: Container limit reached.");
@@ -622,8 +620,6 @@ stock DestroyContainer(containerid)
 {
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
-
-	printf("CONTAINER DELETE %d", containerid);
 
 	DestroyButton(cnt_Data[containerid][cnt_button]);
 	cnt_Data[containerid][cnt_button] = INVALID_BUTTON_ID;
@@ -710,8 +706,6 @@ stock DisplayContainerInventory(playerid, containerid)
 	new
 		list[CNT_MAX_SLOTS * (ITM_MAX_NAME + 1)],
 		tmp[ITM_MAX_NAME];
-
-	printf("CONTAINER VIEW %d", containerid);
 
 	for(new i; i < cnt_Data[containerid][cnt_size]; i++)
 	{
