@@ -25,7 +25,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 		When picked up, items will appear on the character model bone specified
 		in the item definition. This combines the visible aspect of weapons and
-		items that are already in the game with the scriptable versitility of
+		items that are already in the game with the scriptable versatility of
 		server created and scriptable entities.
 	}
 
@@ -946,6 +946,9 @@ ItemType:	itm_type,
 Float:		itm_posX,
 Float:		itm_posY,
 Float:		itm_posZ,
+Float:		itm_rotX,
+Float:		itm_rotY,
+Float:		itm_rotZ,
 
 			itm_exData
 }
@@ -957,9 +960,10 @@ bool:		itm_used,
 			itm_model,
 			itm_size,
 
-Float:		itm_rotX,
-Float:		itm_rotY,
-Float:		itm_rotZ,
+Float:		itm_defaultRotX,
+Float:		itm_defaultRotY,
+Float:		itm_defaultRotZ,
+Float:		itm_offsetZ,
 
 			itm_attachBone,
 Float:		itm_attachPosX,
@@ -975,7 +979,8 @@ Float:		itm_attachRotZ
 static
 			itm_Data			[ITM_MAX][E_ITEM_DATA],
 			itm_Interactor		[ITM_MAX],
-			itm_Holder			[ITM_MAX],
+			itm_Holder			[ITM_MAX];
+new
 Iterator:	itm_Index<ITM_MAX>,
 Iterator:	itm_WorldIndex<ITM_MAX>;
 
@@ -989,6 +994,7 @@ Timer:		itm_InteractTimer	[MAX_PLAYERS];
 
 
 forward OnItemCreate(itemid);
+forward OnItemDestroy(itemid);
 forward OnItemCreateInWorld(itemid);
 forward OnPlayerUseItem(playerid, itemid);
 forward OnPlayerUseItemWithItem(playerid, itemid, withitemid);
@@ -1058,7 +1064,8 @@ stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Fl
 
 	itm_Data[id][itm_type] = type;
 
-	CallRemoteFunction("OnItemCreate", "d", id);
+	CallLocalFunction("OnItemCreate", "d", id);
+	// CallLocalFunction("OnItemCreated", "d", id);
 
 	CreateItemInWorld(id,
 		Float:x, Float:y, Float:z,
@@ -1071,6 +1078,8 @@ stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Fl
 stock DestroyItem(itemid)
 {
 	if(!Iter_Contains(itm_Index, itemid))return 0;
+
+	CallLocalFunction("OnItemDestroy", "d", itemid);
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
@@ -1094,6 +1103,9 @@ stock DestroyItem(itemid)
 	itm_Data[itemid][itm_posX] = 0.0;
 	itm_Data[itemid][itm_posY] = 0.0;
 	itm_Data[itemid][itm_posZ] = 0.0;
+	itm_Data[itemid][itm_rotX] = 0.0;
+	itm_Data[itemid][itm_rotY] = 0.0;
+	itm_Data[itemid][itm_rotZ] = 0.0;
 	itm_Data[itemid][itm_exData] = 0;
 
 	itm_Holder[itemid]			= INVALID_PLAYER_ID;
@@ -1102,10 +1114,12 @@ stock DestroyItem(itemid)
 	Iter_Remove(itm_Index, itemid);
 	Iter_Remove(itm_WorldIndex, itemid);
 
+	// CallLocalFunction("OnItemDestroyed", "d", itemid);
+
 	return 1;
 }
 
-stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, boneid = 6)
+stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, boneid = 6)
 {
 	new ItemType:id;
 
@@ -1123,9 +1137,10 @@ stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty 
 	itm_TypeData[id][itm_model]			= model;
 	itm_TypeData[id][itm_size]			= size;
 
-	itm_TypeData[id][itm_rotX]			= rotx;
-	itm_TypeData[id][itm_rotY]			= roty;
-	itm_TypeData[id][itm_rotZ]			= rotz;
+	itm_TypeData[id][itm_defaultRotX]	= rotx;
+	itm_TypeData[id][itm_defaultRotY]	= roty;
+	itm_TypeData[id][itm_defaultRotZ]	= rotz;
+	itm_TypeData[id][itm_offsetZ]		= zoffset;
 
 	itm_TypeData[id][itm_attachBone]	= boneid;
 
@@ -1163,9 +1178,9 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 		itm_TypeData[i + ItemType:amount][itm_model]			= itm_TypeData[i][itm_model];
 		itm_TypeData[i + ItemType:amount][itm_size]			= itm_TypeData[i][itm_size];
 
-		itm_TypeData[i + ItemType:amount][itm_rotX]			= itm_TypeData[i][itm_rotX];
-		itm_TypeData[i + ItemType:amount][itm_rotY]			= itm_TypeData[i][itm_rotY];
-		itm_TypeData[i + ItemType:amount][itm_rotZ]			= itm_TypeData[i][itm_rotZ];
+		itm_TypeData[i + ItemType:amount][itm_defaultRotX]			= itm_TypeData[i][itm_defaultRotX];
+		itm_TypeData[i + ItemType:amount][itm_defaultRotY]			= itm_TypeData[i][itm_defaultRotY];
+		itm_TypeData[i + ItemType:amount][itm_defaultRotZ]			= itm_TypeData[i][itm_defaultRotZ];
 
 		itm_TypeData[i + ItemType:amount][itm_attachBone]	= itm_TypeData[i][itm_attachBone];
 		itm_TypeData[i + ItemType:amount][itm_attachPosX]	= itm_TypeData[i][itm_attachPosX];
@@ -1182,9 +1197,9 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 		itm_TypeData[i][itm_model]							= 0;
 		itm_TypeData[i][itm_size]							= 0;
 
-		itm_TypeData[i][itm_rotX]							= 0.0;
-		itm_TypeData[i][itm_rotY]							= 0.0;
-		itm_TypeData[i][itm_rotZ]							= 0.0;
+		itm_TypeData[i][itm_defaultRotX]							= 0.0;
+		itm_TypeData[i][itm_defaultRotY]							= 0.0;
+		itm_TypeData[i][itm_defaultRotZ]							= 0.0;
 
 		itm_TypeData[i][itm_attachBone]						= 0;
 		itm_TypeData[i][itm_attachPosX]						= 0.0;
@@ -1378,9 +1393,9 @@ stock RemoveCurrentItem(playerid)
 		x + (0.5 * floatsin(-r, degrees)),
 		y + (0.5 * floatcos(-r, degrees)),
 		z - 0.868,
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_rotX],
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_rotY],
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_rotZ] + r,
+		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
+		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
+		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
 		0.7, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 	return itemid;
@@ -1407,27 +1422,33 @@ CreateItemInWorld(itemid,
 	if(!IsValidItemType(itemtype))return 0;
 
 	if(rx == 1000.0)
-		rx = itm_TypeData[itemtype][itm_rotX];
+		rx = itm_TypeData[itemtype][itm_defaultRotX];
 
 	if(ry == 1000.0)
-		ry = itm_TypeData[itemtype][itm_rotY];
+		ry = itm_TypeData[itemtype][itm_defaultRotY];
 
 	if(rz == 1000.0)
-		rz = itm_TypeData[itemtype][itm_rotZ];
+		rz = itm_TypeData[itemtype][itm_defaultRotZ];
 
 	itm_Data[itemid][itm_posX]					= x;
 	itm_Data[itemid][itm_posY]					= y;
 	itm_Data[itemid][itm_posZ]					= z;
-	
+	itm_Data[itemid][itm_rotX]					= rx;
+	itm_Data[itemid][itm_rotY]					= ry;
+	itm_Data[itemid][itm_rotZ]					= rz;
+
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
+		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
+		SetPlayerSpecialAction(itm_Holder[itemid], SPECIAL_ACTION_NONE);
+
 	    itm_Holding[itm_Holder[itemid]]			= INVALID_ITEM_ID;
     	itm_Interacting[itm_Holder[itemid]]		= INVALID_ITEM_ID;
     }
     itm_Interactor[itemid]						= INVALID_PLAYER_ID;
     itm_Holder[itemid]							= INVALID_PLAYER_ID;
 
-	itm_Data[itemid][itm_objId]					= CreateDynamicObject(itm_TypeData[itemtype][itm_model], x, y, z, rx, ry, rz, world, interior);
+	itm_Data[itemid][itm_objId]					= CreateDynamicObject(itm_TypeData[itemtype][itm_model], x, y, z + itm_TypeData[itemtype][itm_offsetZ], rx, ry, rz, world, interior);
 	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + zoffset, "Press F to pick up", world, interior, 1.0);
 
 	if(label)
@@ -1435,7 +1456,7 @@ CreateItemInWorld(itemid,
 
 	Iter_Add(itm_WorldIndex, itemid);
 
-	CallRemoteFunction("OnItemCreateInWorld", "d", itemid);
+	CallLocalFunction("OnItemCreateInWorld", "d", itemid);
 
 	return 1;
 }
@@ -1565,7 +1586,7 @@ public OnButtonPress(playerid, buttonid)
 			if(buttonid == itm_Data[i][itm_button] && itm_Holder[i] == INVALID_PLAYER_ID && itm_Interactor[i] == INVALID_PLAYER_ID)
 			{
 				if(Iter_Contains(itm_Index, item))
-					return CallRemoteFunction("OnPlayerUseItemWithItem", "ddd", playerid, item, i);
+					return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, item, i);
 
 				new
 					Float:itm_x = itm_Data[i][itm_posX],
@@ -1651,9 +1672,9 @@ timer DropItemDelay[400](playerid)
 		x + (0.5 * floatsin(-r, degrees)),
 		y + (0.5 * floatcos(-r, degrees)),
 		z - 0.868,
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_rotX],
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_rotY],
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_rotZ] + r,
+		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
+		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
+		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
 		0.7, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 	ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
@@ -1705,9 +1726,9 @@ public OnPlayerDeath(playerid, killerid, reason)
 			x + (0.5 * floatsin(-r, degrees)),
 			y + (0.5 * floatcos(-r, degrees)),
 			z - 0.868,
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_rotX],
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_rotY],
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_rotZ] + r,
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
 			0.868, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
@@ -1797,6 +1818,17 @@ stock SetItemPos(itemid, Float:x, Float:y, Float:z)
 
 	return 1;
 }
+stock GetItemRot(itemid, &Float:rx, &Float:ry, &Float:rz)
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	rx = itm_Data[itemid][itm_rotX];
+	ry = itm_Data[itemid][itm_rotY];
+	rz = itm_Data[itemid][itm_rotZ];
+
+	return 1;
+}
 stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults = false)
 {
 	if(!Iter_Contains(itm_Index, itemid))
@@ -1806,13 +1838,24 @@ stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults =
 		return 0;
 
 	if(offsetfromdefaults)
+	{
 		SetDynamicObjectRot(itm_Data[itemid][itm_objId],
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_rotX]+rx,
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_rotY]+ry,
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_rotZ]+rz);
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX] + rx,
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY] + ry,
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + rz);
 
+		itm_Data[itemid][itm_rotX] = itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX] + rx;
+		itm_Data[itemid][itm_rotY] = itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY] + ry;
+		itm_Data[itemid][itm_rotZ] = itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + rz;
+	}
 	else
+	{
 		SetDynamicObjectRot(itm_Data[itemid][itm_objId], rx, ry, rz);
+
+		itm_Data[itemid][itm_rotX] = rx;
+		itm_Data[itemid][itm_rotY] = ry;
+		itm_Data[itemid][itm_rotZ] = rz;
+	}
 
 	return 1;	
 }
@@ -1888,4 +1931,15 @@ stock GetPlayerItem(playerid)
 		return INVALID_ITEM_ID;
 
 	return itm_Holding[playerid];
+}
+
+stock IsItemInWorld(itemid)
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	if(!Iter_Contains(itm_WorldIndex, itemid))
+		return 0;
+
+	return 1;
 }

@@ -19,7 +19,7 @@ new
 	itd_Total;
 
 
-DefineItemDamage(ItemType:itemtype, Float:damage, animlib[32], animname[32])
+stock DefineItemDamage(ItemType:itemtype, Float:damage, animlib[32], animname[32])
 {
 	new id;
 	while(itd_Data[id][itd_used] && id < MAX_ITEM_WEP)id++;

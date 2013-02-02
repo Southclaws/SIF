@@ -577,6 +577,11 @@ stock DisplayPlayerInventory(playerid)
 
 	return 1;
 }
+ClosePlayerInventory(playerid)
+{
+	ShowPlayerDialog(playerid, -1, 0, "", "", "", "");
+	inv_ViewingInventory[playerid] = false;
+}
 
 
 /*==============================================================================
@@ -622,6 +627,20 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 	return 1;
 }
+
+hook OnPlayerClickTextDraw(playerid, Text:clickedid)
+{
+	if(clickedid == Text:65535)
+	{
+		if(inv_ViewingInventory[playerid])
+		{
+			ClosePlayerInventory(playerid);
+		}
+	}
+
+	return 1;
+}
+
 
 timer PlayerPutItemInInventory[300](playerid, itemid)
 {

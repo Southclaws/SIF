@@ -49,7 +49,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Container/Core
 		native -
 
-		native CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0)
+		native CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0, max_med = -1, max_large = -1, max_carry = -1)
 		{
 			Description:
 				Creates a container to store items in, can be specified as
@@ -85,6 +85,14 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					by players, the only way to access the container would be
 					through the function DisplayContainerInventory.
 
+				<max_med> (int)
+					The limit for medium sized items.
+
+				<max_large> (int)
+					The limit for large items.
+
+				<max_carry> (int)
+					The limit for carry-only items.
 
 			Returns:
 				(int, containerid)
@@ -537,6 +545,7 @@ Float:		cnt_posX,
 Float:		cnt_posY,
 Float:		cnt_posZ,
 			cnt_size,
+			cnt_maxOfSize[3],
 			cnt_world,
 			cnt_interior
 }
@@ -584,7 +593,9 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0)
+stock CreateContainer(name[], size,
+	Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0,
+	max_med = -1, max_large = -1, max_carry = -1)
 {
 	new id = Iter_Free(cnt_Index);
 
@@ -601,12 +612,15 @@ stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 		cnt_Data[id][cnt_button] = INVALID_BUTTON_ID;
 
 	strcpy(cnt_Data[id][cnt_name], name, CNT_MAX_NAME);
-	cnt_Data[id][cnt_posX]		= x;
-	cnt_Data[id][cnt_posY]		= y;
-	cnt_Data[id][cnt_posZ]		= z;
-	cnt_Data[id][cnt_size]		= size;
-	cnt_Data[id][cnt_world]		= world;
-	cnt_Data[id][cnt_interior]	= interior;
+	cnt_Data[id][cnt_posX]			= x;
+	cnt_Data[id][cnt_posY]			= y;
+	cnt_Data[id][cnt_posZ]			= z;
+	cnt_Data[id][cnt_size]			= size;
+	cnt_Data[id][cnt_maxOfSize][0]	= max_med;
+	cnt_Data[id][cnt_maxOfSize][1]	= max_large;
+	cnt_Data[id][cnt_maxOfSize][2]	= max_carry;
+	cnt_Data[id][cnt_world]			= world;
+	cnt_Data[id][cnt_interior]		= interior;
 
 	for(new i; i < CNT_MAX_SLOTS; i++)
 		cnt_Items[id][i] = INVALID_ITEM_ID;
@@ -654,13 +668,48 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 			return 1;
 	}
 
-	new i;
+	new
+		i,
+		count;
+
 	while(i < cnt_Data[containerid][cnt_size])
 	{
-		if(!IsValidItem(cnt_Items[containerid][i]))break;
+		if(IsValidItem(cnt_Items[containerid][i]))
+		{
+			if(GetItemTypeSize(GetItemType(itemid)) == ITEM_SIZE_MEDIUM && cnt_Data[containerid][cnt_maxOfSize][0] != -1)
+			{
+				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_MEDIUM)
+					count++;
+
+				if(count >= cnt_Data[containerid][cnt_maxOfSize][0])
+					return -1;
+			}
+			else if(GetItemTypeSize(GetItemType(itemid)) == ITEM_SIZE_LARGE && cnt_Data[containerid][cnt_maxOfSize][1] != -1)
+			{
+				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_LARGE)
+					count++;
+
+				if(count >= cnt_Data[containerid][cnt_maxOfSize][1])
+					return -1;
+			}
+			else if(GetItemTypeSize(GetItemType(itemid)) == ITEM_SIZE_CARRY && cnt_Data[containerid][cnt_maxOfSize][2] != -1)
+			{
+				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_CARRY)
+					count++;
+
+				if(count >= cnt_Data[containerid][cnt_maxOfSize][2])
+					return -1;
+			}
+		}
+		else
+		{
+			break;
+		}
 		i++;
 	}
-	if(i == cnt_Data[containerid][cnt_size])return 0;
+
+	if(i == cnt_Data[containerid][cnt_size])
+		return -2;
 	
 	cnt_Items[containerid][i] = itemid;
 
@@ -857,6 +906,19 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				CallLocalFunction("OnPlayerSelectContInvOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
 			}
+		}
+	}
+
+	return 1;
+}
+
+hook OnPlayerClickTextDraw(playerid, Text:clickedid)
+{
+	if(clickedid == Text:65535)
+	{
+		if(Iter_Contains(cnt_Index, cnt_CurrentContainer[playerid]))
+		{
+			ClosePlayerContainer(playerid);
 		}
 	}
 
@@ -1130,6 +1192,22 @@ stock IsContainerSlotUsed(containerid, slotid)
 }
 
 stock IsContainerFull(containerid)
+{
+	if(!Iter_Contains(cnt_Index, containerid))
+		return 0;
+
+	return IsValidItem(cnt_Items[containerid][cnt_Data[containerid][cnt_size]-1]);
+}
+
+stock IsContainerEmpty(containerid)
+{
+	if(!Iter_Contains(cnt_Index, containerid))
+		return 0;
+
+	return !IsValidItem(cnt_Items[containerid][0]);
+}
+
+stock IsContainerFullOfItemSize(containerid, size)
 {
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
