@@ -2,7 +2,9 @@
 
 
 new stock gHolsterWeaponData[MAX_PLAYERS][2];
-new tick_LastHolstered[MAX_PLAYERS];
+new
+	gPlayerArmedWeapon[MAX_PLAYERS],
+	tick_LastHolstered[MAX_PLAYERS];
 
 stock GetPlayerHolsteredWeapon(playerid)
 {
