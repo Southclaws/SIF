@@ -501,6 +501,20 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				(none)
 		}
+		native OnItemNameRender(itemid)
+		{
+			Called:
+				When the function GetItemName is called, so an additional piece
+				of text can be added to items giving more information unique to
+				that specific item.
+
+			Parameters:
+				<itemid>
+					The ID handle of the item that had it's name requested.
+
+			Returns:
+				(none)
+		}
 	}
 
 	SIF/Item/Interface Functions
@@ -702,6 +716,38 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+		native SetItemExtraText(itemid, string[])
+		{
+			Description:
+				Gives the item a unique string of text.
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID handle of the item to set the text of.
+
+				<string> (string)
+					The string to give to the item.
+
+			Returns:
+				0
+					If the entered item ID handle is invalid.
+		}
+		native GetItemExtraText(itemid, string[])
+		{
+			Description:
+				Retrieves the unique string of text assigned to an item.
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID handle of the item to get the text of.
+
+				<string> (string)
+					A variable to put the retrieved string into.
+
+			Returns:
+				0
+					If the entered item ID handle is invalid.
+		}
 		native IsValidItemType(ItemType:itemtype)
 		{
 			Description:
@@ -784,6 +830,23 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				INVALID_ITEM_ID
 					If the player isn't holding something or is an invalid
 					player ID. There is no IsPlayerConnected check here.
+		}
+		native GetItemName(itemid, string[])
+		{
+			Description:
+				Returns the name of the type of the specified item ID and
+				appends the unique text assigned to the item to the end.
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID handle of the item to get the name and text of.
+
+				<string> (string)
+					A variable to store the retrieved name and text in.
+					
+			Returns:
+				0
+					If the item ID handle is invalid.
 		}
 	}
 
@@ -924,6 +987,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define ITM_MAX				(10000)
 #define ITM_MAX_TYPES		(ItemType:256)
 #define ITM_MAX_NAME		(32)
+#define ITM_MAX_TEXT		(32)
 #define ITM_ATTACH_INDEX	(0)
 
 #define FLOOR_OFFSET		(0.8568)
@@ -950,7 +1014,8 @@ Float:		itm_rotX,
 Float:		itm_rotY,
 Float:		itm_rotZ,
 
-			itm_exData
+			itm_exData,
+			itm_nameEx[ITM_MAX_TEXT]
 }
 
 enum E_ITEM_TYPE_DATA
@@ -1006,6 +1071,7 @@ forward OnPlayerDroppedItem(playerid, itemid);
 forward OnPlayerGiveItem(playerid, targetid, itemid);
 forward OnPlayerGivenItem(playerid, targetid, itemid);
 forward OnItemRemovedFromPlayer(playerid, itemid);
+forward OnItemNameRender(itemid);
 
 
 /*==============================================================================
@@ -1292,8 +1358,15 @@ stock PlayerGiveItem(playerid, targetid, call)
 	SetPlayerFacingAngle(playerid, angle);
 	SetPlayerFacingAngle(targetid, angle+180.0);
 
-	ApplyAnimation(playerid, "CASINO", "SLOT_PLYR", 4.0, 0, 0, 0, 0, 450);
-	ApplyAnimation(targetid, "CASINO", "SLOT_PLYR", 4.0, 0, 0, 0, 0, 450);
+	if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] != ITEM_SIZE_CARRY)
+	{
+		ApplyAnimation(playerid, "CASINO", "SLOT_PLYR", 4.0, 0, 0, 0, 0, 450);
+		ApplyAnimation(targetid, "CASINO", "SLOT_PLYR", 4.0, 0, 0, 0, 0, 450);
+	}
+	else
+	{
+		SetPlayerSpecialAction(targetid, SPECIAL_ACTION_CARRY);
+	}
 
 	itm_Interacting[playerid]	= targetid;
 	itm_Interacting[targetid]	= playerid;
@@ -1577,7 +1650,7 @@ public OnButtonPress(playerid, buttonid)
 {
 	print("OnButtonPress <Item Script>");
 
-	if(itm_Interacting[playerid] == INVALID_ITEM_ID)
+	if(itm_Interacting[playerid] == INVALID_ITEM_ID && GetPlayerWeapon(playerid) == 0)
 	{
 		new item = itm_Holding[playerid];
 
@@ -1702,6 +1775,8 @@ timer GiveItemDelay[500](playerid, targetid)
 		targetid, ITM_ATTACH_INDEX, itm_TypeData[type][itm_model], itm_TypeData[type][itm_attachBone],
 		itm_TypeData[type][itm_attachPosX], itm_TypeData[type][itm_attachPosY], itm_TypeData[type][itm_attachPosZ],
 		itm_TypeData[type][itm_attachRotX], itm_TypeData[type][itm_attachRotY], itm_TypeData[type][itm_attachRotZ]);
+
+	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_NONE);
 
 	itm_Holding[targetid] = id;
     itm_Holder[id] = targetid;
@@ -1863,13 +1938,18 @@ stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults =
 // itm_exData
 stock SetItemExtraData(itemid, data)
 {
-	if(!Iter_Contains(itm_Index, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
 	itm_Data[itemid][itm_exData] = data;
+
 	return 1;
 }
 stock GetItemExtraData(itemid)
 {
-	if(!Iter_Contains(itm_Index, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
 	return itm_Data[itemid][itm_exData];
 }
 
@@ -1940,6 +2020,37 @@ stock IsItemInWorld(itemid)
 
 	if(!Iter_Contains(itm_WorldIndex, itemid))
 		return 0;
+
+	return 1;
+}
+
+stock SetItemNameExtra(itemid, string[])
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	itm_Data[itemid][itm_nameEx][0] = EOS;
+	strcat(itm_Data[itemid][itm_nameEx], string, ITM_MAX_TEXT);
+
+	return 1;
+}
+
+stock GetItemName(itemid, string[])
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	string[0] = EOS;
+	strcat(string, itm_TypeData[itm_Data[itemid][itm_type]][itm_name], ITM_MAX_NAME);
+
+	CallLocalFunction("OnItemNameRender", "d", itemid);
+
+	if(!isnull(itm_Data[itemid][itm_nameEx]))
+	{
+		strcat(string, " (", ITM_MAX_TEXT);
+		strcat(string, itm_Data[itemid][itm_nameEx], ITM_MAX_TEXT);
+		strcat(string, ")", ITM_MAX_TEXT);
+	}
 
 	return 1;
 }

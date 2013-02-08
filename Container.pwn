@@ -559,6 +559,8 @@ Iterator:	cnt_Index<CNT_MAX>;
 static
 			cnt_CurrentContainer		[MAX_PLAYERS],
 			cnt_SelectedSlot			[MAX_PLAYERS],
+			cnt_OptionsList				[MAX_PLAYERS][128],
+			cnt_OptionsCount			[MAX_PLAYERS],
 			cnt_InventoryContainerItem	[MAX_PLAYERS],
 			cnt_InventoryOptionID		[MAX_PLAYERS];
 
@@ -710,7 +712,7 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 
 	if(i == cnt_Data[containerid][cnt_size])
 		return -2;
-	
+
 	cnt_Items[containerid][i] = itemid;
 
 	RemoveItemFromWorld(itemid);
@@ -741,8 +743,9 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
 
 		cnt_Items[containerid][(cnt_Data[containerid][cnt_size] - 1)] = INVALID_ITEM_ID;
 	}
-	
-	CallLocalFunction("OnPlayerTakenFromContainer", "ddd", playerid, containerid, slotid);
+
+	if(playerid != INVALID_PLAYER_ID)
+		CallLocalFunction("OnPlayerTakenFromContainer", "ddd", playerid, containerid, slotid);
 
 	return 1;
 }
@@ -761,7 +764,7 @@ stock DisplayContainerInventory(playerid, containerid)
 		if(!IsValidItem(cnt_Items[containerid][i])) strcat(list, "<Empty>\n");
 		else
 		{
-			GetItemTypeName(GetItemType(cnt_Items[containerid][i]), tmp);
+			GetItemName(cnt_Items[containerid][i], tmp);
 			strcat(list, tmp);
 			strcat(list, "\n");
 		}
@@ -797,17 +800,22 @@ stock ClosePlayerContainer(playerid)
 
 DisplayContainerOptions(playerid, slotid)
 {
-	new tmp[ITM_MAX_NAME];
+	new
+		tmp[ITM_MAX_NAME];
 
-	GetItemTypeName(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][slotid]), tmp);
+	GetItemName(cnt_Items[cnt_CurrentContainer[playerid]][slotid], tmp);
+
+	if(GetItemTypeSize(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][slotid])) == ITEM_SIZE_SMALL)
+		cnt_OptionsList[playerid] = "Equip\nMove to inventory\n";
+
+	else
+		cnt_OptionsList[playerid] = "Equip\n";
+
+	cnt_OptionsCount[playerid] = 0;
 
 	CallLocalFunction("OnPlayerViewContainerOpt", "dd", playerid, cnt_CurrentContainer[playerid]);
 
-	if(GetItemTypeSize(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][slotid])) == ITEM_SIZE_SMALL)
-		ShowPlayerDialog(playerid, DIALOG_CONTAINER_OPTIONS, DIALOG_STYLE_LIST, tmp, "Equip\nMove to inventory", "Accept", "Back");
-
-	else
-		ShowPlayerDialog(playerid, DIALOG_CONTAINER_OPTIONS, DIALOG_STYLE_LIST, tmp, "Equip", "Accept", "Back");
+	ShowPlayerDialog(playerid, DIALOG_CONTAINER_OPTIONS, DIALOG_STYLE_LIST, tmp, cnt_OptionsList[playerid], "Accept", "Back");
 }
 
 public OnButtonPress(playerid, buttonid)
@@ -889,6 +897,12 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			case 1:
 			{
+				if(GetItemTypeSize(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]])) != ITEM_SIZE_SMALL)
+				{
+					CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], 0);
+					return 1;
+				}
+
 				new id = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
 
 				if(IsPlayerInventoryFull(playerid) || !IsValidItem(id))
@@ -902,9 +916,9 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				AddItemToInventory(playerid, id);
 				DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 			}
-			case 2:
+			default:
 			{
-				CallLocalFunction("OnPlayerSelectContInvOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
+				CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
 			}
 		}
 	}
@@ -1207,10 +1221,61 @@ stock IsContainerEmpty(containerid)
 	return !IsValidItem(cnt_Items[containerid][0]);
 }
 
-stock IsContainerFullOfItemSize(containerid, size)
+stock WillItemTypeFitInContainer(containerid, ItemType:itemtype)
 {
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
-	return IsValidItem(cnt_Items[containerid][cnt_Data[containerid][cnt_size]-1]);
+	new
+		i,
+		count;
+
+	while(i < cnt_Data[containerid][cnt_size])
+	{
+		if(IsValidItem(cnt_Items[containerid][i]))
+		{
+			if(GetItemTypeSize(itemtype) == ITEM_SIZE_MEDIUM && cnt_Data[containerid][cnt_maxOfSize][0] != -1)
+			{
+				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_MEDIUM)
+					count++;
+
+				if(count >= cnt_Data[containerid][cnt_maxOfSize][0])
+					return 0;
+			}
+			else if(GetItemTypeSize(itemtype) == ITEM_SIZE_LARGE && cnt_Data[containerid][cnt_maxOfSize][1] != -1)
+			{
+				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_LARGE)
+					count++;
+
+				if(count >= cnt_Data[containerid][cnt_maxOfSize][1])
+					return 0;
+			}
+			else if(GetItemTypeSize(itemtype) == ITEM_SIZE_CARRY && cnt_Data[containerid][cnt_maxOfSize][2] != -1)
+			{
+				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_CARRY)
+					count++;
+
+				if(count >= cnt_Data[containerid][cnt_maxOfSize][2])
+					return 0;
+			}
+		}
+		else
+		{
+			break;
+		}
+		i++;
+	}
+	
+	return 1;
+}
+
+stock AddContainerOption(playerid, option[])
+{
+	if(strlen(cnt_OptionsList[playerid]) + strlen(option) > sizeof(cnt_OptionsList[]))
+		return 0;
+
+	strcat(cnt_OptionsList[playerid], option);
+	strcat(cnt_OptionsList[playerid], "\n");
+
+	return cnt_OptionsCount[playerid]++;
 }

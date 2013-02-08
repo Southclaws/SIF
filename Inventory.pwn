@@ -555,7 +555,7 @@ stock DisplayPlayerInventory(playerid)
 		if(!IsValidItem(inv_Data[playerid][i])) strcat(list, "<Empty>\n");
 		else
 		{
-			GetItemTypeName(GetItemType(inv_Data[playerid][i]), tmp);
+			GetItemName(inv_Data[playerid][i], tmp);
 			strcat(list, tmp);
 			strcat(list, "\n");
 		}
@@ -577,6 +577,7 @@ stock DisplayPlayerInventory(playerid)
 
 	return 1;
 }
+
 ClosePlayerInventory(playerid)
 {
 	ShowPlayerDialog(playerid, -1, 0, "", "", "", "");
@@ -652,7 +653,7 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 	new
 		name[ITM_MAX_NAME];
 
-	GetItemTypeName(GetItemType(inv_Data[playerid][slotid]), name);
+	GetItemName(inv_Data[playerid][slotid], name);
 	inv_OptionsList[playerid] = "Equip\nUse\nDrop\n";
 	inv_OptionsCount[playerid] = 0;
 

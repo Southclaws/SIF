@@ -325,6 +325,7 @@ timer HolsterWeapon[time](playerid, type, ammo, time)
 timer UnholsterWeapon[time](playerid, time)
 {
 	#pragma unused time
+
 	GivePlayerWeapon(playerid, gHolsterWeaponData[playerid][0], gHolsterWeaponData[playerid][1]);
 	gPlayerArmedWeapon[playerid] = gHolsterWeaponData[playerid][0];
 
