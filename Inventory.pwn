@@ -580,7 +580,8 @@ stock DisplayPlayerInventory(playerid)
 
 ClosePlayerInventory(playerid)
 {
-	ShowPlayerDialog(playerid, -1, 0, "", "", "", "");
+	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
+	CallLocalFunction("OnPlayerCloseInventory", "d", playerid);
 	inv_ViewingInventory[playerid] = false;
 }
 

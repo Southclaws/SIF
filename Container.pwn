@@ -786,7 +786,8 @@ stock DisplayContainerInventory(playerid, containerid)
 
 stock ClosePlayerContainer(playerid)
 {
-	ShowPlayerDialog(playerid, -1, 0, "", "", "", "");
+	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
+	CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]);
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
 }
 
