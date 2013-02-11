@@ -85,8 +85,16 @@ public OnPlayerPickUpItem(playerid, itemid)
 		if(weaponid != 0)
 		{
 			if(weaponid != _:type)
+			{
 				return 1;
+			}
+
 		}
+	}
+	else
+	{
+		if(GetPlayerWeapon(playerid) != 0)
+			return 1;
 	}
 	return CallLocalFunction("wep_OnPlayerPickUpItem", "dd", playerid, itemid);
 }
@@ -258,7 +266,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				}
 			}
 		}
-		if(_:type == 0 && GetPlayerItem(playerid) == INVALID_ITEM_ID)
+		if(_:type == 0 && GetPlayerItem(playerid) == INVALID_ITEM_ID && gPlayerArmedWeapon[playerid] == 0)
 		{
 			if(gHolsterWeaponData[playerid][0] != 0)
 			{

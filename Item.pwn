@@ -1124,7 +1124,10 @@ stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Fl
 	}
 
 	if(!IsValidItemType(type))
-		return printf("ERROR: Item creation with undefined typeid (%d) failed.", _:type);
+	{
+		printf("ERROR: Item creation with undefined typeid (%d) failed.", _:type);
+		return INVALID_ITEM_ID;
+	}
 
 	Iter_Add(itm_Index, id);
 
@@ -1650,7 +1653,7 @@ public OnButtonPress(playerid, buttonid)
 {
 	print("OnButtonPress <Item Script>");
 
-	if(itm_Interacting[playerid] == INVALID_ITEM_ID && GetPlayerWeapon(playerid) == 0)
+	if(itm_Interacting[playerid] == INVALID_ITEM_ID)// && GetPlayerWeapon(playerid) == 0)
 	{
 		new item = itm_Holding[playerid];
 
