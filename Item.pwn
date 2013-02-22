@@ -1179,6 +1179,7 @@ stock DestroyItem(itemid)
 	itm_Data[itemid][itm_rotY] = 0.0;
 	itm_Data[itemid][itm_rotZ] = 0.0;
 	itm_Data[itemid][itm_exData] = 0;
+	itm_Data[itemid][itm_nameEx][0] = EOS;
 
 	itm_Holder[itemid]			= INVALID_PLAYER_ID;
 	itm_Interactor[itemid]		= INVALID_PLAYER_ID;
@@ -1855,8 +1856,8 @@ stock GetItemObjectID(itemid)
 // itm_button
 stock GetItemButtonID(itemid)
 {
-	if(!Iter_Contains(itm_Index, itemid))return 0;
-	if(!Iter_Contains(itm_WorldIndex, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))return INVALID_BUTTON_ID;
+	if(!Iter_Contains(itm_WorldIndex, itemid))return INVALID_BUTTON_ID;
 	return itm_Data[itemid][itm_button];
 }
 stock SetItemLabel(itemid, text[], colour = 0xFFFF00FF, Float:range = 10.0)

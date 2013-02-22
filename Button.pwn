@@ -243,7 +243,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Button/Interface
 		native -
 
-		native IsValidButtonID(buttonid)
+		native IsValidButton(buttonid)
 		{
 			Description:
 				Checks if <buttonid> is a valid button ID handle.
@@ -867,7 +867,7 @@ forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
 ==============================================================================*/
 
 
-stock IsValidButtonID(buttonid)
+stock IsValidButton(buttonid)
 {
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;

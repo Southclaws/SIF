@@ -569,7 +569,12 @@ stock CreateDoor(model, buttonids[],
 	if(id == -1)
 		return INVALID_DOOR_ID;
 
-	dr_Data[id][dr_objectid] = CreateDynamicObject(model, px, py, pz, rx, ry, rz, worldid, interiorid);
+	if(initstate == DR_STATE_CLOSED)
+		dr_Data[id][dr_objectid] = CreateDynamicObject(model, px, py, pz, rx, ry, rz, worldid, interiorid);
+
+	else
+		dr_Data[id][dr_objectid] = CreateDynamicObject(model, mpx, mpy, mpz, mrx, mry, mrz, worldid, interiorid);
+
 	dr_Data[id][dr_model] = model;
 	dr_Data[id][dr_buttonCount] = maxbuttons;
 	dr_Data[id][dr_closeDelay] = closedelay;
@@ -654,7 +659,7 @@ public OnButtonPress(playerid, buttonid)
 		{
 			if(buttonid == dr_Data[i][dr_buttonArray][j])
 			{
-				if(dr_State{i} == DR_STATE_CLOSED)
+				if(dr_State{i} == DR_STATE_CLOSED || dr_State{i} == DR_STATE_CLOSING)
 				{
 					if(CallLocalFunction("OnPlayerActivateDoor", "ddd", playerid, i, DR_STATE_OPENING))
 						return 0;
@@ -662,7 +667,7 @@ public OnButtonPress(playerid, buttonid)
 					OpenDoor(i);
 				}
 
-				if(dr_State{i} == DR_STATE_OPEN)
+				if(dr_State{i} == DR_STATE_OPEN || dr_State{i} == DR_STATE_OPENING)
 				{
 					if(CallLocalFunction("OnPlayerActivateDoor", "ddd", playerid, i, DR_STATE_CLOSING))
 						return 0;
