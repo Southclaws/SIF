@@ -640,7 +640,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
-		native SetItemPos(itemid, Float:x, Float:y, Float:z)
+		native SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0)
 		{
 
 			Description:
@@ -654,6 +654,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 				<x>, <y>, <z> (float, absolute world position)
 					The position variables passed by reference.
+
+				<zoffset> (float)
+					A height offset for the item's button position.
 
 			Returns:
 				0
@@ -1883,7 +1886,7 @@ stock GetItemPos(itemid, &Float:x, &Float:y, &Float:z)
 
 	return 1;
 }
-stock SetItemPos(itemid, Float:x, Float:y, Float:z)
+stock SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0)
 {
 	if(!Iter_Contains(itm_Index, itemid))return 0;
 
@@ -1891,7 +1894,7 @@ stock SetItemPos(itemid, Float:x, Float:y, Float:z)
 	itm_Data[itemid][itm_posY] = y;
 	itm_Data[itemid][itm_posZ] = z;
 
-	SetButtonPos(itm_Data[itemid][itm_button], x, y, z);
+	SetButtonPos(itm_Data[itemid][itm_button], x, y, z + zoffset);
 	SetDynamicObjectPos(itm_Data[itemid][itm_objId], x, y, z);
 
 	return 1;

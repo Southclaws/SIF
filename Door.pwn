@@ -432,6 +432,18 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+		native GetDoorState(doorid)
+		{
+			Description:
+				Returns the state of a door.
+
+			Parameters:
+				-
+
+			Returns:
+				-1
+					If the specified door handle ID is invalid.
+		}
 	}
 
 	SIF/Door/Internal Functions
@@ -495,6 +507,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define DR_MAX_BUTTONS_PER		(4)
 #define INVALID_DOOR_ID			(-1)
 
+#define DR_STATE_INVALID		(-1)
 #define DR_STATE_OPEN			(0)
 #define DR_STATE_CLOSED			(1)
 #define DR_STATE_OPENING		(2)
@@ -994,4 +1007,13 @@ stock SetDoorMoveRot(doorid, Float:rx, Float:ry, Float:rz)
 	dr_Data[doorid][dr_rotMoveZ] = rz;
 	
 	return 1;
+}
+
+// dr_State
+stock GetDoorState(doorid)
+{
+	if(!Iter_Contains(dr_Index, doorid))
+		return DR_STATE_INVALID;
+
+	return dr_State{doorid};
 }

@@ -138,11 +138,13 @@ hook OnPlayerConnect(playerid)
 
 	file = fopen(filename, io_read);
 
-	for(new i; i < MAX_PAGES; i++)
+	if(file)
 	{
-		fblockread(file, nbk_Data[playerid][i], MAX_NOTE_TEXT);
+		for(new i; i < MAX_PAGES; i++)
+		{
+			fblockread(file, nbk_Data[playerid][i], MAX_NOTE_TEXT);
+		}
 	}
-
 	fclose(file);
 
 	return 1;
@@ -160,9 +162,12 @@ hook OnPlayerDisconnect(playerid)
 
 	file = fopen(filename, io_write);
 
-	for(new i; i < MAX_PAGES; i++)
+	if(file)
 	{
-		fblockwrite(file, nbk_Data[playerid][i], MAX_NOTE_TEXT);
+		for(new i; i < MAX_PAGES; i++)
+		{
+			fblockwrite(file, nbk_Data[playerid][i], MAX_NOTE_TEXT);
+		}
 	}
 
 	fclose(file);
