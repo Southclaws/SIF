@@ -765,8 +765,6 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 Internal_OnButtonPress(playerid, buttonid)
 {
-	printf("\n\nOnButtonPress <Root Script> buttonid: %d", buttonid);
-
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 

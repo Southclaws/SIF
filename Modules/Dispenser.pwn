@@ -99,7 +99,6 @@ stock DispenserType:DefineDispenserType(name[], ItemType:type, price)
 
 public OnButtonPress(playerid, buttonid)
 {
-	print("OnButtonPress <Dispenser Script>");
 	foreach(new i : dsp_Index)
 	{
 		if(buttonid == dsp_Data[i][dsp_buttonId])

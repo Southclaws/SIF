@@ -20,13 +20,15 @@ stock GetPlayerHolsteredWeaponAmmo(playerid)
 
 	return gHolsterWeaponData[playerid][1];
 }
-stock ClearPlayerHolsterWeapon(playerid)
+stock RemovePlayerHolsterWeapon(playerid)
 {
 	if(!(0 <= playerid < MAX_PLAYERS))
 		return 0;
 
 	gHolsterWeaponData[playerid][0] = 0;
 	gHolsterWeaponData[playerid][1] = 0;
+
+	RemovePlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER);
 
 	return 1;
 }

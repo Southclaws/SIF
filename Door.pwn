@@ -652,7 +652,6 @@ stock DestroyDoor(doorid)
 
 public OnButtonPress(playerid, buttonid)
 {
-	print("OnButtonPress <Door Script>");
 	foreach(new i : dr_Index)
 	{
 		for(new j; j < dr_Data[i][dr_buttonCount]; j++)
@@ -666,8 +665,7 @@ public OnButtonPress(playerid, buttonid)
 
 					OpenDoor(i);
 				}
-
-				if(dr_State{i} == DR_STATE_OPEN || dr_State{i} == DR_STATE_OPENING)
+				else if(dr_State{i} == DR_STATE_OPEN || dr_State{i} == DR_STATE_OPENING)
 				{
 					if(CallLocalFunction("OnPlayerActivateDoor", "ddd", playerid, i, DR_STATE_CLOSING))
 						return 0;
@@ -680,9 +678,9 @@ public OnButtonPress(playerid, buttonid)
 	return CallLocalFunction("dr_OnButtonPress", "dd", playerid, buttonid);
 }
 #if defined _ALS_OnButtonPress
-    #undef OnButtonPress
+	#undef OnButtonPress
 #else
-    #define _ALS_OnButtonPress
+	#define _ALS_OnButtonPress
 #endif
 #define OnButtonPress dr_OnButtonPress
 forward dr_OnButtonPress(playerid, buttonid);
@@ -738,33 +736,33 @@ public OnDynamicObjectMoved(objectid)
 {
 	foreach(new i : dr_Index)
 	{
-	    if(objectid == dr_Data[i][dr_objectid] && dr_State{i} == DR_STATE_OPENING)
-	    {
-	        dr_State{i} = DR_STATE_OPEN;
-	        if(dr_Data[i][dr_closeDelay] >= 0)
-		        defer CloseDoor(i);
+		if(objectid == dr_Data[i][dr_objectid] && dr_State{i} == DR_STATE_OPENING)
+		{
+			dr_State{i} = DR_STATE_OPEN;
+			if(dr_Data[i][dr_closeDelay] >= 0)
+				defer CloseDoor(i);
 
 			if(dr_Data[i][dr_stopSound] != -1)
 				dr_PlaySoundForAll(dr_Data[i][dr_stopSound], dr_Data[i][dr_posX], dr_Data[i][dr_posY], dr_Data[i][dr_posZ]);
 
 			CallLocalFunction("OnDoorStateChange", "dd", i, DR_STATE_OPEN);
-	    }
-	    if(objectid == dr_Data[i][dr_objectid] && dr_State{i} == DR_STATE_CLOSING)
-	    {
-	        dr_State{i} = DR_STATE_CLOSED;
+		}
+		if(objectid == dr_Data[i][dr_objectid] && dr_State{i} == DR_STATE_CLOSING)
+		{
+			dr_State{i} = DR_STATE_CLOSED;
 
 			if(dr_Data[i][dr_stopSound] != -1)
 				dr_PlaySoundForAll(dr_Data[i][dr_stopSound], dr_Data[i][dr_posX], dr_Data[i][dr_posY], dr_Data[i][dr_posZ]);
 
 			CallLocalFunction("OnDoorStateChange", "dd", i, DR_STATE_CLOSED);
-	    }
+		}
 	}
-    return CallLocalFunction("dr_OnDynamicObjectMoved", "d", objectid);
+	return CallLocalFunction("dr_OnDynamicObjectMoved", "d", objectid);
 }
 #if defined _ALS_OnDynamicObjectMoved
-    #undef OnDynamicObjectMoved
+	#undef OnDynamicObjectMoved
 #else
-    #define _ALS_OnDynamicObjectMoved
+	#define _ALS_OnDynamicObjectMoved
 #endif
 #define OnDynamicObjectMoved dr_OnDynamicObjectMoved
 forward dr_OnDynamicObjectMoved(objectid);

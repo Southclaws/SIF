@@ -1655,8 +1655,6 @@ internal_OnPlayerUseItem(playerid, itemid)
 
 public OnButtonPress(playerid, buttonid)
 {
-	print("OnButtonPress <Item Script>");
-
 	if(itm_Interacting[playerid] == INVALID_ITEM_ID)// && GetPlayerWeapon(playerid) == 0)
 	{
 		new item = itm_Holding[playerid];
