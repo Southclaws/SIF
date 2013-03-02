@@ -2,19 +2,19 @@
 
 
 #if !defined NOTEBOOK_FILE
-	#define NOTEBOOK_FILE		"Notebook/%s.dat"
+	#define NOTEBOOK_FILE			"Notebook/%s.dat"
 #endif
 
 #if !defined MAX_PAGES
-	#define MAX_PAGES			(8)
+	#define MAX_PAGES				(8)
 #endif
 
 #if !defined MAX_NOTE_TEXT
-	#define MAX_NOTE_TEXT		128
+	#define MAX_NOTE_TEXT			128
 #endif
 
-#if !defined MAX_FILE_NAME
-	#define MAX_FILE_NAME		(MAX_PLAYER_NAME + 14)
+#if !defined MAX_NOTEBOOK_FILE_NAME
+	#define MAX_NOTEBOOK_FILE_NAME	(MAX_PLAYER_NAME + 14)
 #endif
 
 #define INVALID_NOTEBOOK_PAGE	(-1)
@@ -127,11 +127,11 @@ hook OnPlayerConnect(playerid)
 {
 	new
 		File:file,
-		filename[MAX_FILE_NAME],
+		filename[MAX_NOTEBOOK_FILE_NAME],
 		name[MAX_PLAYER_NAME];
 
 	GetPlayerName(playerid, name, MAX_PLAYER_NAME);
-	format(filename, MAX_FILE_NAME, NOTEBOOK_FILE, name);
+	format(filename, MAX_NOTEBOOK_FILE_NAME, NOTEBOOK_FILE, name);
 
 	if(!fexist(filename))
 		return 0;
@@ -154,11 +154,11 @@ hook OnPlayerDisconnect(playerid)
 {
 	new
 		File:file,
-		filename[MAX_FILE_NAME],
+		filename[MAX_NOTEBOOK_FILE_NAME],
 		name[MAX_PLAYER_NAME];
 
 	GetPlayerName(playerid, name, MAX_PLAYER_NAME);
-	format(filename, MAX_FILE_NAME, NOTEBOOK_FILE, name);
+	format(filename, MAX_NOTEBOOK_FILE_NAME, NOTEBOOK_FILE, name);
 
 	file = fopen(filename, io_write);
 

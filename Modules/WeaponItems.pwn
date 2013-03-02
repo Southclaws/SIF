@@ -46,7 +46,9 @@ stock RemoveHolsterWeapon(playerid)
 
 hook OnGameModeInit()
 {
-	new size;
+	new
+		size,
+		name[32];
 
 	DefineItemType("Flare", 354, ITEM_SIZE_SMALL);
 
@@ -54,6 +56,8 @@ hook OnGameModeInit()
 
 	for(new i = 1; i < 47; i++)
 	{
+		GetWeaponName(i, name);
+
 		switch(i)
 		{
 			case 1, 4, 16, 17, 22..24, 41, 43, 44, 45:
@@ -65,7 +69,7 @@ hook OnGameModeInit()
 			default: size = ITEM_SIZE_LARGE;
 		}
 
-		DefineItemType(WepData[i][WepName], WepData[i][WepModel], size, .rotx = 90.0);
+		DefineItemType(name, GetWeaponModel(i), size, .rotx = 90.0);
 	}
 	return 1;
 }
@@ -124,7 +128,7 @@ public OnPlayerPickedUpItem(playerid, itemid)
 				DestroyItem(itemid);
 				gPlayerArmedWeapon[playerid] = _:type;
 			}
-			else if(WepData[_:type][GtaSlot] == 0)
+			else if(GetWeaponSlot(_:type) == 0)
 			{
 				GivePlayerWeapon(playerid, _:type, 1);
 				DestroyItem(itemid);
@@ -159,7 +163,7 @@ public OnPlayerGivenItem(playerid, targetid, itemid)
 			gPlayerArmedWeapon[targetid] = _:type;
 			return 1;
 		}
-		else if(WepData[_:type][GtaSlot] == 0)
+		else if(GetWeaponSlot(_:type) == 0)
 		{
 			GivePlayerWeapon(playerid, _:type, 1);
 			DestroyItem(itemid);
@@ -248,14 +252,14 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				{
 					case 2, 3, 5, 6, 7, 8, 15, 1, 4, 16..18, 22..24, 10..13, 26, 28, 32, 39..41, 43, 44, 45:
 					{
-						SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLD, WepData[_:type][WepModel], 6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+						SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLD, GetWeaponModel(_:type), 6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 						ApplyAnimation(playerid, "PED", "PHONE_IN", 1.7, 0, 0, 0, 0, 700);
 						defer HolsterWeapon(playerid, _:type, ammo, 300);
 						tick_LastHolstered[playerid] = tickcount();
 					}
 					case 25, 27, 29, 30, 31, 33, 34, 35, 36:
 					{
-						SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLD, WepData[_:type][WepModel], 6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+						SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLD, GetWeaponModel(_:type), 6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
 						ApplyAnimation(playerid, "GOGGLES", "GOGGLES_PUT_ON", 1.7, 0, 0, 0, 0, 0);
 						defer HolsterWeapon(playerid, _:type, ammo, 800);
 						tick_LastHolstered[playerid] = tickcount();
@@ -299,16 +303,16 @@ timer HolsterWeapon[time](playerid, type, ammo, time)
 	switch(type)
 	{
 		case 2, 3, 5, 6, 7, 8, 15:
-			SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER, WepData[type][WepModel], 1, 0.123097, -0.129424, -0.139251, 0.000000, 301.455871, 0.000000, 1.000000, 1.000000, 1.000000);
+			SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER, GetWeaponModel(type), 1, 0.123097, -0.129424, -0.139251, 0.000000, 301.455871, 0.000000, 1.000000, 1.000000, 1.000000);
 
 		case 1, 4, 16..18, 22..24, 10..13, 26, 28, 32, 39..41, 43, 44, 45:
-			SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER, WepData[type][WepModel], 8, 0.061868, 0.008748, 0.136682, 254.874801, 0.318417, 0.176398, 1.000000, 1.000000, 1.000000 ); // tec9 - small
+			SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER, GetWeaponModel(type), 8, 0.061868, 0.008748, 0.136682, 254.874801, 0.318417, 0.176398, 1.000000, 1.000000, 1.000000 ); // tec9 - small
 
 		case 25, 27, 29, 30, 31, 33, 34:
-			SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER, WepData[type][WepModel], 1, 0.214089, -0.126031, 0.114131, 0.000000, 159.522552, 0.000000, 1.000000, 1.000000, 1.000000 ); // ak47 - ak
+			SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER, GetWeaponModel(type), 1, 0.214089, -0.126031, 0.114131, 0.000000, 159.522552, 0.000000, 1.000000, 1.000000, 1.000000 ); // ak47 - ak
 
 		case 35, 36:
-			SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER, WepData[type][WepModel], 1, 0.181966, -0.238397, -0.094830, 252.791229, 353.893859, 357.529418, 1.000000, 1.000000, 1.000000 ); // rocketla - rpg
+			SetPlayerAttachedObject(playerid, ATTACHSLOT_HOLSTER, GetWeaponModel(type), 1, 0.181966, -0.238397, -0.094830, 252.791229, 353.893859, 357.529418, 1.000000, 1.000000, 1.000000 ); // rocketla - rpg
 
 		default: return 0;
 	}
@@ -370,7 +374,7 @@ PlayerDropWeapon(playerid)
 		{
 			PlayerDropItem(playerid);
 
-			switch(WepData[_:type][GtaSlot])
+			switch(GetWeaponSlot(_:type))
 			{
 				case 0, 1, 10, 11, 12: ammo = 1;
 			}
