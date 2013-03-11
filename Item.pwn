@@ -994,6 +994,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define ITM_ATTACH_INDEX	(0)
 
 #define FLOOR_OFFSET		(0.8568)
+#define ITEM_BTN_OFFSET_Z	(0.6)
 #define INVALID_ITEM_ID		(-1)
 #define INVALID_ITEM_TYPE	(ItemType:-1)
 
@@ -1092,12 +1093,12 @@ hook OnGameModeInit()
 {
 	for(new i;i<MAX_PLAYERS;i++)
 	{
-	    itm_Holding[i] = INVALID_ITEM_ID;
-	    itm_Interacting[i] = INVALID_ITEM_ID;
+		itm_Holding[i] = INVALID_ITEM_ID;
+		itm_Interacting[i] = INVALID_ITEM_ID;
 	}
 	for(new i;i<ITM_MAX;i++)
 	{
-	    itm_Holder[i] = INVALID_PLAYER_ID;
+		itm_Holder[i] = INVALID_PLAYER_ID;
 	}
 	return 1;
 }
@@ -1137,12 +1138,13 @@ stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Fl
 	itm_Data[id][itm_type] = type;
 
 	CallLocalFunction("OnItemCreate", "d", id);
-	// CallLocalFunction("OnItemCreated", "d", id);
 
 	CreateItemInWorld(id,
 		Float:x, Float:y, Float:z,
 		Float:rx, Float:ry, Float:rz,
 		Float:zoffset, world, interior, label);
+
+	// CallLocalFunction("OnItemCreated", "d", id);
 
 	return id;
 }
@@ -1159,8 +1161,8 @@ stock DestroyItem(itemid)
 			SetPlayerSpecialAction(itm_Holder[itemid], SPECIAL_ACTION_NONE);
 
 		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
-	    itm_Holding[itm_Holder[itemid]] = INVALID_ITEM_ID;
-	    itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
+		itm_Holding[itm_Holder[itemid]] = INVALID_ITEM_ID;
+		itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
 		stop itm_InteractTimer[itm_Holder[itemid]];
 	}
 	else
@@ -1287,28 +1289,43 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 	return 1;
 }
 
-stock PlayerPickUpItem(playerid, itemid, animtype)
+stock PlayerPickUpItem(playerid, itemid)
 {
-	if(animtype == 0)
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	new
+		Float:x,
+		Float:y,
+		Float:z;
+
+	GetPlayerPos(playerid, x, y, z);
+	SetPlayerFacingAngle(playerid, sif_GetAngleToPoint(x, y, itm_Data[itemid][itm_posX], itm_Data[itemid][itm_posY]));
+
+	if((z - itm_Data[itemid][itm_posZ]) < 0.3) // If the height between the player and the item is below 0.5 units
 	{
 		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] == ITEM_SIZE_CARRY)
-			ApplyAnimation(playerid, "CARRY", "liftup", 5.0, 0, 0, 0, 0, 399);
-
-		else
-			ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_IN", 5.0, 0, 0, 0, 0, 450);
-
-		itm_InteractTimer[playerid] = defer PickUpItemDelay(playerid, itemid, .animtype = 0);
-	}
-	if(animtype == 1)
-	{
-		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] == ITEM_SIZE_CARRY)
-			ApplyAnimation(playerid, "CARRY", "liftup105", 5.0, 0, 0, 0, 0, 399);
+			ApplyAnimation(playerid, "CARRY", "liftup105", 5.0, 0, 0, 0, 0, 400);
 
 		else
 			ApplyAnimation(playerid, "CASINO", "SLOT_PLYR", 4.0, 0, 0, 0, 0, 0);
 
-		itm_InteractTimer[playerid] = defer PickUpItemDelay(playerid, itemid, .animtype = 1);
+		itm_InteractTimer[playerid] = defer PickUpItemDelay(playerid, itemid, 1);
 	}
+	else
+	{
+		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] == ITEM_SIZE_CARRY)
+			ApplyAnimation(playerid, "CARRY", "liftup", 5.0, 0, 0, 0, 0, 400);
+
+		else
+			ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_IN", 5.0, 0, 0, 0, 0, 450);
+
+		itm_InteractTimer[playerid] = defer PickUpItemDelay(playerid, itemid, 0);
+	}
+
+	itm_Interacting[playerid] = itemid;
+	itm_Interactor[itemid] = playerid;
+
 	return 1;
 }
 
@@ -1416,10 +1433,10 @@ GiveWorldItemToPlayer(playerid, itemid, call)
 	itm_Data[itemid][itm_posY]		= 0.0;
 	itm_Data[itemid][itm_posZ]		= 0.0;
 
-    itm_Holding[playerid]			= itemid;
-    itm_Holder[itemid]				= playerid;
-    itm_Interacting[playerid]		= INVALID_ITEM_ID;
-    itm_Interactor[itemid]			= INVALID_PLAYER_ID;
+	itm_Holding[playerid]			= itemid;
+	itm_Holder[itemid]				= playerid;
+	itm_Interacting[playerid]		= INVALID_ITEM_ID;
+	itm_Interactor[itemid]			= INVALID_PLAYER_ID;
 
 	if(Iter_Contains(itm_WorldIndex, itemid))
 	{
@@ -1451,7 +1468,7 @@ stock RemoveCurrentItem(playerid)
 		return INVALID_ITEM_ID;
 
 	new
-	    itemid = itm_Holding[playerid],
+		itemid = itm_Holding[playerid],
 		Float:x,
 		Float:y,
 		Float:z,
@@ -1522,11 +1539,11 @@ CreateItemInWorld(itemid,
 		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
 		SetPlayerSpecialAction(itm_Holder[itemid], SPECIAL_ACTION_NONE);
 
-	    itm_Holding[itm_Holder[itemid]]			= INVALID_ITEM_ID;
-    	itm_Interacting[itm_Holder[itemid]]		= INVALID_ITEM_ID;
-    }
-    itm_Interactor[itemid]						= INVALID_PLAYER_ID;
-    itm_Holder[itemid]							= INVALID_PLAYER_ID;
+		itm_Holding[itm_Holder[itemid]]			= INVALID_ITEM_ID;
+		itm_Interacting[itm_Holder[itemid]]		= INVALID_ITEM_ID;
+	}
+	itm_Interactor[itemid]						= INVALID_PLAYER_ID;
+	itm_Holder[itemid]							= INVALID_PLAYER_ID;
 
 	itm_Data[itemid][itm_objId]					= CreateDynamicObject(itm_TypeData[itemtype][itm_model], x, y, z + itm_TypeData[itemtype][itm_offsetZ], rx, ry, rz, world, interior);
 	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + zoffset, "Press F to pick up", world, interior, 1.0);
@@ -1604,7 +1621,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			PlayerUseItem(playerid);
 		}
 	}
-    return 1;
+	return 1;
 }
 
 
@@ -1615,12 +1632,12 @@ public OnPlayerEnterPlayerArea(playerid, targetid)
 		ShowMsgBox(playerid, "Press N to give item");
 	}
 
-    return CallLocalFunction("itm_OnPlayerEnterPlayerArea", "dd", playerid, targetid);
+	return CallLocalFunction("itm_OnPlayerEnterPlayerArea", "dd", playerid, targetid);
 }
 #if defined _ALS_OnPlayerEnterPlayerArea
-    #undef OnPlayerEnterPlayerArea
+	#undef OnPlayerEnterPlayerArea
 #else
-    #define _ALS_OnPlayerEnterPlayerArea
+	#define _ALS_OnPlayerEnterPlayerArea
 #endif
 #define OnPlayerEnterPlayerArea itm_OnPlayerEnterPlayerArea
 forward itm_OnPlayerEnterPlayerArea(playerid, targetid);
@@ -1632,12 +1649,12 @@ public OnPlayerLeavePlayerArea(playerid, targetid)
 		HideMsgBox(playerid);
 	}
 
-    return CallLocalFunction("itm_OnPlayerLeavePlayerArea", "dd", playerid, targetid);
+	return CallLocalFunction("itm_OnPlayerLeavePlayerArea", "dd", playerid, targetid);
 }
 #if defined _ALS_OnPlayerLeavePlayerArea
-    #undef OnPlayerLeavePlayerArea
+	#undef OnPlayerLeavePlayerArea
 #else
-    #define _ALS_OnPlayerLeavePlayerArea
+	#define _ALS_OnPlayerLeavePlayerArea
 #endif
 #define OnPlayerLeavePlayerArea itm_OnPlayerLeavePlayerArea
 forward itm_OnPlayerLeavePlayerArea(playerid, targetid);
@@ -1666,31 +1683,12 @@ public OnButtonPress(playerid, buttonid)
 				if(Iter_Contains(itm_Index, item))
 					return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, item, i);
 
-				new
-					Float:itm_x = itm_Data[i][itm_posX],
-					Float:itm_y = itm_Data[i][itm_posY];
-
 				if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, i))
 					return 0;
 
-				new
-					Float:x,
-				    Float:y,
-				    Float:z;
+				PlayerPickUpItem(playerid, i);
 
-			    GetPlayerPos(playerid, x, y, z);
-			    SetPlayerFacingAngle(playerid, sif_GetAngleToPoint(x, y, itm_x, itm_y));
-
-				if((itm_Data[i][itm_posZ] - z) > -0.8) // If the player is more than 0.8 units above the item
-					PlayerPickUpItem(playerid, i, 1);
-
-				else
-					PlayerPickUpItem(playerid, i, 0);
-
-				itm_Interacting[playerid] = i;
-				itm_Interactor[i] = playerid;
-
-			    return 1;
+				return 1;
 			}
 		}
 	}
@@ -1706,7 +1704,8 @@ forward itm_OnButtonPress(playerid, buttonid);
 
 timer PickUpItemDelay[400](playerid, id, animtype)
 {
-	if(animtype==0)ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
+	if(animtype == 0)
+		ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
 
 	HideMsgBox(playerid);
 	
@@ -1723,14 +1722,14 @@ timer PickUpItemDelay[400](playerid, id, animtype)
 timer DropItemDelay[400](playerid)
 {
 	new
-	    itemid = itm_Holding[playerid],
+		itemid = itm_Holding[playerid],
 		Float:x,
 		Float:y,
 		Float:z,
 		Float:r;
 
 	if(!Iter_Contains(itm_Index, itemid))
-	    return 0;
+		return 0;
 
 	if(CallLocalFunction("OnPlayerDroppedItem", "dd", playerid, itemid))
 		return 0;
@@ -1738,10 +1737,10 @@ timer DropItemDelay[400](playerid)
 	RemovePlayerAttachedObject(playerid, ITM_ATTACH_INDEX);
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_NONE);
 
-    itm_Holding[playerid] = INVALID_ITEM_ID;
-    itm_Interacting[playerid] = INVALID_ITEM_ID;
-    itm_Holder[itemid] = INVALID_PLAYER_ID;
-    itm_Interactor[itemid] = INVALID_PLAYER_ID;
+	itm_Holding[playerid] = INVALID_ITEM_ID;
+	itm_Interacting[playerid] = INVALID_ITEM_ID;
+	itm_Holder[itemid] = INVALID_PLAYER_ID;
+	itm_Interactor[itemid] = INVALID_PLAYER_ID;
 
 	GetPlayerPos(playerid, x, y, z);
 	GetPlayerFacingAngle(playerid, r);
@@ -1771,9 +1770,9 @@ timer GiveItemDelay[500](playerid, targetid)
 
 	CallLocalFunction("OnPlayerGivenItem", "ddd", playerid, targetid, id);
 
-    itm_Holding[playerid] = INVALID_ITEM_ID;
-    itm_Interacting[playerid] = INVALID_ITEM_ID;
-    itm_Interacting[targetid] = INVALID_ITEM_ID;
+	itm_Holding[playerid] = INVALID_ITEM_ID;
+	itm_Interacting[playerid] = INVALID_ITEM_ID;
+	itm_Interacting[targetid] = INVALID_ITEM_ID;
 	RemovePlayerAttachedObject(playerid, ITM_ATTACH_INDEX);
 
 	SetPlayerAttachedObject(
@@ -1784,7 +1783,7 @@ timer GiveItemDelay[500](playerid, targetid)
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_NONE);
 
 	itm_Holding[targetid] = id;
-    itm_Holder[id] = targetid;
+	itm_Holder[id] = targetid;
 }
 
 public OnPlayerDeath(playerid, killerid, reason)
@@ -1792,10 +1791,10 @@ public OnPlayerDeath(playerid, killerid, reason)
 	new itemid = itm_Holding[playerid];
 	if(Iter_Contains(itm_Index, itemid))
 	{
-	    new
-	        Float:x,
-	        Float:y,
-	        Float:z,
+		new
+			Float:x,
+			Float:y,
+			Float:z,
 			Float:r;
 
 		GetPlayerPos(playerid, x, y, z);
@@ -1813,12 +1812,12 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
 	}
-    return CallLocalFunction("itm_OnPlayerDeath", "ddd", playerid, killerid, reason);
+	return CallLocalFunction("itm_OnPlayerDeath", "ddd", playerid, killerid, reason);
 }
 #if defined _ALS_OnPlayerDeath
-    #undef OnPlayerDeath
+	#undef OnPlayerDeath
 #else
-    #define _ALS_OnPlayerDeath
+	#define _ALS_OnPlayerDeath
 #endif
 #define OnPlayerDeath itm_OnPlayerDeath
 forward itm_OnPlayerDeath(playerid, killerid, reason);

@@ -184,7 +184,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				-
 		}
 
-		native OnPlayerAddToContainer(playerid, containerid, itemid);
+		native OnItemAddToContainer(containerid, itemid, playerid);
 		{
 			Called:
 				-
@@ -196,7 +196,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				-
 		}
 
-		native OnPlayerAddedToContainer(playerid, containerid, itemid);
+		native OnItemAddedToContainer(containerid, itemid, playerid);
 		{
 			Called:
 				-
@@ -208,7 +208,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				-
 		}
 
-		native OnPlayerTakeFromContainer(playerid, containerid, slotid);
+		native OnItemRemoveFromContainer(containerid, slotid, playerid);
 		{
 			Called:
 				-
@@ -220,7 +220,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				-
 		}
 
-		native OnPlayerTakenFromContainer(playerid, containerid, slotid);
+		native OnItemRemovedFromContainer(containerid, slotid, playerid);
 		{
 			Called:
 				-
@@ -567,13 +567,12 @@ static
 
 forward OnPlayerOpenContainer(playerid, containerid);
 forward OnPlayerCloseContainer(playerid, containerid);
-forward OnPlayerAddToContainer(playerid, containerid, itemid);
-forward OnPlayerAddedToContainer(playerid, containerid, itemid);
-forward OnPlayerTakeFromContainer(playerid, containerid, slotid);
-forward OnPlayerTakenFromContainer(playerid, containerid, slotid);
+forward OnItemAddToContainer(containerid, itemid, playerid);
+forward OnItemAddedToContainer(containerid, itemid, playerid);
+forward OnItemRemoveFromContainer(containerid, slotid, playerid);
+forward OnItemRemovedFromContainer(containerid, slotid, playerid);
 forward OnPlayerViewContainerOpt(playerid, containerid);
 forward OnPlayerSelectContainerOpt(playerid, containerid, option);
-
 
 /*==============================================================================
 
@@ -664,11 +663,8 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 	if(!IsValidItem(itemid))
 		return 0;
 
-	if(playerid != INVALID_PLAYER_ID)
-	{
-		if(CallLocalFunction("OnPlayerAddToContainer", "ddd", playerid, containerid, itemid))
-			return 1;
-	}
+	if(CallLocalFunction("OnItemAddToContainer", "ddd", containerid, itemid, playerid))
+		return 1;
 
 	new
 		i,
@@ -717,8 +713,7 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 
 	RemoveItemFromWorld(itemid);
 
-	if(playerid != INVALID_PLAYER_ID)
-		CallLocalFunction("OnPlayerAddedToContainer", "ddd", playerid, containerid, itemid);
+	CallLocalFunction("OnItemAddedToContainer", "ddd", containerid, itemid, playerid);
 	
 	return 1;
 }
@@ -728,11 +723,8 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
 	if(!(0 <= slotid < cnt_Data[containerid][cnt_size]))
 		return 0;
 
-	if(playerid != INVALID_PLAYER_ID)
-	{
-		if(CallLocalFunction("OnPlayerTakeFromContainer", "ddd", playerid, containerid, slotid))
-			return 1;
-	}
+	if(CallLocalFunction("OnItemRemoveFromContainer", "ddd", containerid, slotid, playerid))
+		return 1;
 
 	cnt_Items[containerid][slotid] = INVALID_ITEM_ID;
 	
@@ -744,8 +736,7 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
 		cnt_Items[containerid][(cnt_Data[containerid][cnt_size] - 1)] = INVALID_ITEM_ID;
 	}
 
-	if(playerid != INVALID_PLAYER_ID)
-		CallLocalFunction("OnPlayerTakenFromContainer", "ddd", playerid, containerid, slotid);
+	CallLocalFunction("OnItemRemovedFromContainer", "ddd", containerid, slotid, playerid);
 
 	return 1;
 }
