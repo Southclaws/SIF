@@ -137,7 +137,7 @@ static
 			cft_InventoryOptionID[MAX_PLAYERS];
 
 
-forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1, &retitem);
+forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &retitem = 0);
 
 
 /*==============================================================================
@@ -147,7 +147,7 @@ forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1, &
 ==============================================================================*/
 
 
-stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnitem1, returnitem2)
+stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnitem1 = 0, returnitem2 = 0)
 {
 	new id = Iter_Free(cft_Index);
 	if(id == -1)
