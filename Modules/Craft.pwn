@@ -42,7 +42,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Craft/Core
 		native -
 
-		native DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result)
+		native DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnitem1, returnitem2)
 		{
 			Description:
 				Adds a new combination "recipe" to the index.
@@ -68,7 +68,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Internal events called by player actions done by using features from
 		this script.
 	
-		GetItemComboResult(ItemType:item1, ItemType:item2)
+		GetItemComboResult(ItemType:item1, ItemType:item, &retitem1, &retitem)
 		{
 			Description:
 				Returns the result of two items combined. Returns
@@ -122,7 +122,9 @@ enum E_CRAFT_COMBO_DATA
 {
 ItemType:	cft_item1,
 ItemType:	cft_item2,
-ItemType:	cft_result
+ItemType:	cft_result,
+			cft_retItem1,
+			cft_retItem2
 }
 
 
@@ -135,7 +137,7 @@ static
 			cft_InventoryOptionID[MAX_PLAYERS];
 
 
-forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2);
+forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1, &retitem);
 
 
 /*==============================================================================
@@ -145,7 +147,7 @@ forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2);
 ==============================================================================*/
 
 
-stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result)
+stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnitem1, returnitem2)
 {
 	new id = Iter_Free(cft_Index);
 	if(id == -1)
@@ -154,6 +156,8 @@ stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result)
 	cft_Data[id][cft_item1] = item1;
 	cft_Data[id][cft_item2] = item2;
 	cft_Data[id][cft_result] = result;
+	cft_Data[id][cft_retItem1] = returnitem1;
+	cft_Data[id][cft_retItem2] = returnitem2;
 
 	Iter_Add(cft_Index, id);
 
@@ -245,9 +249,25 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 		// Get the item combination result, AKA the item that the two items will create.
 
-		new ItemType:result = GetItemComboResult(
+		new
+			retitem1,
+			retitem2,
+			ItemType:result,
+			itemslot1,
+			itemslot2;
+
+		result = GetItemComboResult(
 			GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))),
-			GetItemType(GetInventorySlotItem(playerid, listitem)) );
+			GetItemType(GetInventorySlotItem(playerid, listitem)), retitem1, retitem2);
+
+		if(retitem1 && retitem2)
+		{
+			if(GetInventoryFreeSlots(playerid) < 3)
+			{
+				ShowMsgBox(playerid, "Not enough inventory space", 3000);
+				return 0;
+			}
+		}
 
 		// The above function returns an invalid item if there is no combination
 		// If it's valid then delete the original items and add the new one to the inventory.
@@ -256,21 +276,30 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			new newitem = CreateItem(result, 0.0, 0.0, 0.0);
 
-			DestroyItem(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid)));
-			DestroyItem(GetInventorySlotItem(playerid, listitem));
-
 			// Remove from the highest slot first
 			// Because the remove code shifts other inventory items up by 1 slot.
 
 			if(GetPlayerSelectedInventorySlot(playerid) > listitem)
 			{
-				RemoveItemFromInventory(playerid, GetPlayerSelectedInventorySlot(playerid));
-				RemoveItemFromInventory(playerid, listitem);
+				itemslot1 = GetPlayerSelectedInventorySlot(playerid);
+				itemslot2 = listitem;
 			}
 			else
 			{
-				RemoveItemFromInventory(playerid, listitem);
-				RemoveItemFromInventory(playerid, GetPlayerSelectedInventorySlot(playerid));
+				itemslot1 = listitem;
+				itemslot2 = GetPlayerSelectedInventorySlot(playerid);
+			}
+
+			if(!retitem1)
+			{
+				DestroyItem(GetInventorySlotItem(playerid, itemslot1));
+				RemoveItemFromInventory(playerid, itemslot1);
+			}
+
+			if(!retitem2)
+			{
+				DestroyItem(GetInventorySlotItem(playerid, itemslot2));
+				RemoveItemFromInventory(playerid, itemslot2);
 			}
 
 			AddItemToInventory(playerid, newitem);
@@ -286,7 +315,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return 1;
 }
 
-ItemType:GetItemComboResult(ItemType:item1, ItemType:item2)
+ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &retitem = 0)
 {
 	// Loop through all "recipe" item combinations
 	// If a match is found, return that combo result.

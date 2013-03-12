@@ -373,6 +373,18 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the options string can't fit the specified option.
 		}
+
+		native GetInventoryFreeSlots(playerid)
+		{
+			Description:
+				Returns the amount of free slots in a player's inventory.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
 	}
 
 	SIF/Inventory/Internal Functions
@@ -849,4 +861,14 @@ stock IsPlayerViewingInventory(playerid)
 		return 0;
 
 	return inv_ViewingInventory[playerid];
+}
+
+stock GetInventoryFreeSlots(playerid)
+{
+	for(new i; i < INV_MAX_SLOTS; i++)
+	{
+		if(!IsValidItem(inv_Data[playerid][i]))
+			return INV_MAX_SLOTS - (i + 1);
+	}
+	return 0;
 }
