@@ -133,11 +133,12 @@ ItemType:	cft_Data[CFT_MAX_COMBO][E_CRAFT_COMBO_DATA],
 Iterator:	cft_Index<CFT_MAX_COMBO>;
 
 static
+			cft_ListType[MAX_PLAYERS],
 			cft_SelectedInvSlot[MAX_PLAYERS],
 			cft_InventoryOptionID[MAX_PLAYERS];
 
 
-forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &retitem = 0);
+forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &retitem2 = 0);
 
 
 /*==============================================================================
@@ -192,7 +193,7 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 	{
 		cft_SelectedInvSlot[playerid] = GetPlayerSelectedInventorySlot(playerid);
 
-		DisplayCombineInventory(playerid);
+		DisplayCombineInventory(playerid, 0);
 	}
 
 	return CallLocalFunction("cft_OnPlayerSelectInventoryOpt", "dd", playerid, option);
@@ -205,22 +206,77 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 #define OnPlayerSelectInventoryOpt cft_OnPlayerSelectInventoryOpt
 forward OnPlayerSelectInventoryOpt(playerid, option);
 
-DisplayCombineInventory(playerid)
+public OnPlayerViewContainerOpt(playerid, containerid)
+{
+	cft_InventoryOptionID[playerid] = AddContainerOption(playerid, "Combine");
+
+	return CallLocalFunction("cft_OnPlayerViewContainerOpt", "dd", playerid, containerid);
+}
+#if defined _ALS_OnPlayerViewContainerOpt
+	#undef OnPlayerViewContainerOpt
+#else
+	#define _ALS_OnPlayerViewContainerOpt
+#endif
+#define OnPlayerViewContainerOpt cft_OnPlayerViewContainerOpt
+forward OnPlayerViewContainerOpt(playerid, containerid);
+
+public OnPlayerSelectContainerOpt(playerid, containerid, option)
+{
+	if(option == cft_InventoryOptionID[playerid])
+	{
+		cft_SelectedInvSlot[playerid] = GetPlayerContainerSlot(playerid);
+
+		DisplayCombineInventory(playerid, 1);
+	}
+
+	return CallLocalFunction("cft_OnPlayerSelectContainerOpt", "ddd", playerid, containerid, option);
+}
+#if defined _ALS_OnPlayerSelectContainerOpt
+	#undef OnPlayerSelectContainerOpt
+#else
+	#define _ALS_OnPlayerSelectContainerOpt
+#endif
+#define OnPlayerSelectContainerOpt cft_OnPlayerSelectContainerOpt
+forward OnPlayerSelectContainerOpt(playerid, containerid, option);
+
+DisplayCombineInventory(playerid, listtype)
 {
 	new
 		list[INV_MAX_SLOTS * (ITM_MAX_NAME + 1)],
 		tmp[ITM_MAX_NAME];
 	
-	for(new i; i < INV_MAX_SLOTS; i++)
-	{
-		if(!IsValidItem(GetInventorySlotItem(playerid, i)))
-			strcat(list, "<Empty>\n");
+	cft_ListType[playerid] = listtype;
 
-		else
+	if(listtype == 0)
+	{
+		for(new i; i < INV_MAX_SLOTS; i++)
 		{
-			GetItemTypeName(GetItemType(GetInventorySlotItem(playerid, i)), tmp);
-			strcat(list, tmp);
-			strcat(list, "\n");
+			if(!IsValidItem(GetInventorySlotItem(playerid, i)))
+				strcat(list, "<Empty>\n");
+
+			else
+			{
+				GetItemTypeName(GetItemType(GetInventorySlotItem(playerid, i)), tmp);
+				strcat(list, tmp);
+				strcat(list, "\n");
+			}
+		}
+	}
+	else
+	{
+		new containerid = GetPlayerCurrentContainer(playerid);
+
+		for(new i, j = GetContainerSize(containerid); i < j; i++)
+		{
+			if(!IsValidItem(GetContainerSlotItem(containerid, i)))
+				strcat(list, "<Empty>\n");
+
+			else
+			{
+				GetItemTypeName(GetItemType(GetContainerSlotItem(containerid, i)), tmp);
+				strcat(list, tmp);
+				strcat(list, "\n");
+			}
 		}
 	}
 
@@ -237,95 +293,178 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			return 1;
 		}
 
-		// If the player picks the same inventory item as the one he is trying to combine
-		// Or if he picks an empty slot, re-render the dialog.
-		// You can't combine something with itself or nothing, that's like dividing by zero!
-
-		if(listitem == GetPlayerSelectedInventorySlot(playerid) || !IsInventorySlotUsed(playerid, listitem))
+		if(cft_ListType[playerid] == 0)
 		{
-			DisplayCombineInventory(playerid);
-			return 1;
-		}
+			// If the player picks the same inventory item as the one he is trying to combine
+			// Or if he picks an empty slot, re-render the dialog.
+			// You can't combine something with itself or nothing, that's like dividing by zero!
 
-		// Get the item combination result, AKA the item that the two items will create.
-
-		new
-			retitem1,
-			retitem2,
-			ItemType:result,
-			itemslot1,
-			itemslot2;
-
-		result = GetItemComboResult(
-			GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))),
-			GetItemType(GetInventorySlotItem(playerid, listitem)), retitem1, retitem2);
-
-		if(retitem1 && retitem2)
-		{
-			if(GetInventoryFreeSlots(playerid) < 3)
+			if(listitem == GetPlayerSelectedInventorySlot(playerid) || !IsInventorySlotUsed(playerid, listitem))
 			{
-				ShowMsgBox(playerid, "Not enough inventory space", 3000);
-				return 0;
+				DisplayCombineInventory(playerid, 0);
+				return 1;
 			}
-		}
 
-		// The above function returns an invalid item if there is no combination
-		// If it's valid then delete the original items and add the new one to the inventory.
+			// Get the item combination result, AKA the item that the two items will create.
 
-		if(IsValidItemType(result))
-		{
-			new newitem = CreateItem(result, 0.0, 0.0, 0.0);
+			new
+				retitem1,
+				retitem2,
+				ItemType:result,
+				itemslot1,
+				itemslot2;
 
-			// Remove from the highest slot first
-			// Because the remove code shifts other inventory items up by 1 slot.
+			result = GetItemComboResult(
+				GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))),
+				GetItemType(GetInventorySlotItem(playerid, listitem)), retitem1, retitem2);
 
-			if(GetPlayerSelectedInventorySlot(playerid) > listitem)
+			if(retitem1 && retitem2)
 			{
-				itemslot1 = GetPlayerSelectedInventorySlot(playerid);
-				itemslot2 = listitem;
+				if(GetInventoryFreeSlots(playerid) < 1)
+				{
+					ShowMsgBox(playerid, "Not enough inventory space", 3000);
+					return 0;
+				}
+			}
+
+			// The above function returns an invalid item if there is no combination
+			// If it's valid then delete the original items and add the new one to the inventory.
+
+			if(IsValidItemType(result))
+			{
+				new newitem = CreateItem(result, 0.0, 0.0, 0.0);
+
+				// Remove from the highest slot first
+				// Because the remove code shifts other inventory items up by 1 slot.
+
+				if(GetPlayerSelectedInventorySlot(playerid) > listitem)
+				{
+					itemslot1 = GetPlayerSelectedInventorySlot(playerid);
+					itemslot2 = listitem;
+				}
+				else
+				{
+					itemslot1 = listitem;
+					itemslot2 = GetPlayerSelectedInventorySlot(playerid);
+				}
+
+				if(!retitem1)
+				{
+					DestroyItem(GetInventorySlotItem(playerid, itemslot1));
+					RemoveItemFromInventory(playerid, itemslot1);
+				}
+
+				if(!retitem2)
+				{
+					DestroyItem(GetInventorySlotItem(playerid, itemslot2));
+					RemoveItemFromInventory(playerid, itemslot2);
+				}
+
+				AddItemToInventory(playerid, newitem);
+
+				DisplayPlayerInventory(playerid);
 			}
 			else
 			{
-				itemslot1 = listitem;
-				itemslot2 = GetPlayerSelectedInventorySlot(playerid);
+				// If it's not valid, re-render the dialog.
+				DisplayCombineInventory(playerid, 0);
 			}
-
-			if(!retitem1)
-			{
-				DestroyItem(GetInventorySlotItem(playerid, itemslot1));
-				RemoveItemFromInventory(playerid, itemslot1);
-			}
-
-			if(!retitem2)
-			{
-				DestroyItem(GetInventorySlotItem(playerid, itemslot2));
-				RemoveItemFromInventory(playerid, itemslot2);
-			}
-
-			AddItemToInventory(playerid, newitem);
-
-			DisplayPlayerInventory(playerid);
 		}
+		else
+		{
+			new
+				containerid = GetPlayerCurrentContainer(playerid);
 
-		// If it's not valid, re-render the dialog.
+			if(listitem == GetPlayerContainerSlot(playerid) || !IsContainerSlotUsed(containerid, listitem))
+			{
+				DisplayCombineInventory(playerid, 1);
+				print("1");
+				return 1;
+			}
 
-		else DisplayCombineInventory(playerid);
+			new
+				retitem1,
+				retitem2,
+				ItemType:result,
+				itemslot1,
+				itemslot2;
+
+			result = GetItemComboResult(
+				GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))),
+				GetItemType(GetContainerSlotItem(containerid, listitem)), retitem1, retitem2);
+
+			printf("Result: %d", _:result);
+
+			if(retitem1 && retitem2)
+			{
+				if(GetContainerFreeSlots(playerid) < 1)
+				{
+					ShowMsgBox(playerid, "Not enough inventory space", 3000);
+					return 0;
+				}
+			}
+
+			if(IsValidItemType(result))
+			{
+				new newitem = CreateItem(result, 0.0, 0.0, 0.0);
+
+				if(GetPlayerContainerSlot(playerid) > listitem)
+				{
+					itemslot1 = GetPlayerContainerSlot(playerid);
+					itemslot2 = listitem;
+				}
+				else
+				{
+					itemslot1 = listitem;
+					itemslot2 = GetPlayerContainerSlot(playerid);
+				}
+
+				if(!retitem1)
+				{
+					DestroyItem(GetContainerSlotItem(containerid, itemslot1));
+					RemoveItemFromContainer(containerid, itemslot1);
+				}
+
+				if(!retitem2)
+				{
+					DestroyItem(GetContainerSlotItem(containerid, itemslot2));
+					RemoveItemFromContainer(containerid, itemslot2);
+				}
+
+				AddItemToContainer(containerid, newitem);
+
+				DisplayContainerInventory(playerid, containerid);
+			}
+			else
+			{
+				print("2");
+				DisplayCombineInventory(playerid, 1);
+			}
+		}
 	}
 
 	return 1;
 }
 
-ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &retitem = 0)
+ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &retitem2 = 0)
 {
 	// Loop through all "recipe" item combinations
 	// If a match is found, return that combo result.
 	foreach(new i : cft_Index)
 	{
 		if(cft_Data[i][cft_item1] == item1 && cft_Data[i][cft_item2] == item2)
+		{
+			retitem1 = cft_Data[i][cft_retItem1];
+			retitem2 = cft_Data[i][cft_retItem2];
 			return cft_Data[i][cft_result];
+		}
 
 		if(cft_Data[i][cft_item2] == item1 && cft_Data[i][cft_item1] == item2)
+		{
+			retitem1 = cft_Data[i][cft_retItem1];
+			retitem2 = cft_Data[i][cft_retItem2];
 			return cft_Data[i][cft_result];
+		}
 	}
 
 	// If no match is found, return an invalid item type.

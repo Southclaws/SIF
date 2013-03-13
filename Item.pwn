@@ -254,7 +254,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If the target player was already holding an item.
 		}
 
-		native GiveWorldItemToPlayer(playerid, itemid, call)
+		native GiveWorldItemToPlayer(playerid, itemid, call = 1)
 		{
 			Description:
 				Give a world item to a player.
@@ -1406,7 +1406,7 @@ PlayerUseItem(playerid)
 	internal_OnPlayerUseItem(playerid, itm_Holding[playerid]);
 }
 
-GiveWorldItemToPlayer(playerid, itemid, call)
+GiveWorldItemToPlayer(playerid, itemid, call = 1)
 {
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;

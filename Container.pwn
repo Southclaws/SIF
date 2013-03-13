@@ -467,6 +467,28 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+		native WillItemTypeFitInContainer(containerid, ItemType:itemtype)
+		{
+			Description:
+				-
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+		native GetContainerFreeSlots(containerid)
+		{
+			Description:
+				-
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
 	}
 
 	SIF/Container/Internal Functions
@@ -1270,4 +1292,14 @@ stock AddContainerOption(playerid, option[])
 	strcat(cnt_OptionsList[playerid], "\n");
 
 	return cnt_OptionsCount[playerid]++;
+}
+
+stock GetContainerFreeSlots(containerid)
+{
+	for(new i, j = cnt_Data[containerid][cnt_size]; i < j; i++)
+	{
+		if(!IsValidItem(cnt_Items[containerid][i]))
+			return cnt_Data[containerid][cnt_size] - (i + 1);
+	}
+	return 0;
 }
