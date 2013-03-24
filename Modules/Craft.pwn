@@ -280,7 +280,7 @@ DisplayCombineInventory(playerid, listtype)
 		}
 	}
 
-	ShowPlayerDialog(playerid, DIALOG_COMBINE_ITEM, DIALOG_STYLE_LIST, "Inventory", list, "Combine", "Close");
+	ShowPlayerDialog(playerid, DIALOG_COMBINE_ITEM, DIALOG_STYLE_LIST, "Combine", list, "Combine", "Close");
 }
 
 hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
@@ -378,7 +378,6 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(listitem == GetPlayerContainerSlot(playerid) || !IsContainerSlotUsed(containerid, listitem))
 			{
 				DisplayCombineInventory(playerid, 1);
-				print("1");
 				return 1;
 			}
 
@@ -392,8 +391,6 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			result = GetItemComboResult(
 				GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))),
 				GetItemType(GetContainerSlotItem(containerid, listitem)), retitem1, retitem2);
-
-			printf("Result: %d", _:result);
 
 			if(retitem1 && retitem2)
 			{
@@ -437,7 +434,6 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			else
 			{
-				print("2");
 				DisplayCombineInventory(playerid, 1);
 			}
 		}

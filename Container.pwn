@@ -932,7 +932,11 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			default:
 			{
-				CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
+				if(GetItemTypeSize(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]])) == ITEM_SIZE_SMALL)
+					CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
+
+				else
+					CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 1);
 			}
 		}
 	}
