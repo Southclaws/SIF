@@ -2058,3 +2058,11 @@ stock GetItemName(itemid, string[])
 
 	return 1;
 }
+
+stock GetPlayerInteractingItem(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return INVALID_ITEM_ID;
+
+	return itm_Interacting[playerid];
+}

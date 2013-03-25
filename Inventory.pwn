@@ -628,7 +628,6 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				{
 					ShowMsgBox(playerid, "Inventory full", 3000, 100);
 				}
-
 				else
 				{
 					ShowMsgBox(playerid, "Item added to inventory", 3000, 150);

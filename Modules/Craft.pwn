@@ -129,16 +129,13 @@ ItemType:	cft_result,
 
 
 static 
-ItemType:	cft_Data[CFT_MAX_COMBO][E_CRAFT_COMBO_DATA],
+			cft_Data[CFT_MAX_COMBO][E_CRAFT_COMBO_DATA],
 Iterator:	cft_Index<CFT_MAX_COMBO>;
 
 static
 			cft_ListType[MAX_PLAYERS],
 			cft_SelectedInvSlot[MAX_PLAYERS],
 			cft_InventoryOptionID[MAX_PLAYERS];
-
-
-forward ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &retitem2 = 0);
 
 
 /*==============================================================================
@@ -310,13 +307,18 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			new
 				retitem1,
 				retitem2,
-				ItemType:result,
+				result,
+				ItemType:itemtype,
 				itemslot1,
 				itemslot2;
 
 			result = GetItemComboResult(
 				GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))),
-				GetItemType(GetInventorySlotItem(playerid, listitem)), retitem1, retitem2);
+				GetItemType(GetInventorySlotItem(playerid, listitem)));
+
+			itemtype = cft_Data[result][cft_result];
+			retitem1 = cft_Data[result][cft_retItem1];
+			retitem2 = cft_Data[result][cft_retItem2];
 
 			if(retitem1 && retitem2)
 			{
@@ -330,14 +332,14 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			// The above function returns an invalid item if there is no combination
 			// If it's valid then delete the original items and add the new one to the inventory.
 
-			if(IsValidItemType(result))
+			if(IsValidItemType(itemtype))
 			{
-				new newitem = CreateItem(result, 0.0, 0.0, 0.0);
+				new newitem = CreateItem(itemtype, 0.0, 0.0, 0.0);
 
 				// Remove from the highest slot first
 				// Because the remove code shifts other inventory items up by 1 slot.
 
-				if(GetPlayerSelectedInventorySlot(playerid) > listitem)
+				if(GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))) == cft_Data[result][cft_item1])
 				{
 					itemslot1 = GetPlayerSelectedInventorySlot(playerid);
 					itemslot2 = listitem;
@@ -384,13 +386,18 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			new
 				retitem1,
 				retitem2,
-				ItemType:result,
+				result,
+				ItemType:itemtype,
 				itemslot1,
 				itemslot2;
 
 			result = GetItemComboResult(
 				GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))),
-				GetItemType(GetContainerSlotItem(containerid, listitem)), retitem1, retitem2);
+				GetItemType(GetContainerSlotItem(containerid, listitem)));
+
+			itemtype = cft_Data[result][cft_result];
+			retitem1 = cft_Data[result][cft_retItem1];
+			retitem2 = cft_Data[result][cft_retItem2];
 
 			if(retitem1 && retitem2)
 			{
@@ -401,11 +408,11 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 			}
 
-			if(IsValidItemType(result))
+			if(IsValidItemType(itemtype))
 			{
-				new newitem = CreateItem(result, 0.0, 0.0, 0.0);
+				new newitem = CreateItem(itemtype, 0.0, 0.0, 0.0);
 
-				if(GetPlayerContainerSlot(playerid) > listitem)
+				if(GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))) != cft_Data[result][cft_item1])
 				{
 					itemslot1 = GetPlayerContainerSlot(playerid);
 					itemslot2 = listitem;
@@ -442,7 +449,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return 1;
 }
 
-ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &retitem2 = 0)
+GetItemComboResult(ItemType:item1, ItemType:item2)
 {
 	// Loop through all "recipe" item combinations
 	// If a match is found, return that combo result.
@@ -450,20 +457,14 @@ ItemType:GetItemComboResult(ItemType:item1, ItemType:item2, &retitem1 = 0, &reti
 	{
 		if(cft_Data[i][cft_item1] == item1 && cft_Data[i][cft_item2] == item2)
 		{
-			retitem1 = cft_Data[i][cft_retItem1];
-			retitem2 = cft_Data[i][cft_retItem2];
-			return cft_Data[i][cft_result];
+			return i;
 		}
 
 		if(cft_Data[i][cft_item2] == item1 && cft_Data[i][cft_item1] == item2)
 		{
-			retitem1 = cft_Data[i][cft_retItem1];
-			retitem2 = cft_Data[i][cft_retItem2];
-			return cft_Data[i][cft_result];
+			return i;
 		}
 	}
 
-	// If no match is found, return an invalid item type.
-
-	return INVALID_ITEM_TYPE;
+	return -1;
 }
