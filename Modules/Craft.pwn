@@ -316,40 +316,52 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))),
 				GetItemType(GetInventorySlotItem(playerid, listitem)));
 
+			if(result == -1)
+			{
+				DisplayCombineInventory(playerid, 0);
+				return 0;
+			}
+
 			itemtype = cft_Data[result][cft_result];
 			retitem1 = cft_Data[result][cft_retItem1];
 			retitem2 = cft_Data[result][cft_retItem2];
+
+			if(!IsValidItemType(itemtype))
+			{
+				DisplayCombineInventory(playerid, 0);
+				return 0;
+			}
 
 			if(retitem1 && retitem2)
 			{
 				if(GetInventoryFreeSlots(playerid) < 1)
 				{
-					ShowMsgBox(playerid, "Not enough inventory space", 3000);
+					ShowMsgBox(playerid, "Not enough free space", 3000);
+					DisplayCombineInventory(playerid, 0);
 					return 0;
 				}
 			}
 
-			// The above function returns an invalid item if there is no combination
-			// If it's valid then delete the original items and add the new one to the inventory.
-
-			if(IsValidItemType(itemtype))
+			if(GetItemTypeSize(itemtype) != ITEM_SIZE_SMALL)
 			{
-				new newitem = CreateItem(itemtype, 0.0, 0.0, 0.0);
+				ShowMsgBox(playerid, "Result item is too large", 3000);
+				DisplayCombineInventory(playerid, 0);
+				return 0;
+			}
 
-				// Remove from the highest slot first
-				// Because the remove code shifts other inventory items up by 1 slot.
+			if(GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))) != cft_Data[result][cft_item1])
+			{
+				itemslot1 = GetPlayerSelectedInventorySlot(playerid);
+				itemslot2 = listitem;
+			}
+			else
+			{
+				itemslot1 = listitem;
+				itemslot2 = GetPlayerSelectedInventorySlot(playerid);
+			}
 
-				if(GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))) == cft_Data[result][cft_item1])
-				{
-					itemslot1 = GetPlayerSelectedInventorySlot(playerid);
-					itemslot2 = listitem;
-				}
-				else
-				{
-					itemslot1 = listitem;
-					itemslot2 = GetPlayerSelectedInventorySlot(playerid);
-				}
-
+			if(itemslot1 > itemslot2)
+			{
 				if(!retitem1)
 				{
 					DestroyItem(GetInventorySlotItem(playerid, itemslot1));
@@ -361,16 +373,25 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					DestroyItem(GetInventorySlotItem(playerid, itemslot2));
 					RemoveItemFromInventory(playerid, itemslot2);
 				}
-
-				AddItemToInventory(playerid, newitem);
-
-				DisplayPlayerInventory(playerid);
 			}
 			else
 			{
-				// If it's not valid, re-render the dialog.
-				DisplayCombineInventory(playerid, 0);
+				if(!retitem2)
+				{
+					DestroyItem(GetInventorySlotItem(playerid, itemslot2));
+					RemoveItemFromInventory(playerid, itemslot2);
+				}
+
+				if(!retitem1)
+				{
+					DestroyItem(GetInventorySlotItem(playerid, itemslot1));
+					RemoveItemFromInventory(playerid, itemslot1);
+				}
 			}
+
+			AddItemToInventory(playerid, CreateItem(itemtype, 0.0, 0.0, 0.0));
+
+			DisplayPlayerInventory(playerid);
 		}
 		else
 		{
@@ -395,54 +416,85 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))),
 				GetItemType(GetContainerSlotItem(containerid, listitem)));
 
+			if(result == -1)
+			{
+				DisplayCombineInventory(playerid, 1);
+				return 0;
+			}
+
 			itemtype = cft_Data[result][cft_result];
 			retitem1 = cft_Data[result][cft_retItem1];
 			retitem2 = cft_Data[result][cft_retItem2];
+
+			if(!IsValidItemType(itemtype))
+			{
+				DisplayCombineInventory(playerid, 1);
+				return 0;
+			}
 
 			if(retitem1 && retitem2)
 			{
 				if(GetContainerFreeSlots(playerid) < 1)
 				{
-					ShowMsgBox(playerid, "Not enough inventory space", 3000);
+					ShowMsgBox(playerid, "Not enough free space", 3000);
+					DisplayCombineInventory(playerid, 1);
 					return 0;
 				}
 			}
 
-			if(IsValidItemType(itemtype))
+			if(!WillItemTypeFitInContainer(containerid, itemtype))
 			{
-				new newitem = CreateItem(itemtype, 0.0, 0.0, 0.0);
+				ShowMsgBox(playerid, "Result item won't fit", 3000);
+				DisplayCombineInventory(playerid, 1);
+				return 0;
+			}
 
-				if(GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))) != cft_Data[result][cft_item1])
-				{
-					itemslot1 = GetPlayerContainerSlot(playerid);
-					itemslot2 = listitem;
-				}
-				else
-				{
-					itemslot1 = listitem;
-					itemslot2 = GetPlayerContainerSlot(playerid);
-				}
+			if(GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))) != cft_Data[result][cft_item1])
+			{
+				itemslot1 = GetPlayerContainerSlot(playerid);
+				itemslot2 = listitem;
+			}
+			else
+			{
+				itemslot1 = listitem;
+				itemslot2 = GetPlayerContainerSlot(playerid);
+			}
 
+			if(itemslot1 > itemslot2)
+			{
 				if(!retitem1)
 				{
-					DestroyItem(GetContainerSlotItem(containerid, itemslot1));
+					new tmp = GetContainerSlotItem(containerid, itemslot1);
 					RemoveItemFromContainer(containerid, itemslot1);
+					DestroyItem(tmp);
 				}
 
 				if(!retitem2)
 				{
-					DestroyItem(GetContainerSlotItem(containerid, itemslot2));
+					new tmp = GetContainerSlotItem(containerid, itemslot2);
 					RemoveItemFromContainer(containerid, itemslot2);
+					DestroyItem(tmp);
 				}
-
-				AddItemToContainer(containerid, newitem);
-
-				DisplayContainerInventory(playerid, containerid);
 			}
 			else
 			{
-				DisplayCombineInventory(playerid, 1);
+				if(!retitem2)
+				{
+					new tmp = GetContainerSlotItem(containerid, itemslot2);
+					RemoveItemFromContainer(containerid, itemslot2);
+					DestroyItem(tmp);
+				}
+				if(!retitem1)
+				{
+					new tmp = GetContainerSlotItem(containerid, itemslot1);
+					RemoveItemFromContainer(containerid, itemslot1);
+					DestroyItem(tmp);
+				}
 			}
+
+			AddItemToContainer(containerid, CreateItem(itemtype, 0.0, 0.0, 0.0));
+
+			DisplayContainerInventory(playerid, containerid);
 		}
 	}
 
