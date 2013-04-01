@@ -56,7 +56,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native SIF/Item/Core
 		native -
 
-		native CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
+		native CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
 		{
 			Description:
 				Creates an item in the game world at the specified coordinates
@@ -1117,7 +1117,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x, Float:y, Float:z, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
+stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
 {
 	new id = Iter_Free(itm_Index);
 
