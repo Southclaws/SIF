@@ -859,9 +859,13 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	{
 		if(response)
 		{
-			if(listitem == cnt_Data[cnt_CurrentContainer[playerid]][cnt_size])
-				DisplayPlayerInventory(playerid);
+			if(!Iter_Contains(cnt_Index, cnt_CurrentContainer[playerid]))
+				return 0;
 
+			if(listitem == cnt_Data[cnt_CurrentContainer[playerid]][cnt_size])
+			{
+				DisplayPlayerInventory(playerid);
+			}
 			else
 			{
 				if(!IsValidItem(cnt_Items[cnt_CurrentContainer[playerid]][listitem]))
