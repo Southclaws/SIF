@@ -193,7 +193,13 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 {
 	foreach(new i : Character)
 	{
-		if(areaid == gPlayerArea[i] && playerid != i)
+		if(i == playerid)
+			continue;
+
+		if(GetPlayerState(i) == PLAYER_STATE_SPECTATING)
+			continue;
+
+		if(areaid == gPlayerArea[i])
 		{
 			CallLocalFunction("OnPlayerEnterPlayerArea", "dd", playerid, i);
 		}
@@ -213,7 +219,13 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
 	foreach(new i : Character)
 	{
-		if(areaid == gPlayerArea[i] && playerid != i)
+		if(i == playerid)
+			continue;
+
+		if(GetPlayerState(i) == PLAYER_STATE_SPECTATING)
+			continue;
+
+		if(areaid == gPlayerArea[i])
 		{
 			CallLocalFunction("OnPlayerLeavePlayerArea", "dd", playerid, i);
 		}
@@ -232,6 +244,12 @@ forward SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
 stock IsPlayerInPlayerArea(playerid, targetid)
 {
 	if(playerid == targetid)
+		return 0;
+	
+	if(GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
+		return 0;
+
+	if(GetPlayerState(targetid) == PLAYER_STATE_SPECTATING)
 		return 0;
 
 	return IsPlayerInDynamicArea(playerid, gPlayerArea[targetid]);

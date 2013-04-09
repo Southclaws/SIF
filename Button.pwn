@@ -432,6 +432,29 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				-1
 					If the button does not have a label to remove.
 		}
+		stock GetPlayerAngleToButton(playerid, buttonid)
+		{
+			Description:
+				-
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+		stock GetButtonAngleToPlayer(playerid, buttonid)
+		{
+			Description:
+				-
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
 	}
 
 	SIF/Button/Internal Functions
@@ -516,10 +539,7 @@ Float:		btn_size,
 			btn_world,
 			btn_interior,
 			btn_link,
-			btn_text[BTN_MAX_TEXT],
-			btn_attachVehicle,
-Float:		btn_attachAngle,
-Float:		btn_attachAngleRange,
+			btn_text[BTN_MAX_TEXT]
 }
 
 
@@ -574,7 +594,7 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 	if(id == -1)
 		return INVALID_BUTTON_ID;
 
-	btn_Data[id][btn_area]				= CreateDynamicSphere(x, y, z, areasize, world, interior);
+	btn_Data[id][btn_area]				= CreateDynamicCircle(x, y, areasize, world, interior);
 
 	strcpy(btn_Data[id][btn_text], text, BTN_MAX_TEXT);
 	btn_Data[id][btn_posX]				= x;
@@ -609,6 +629,7 @@ stock DestroyButton(buttonid)
 	btn_Data[buttonid][btn_posX]		= 0.0;
 	btn_Data[buttonid][btn_posY]		= 0.0;
 	btn_Data[buttonid][btn_posZ]		= 0.0;
+	btn_Data[buttonid][btn_size]		= 0.0;
 	btn_Data[buttonid][btn_world]		= 0;
 	btn_Data[buttonid][btn_interior]	= 0;
 	btn_Data[buttonid][btn_link]		= INVALID_BUTTON_ID;
@@ -649,58 +670,6 @@ stock UnLinkTP(buttonid1, buttonid2)
 
 	return 1;
 }
-stock AttachButtonToVehicle(buttonid, vehicleid, Float:angle, Float:range, Float:distance, Float:z = 0.0)
-{
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	if(!IsValidVehicle(vehicleid))
-		return 0;
-
-	AttachDynamicAreaToVehicle(btn_Data[buttonid][btn_area], vehicleid);
-	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_SIZE, distance + 2.0);
-
-	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
-	{
-		Streamer_SetIntData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_ATTACHED_VEHICLE, vehicleid);
-		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_X, distance * floatsin(angle, degrees));
-		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_Y, distance * floatcos(angle, degrees));
-		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_Z, z);
-	}
-
-	btn_Data[buttonid][btn_attachVehicle] = vehicleid;
-	btn_Data[buttonid][btn_attachAngle] = angle;
-	btn_Data[buttonid][btn_attachAngleRange] = range;
-
-	return 1;
-}
-stock DetatchButtonFromVehicle(buttonid)
-{
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	if(!IsValidVehicle(btn_Data[buttonid][btn_attachVehicle]))
-		return 0;
-
-	Streamer_SetIntData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_ATTACHED_VEHICLE, INVALID_VEHICLE_ID);
-	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_X, btn_Data[buttonid][btn_posX]);
-	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_Y, btn_Data[buttonid][btn_posY]);
-	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_Z, btn_Data[buttonid][btn_posZ]);
-
-	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
-	{
-		Streamer_SetIntData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_ATTACHED_VEHICLE, INVALID_VEHICLE_ID);
-		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_X, btn_Data[buttonid][btn_posX]);
-		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_Y, btn_Data[buttonid][btn_posY]);
-		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_Z, btn_Data[buttonid][btn_posZ]);
-	}
-
-	btn_Data[buttonid][btn_attachVehicle] = INVALID_VEHICLE_ID;
-	btn_Data[buttonid][btn_attachAngle] = 0.0;
-	btn_Data[buttonid][btn_attachAngleRange] = 0.0;
-
-	return 1;
-}
 
 
 /*==============================================================================
@@ -716,38 +685,19 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	{
 		if(newkeys & 16)
 		{
+			new Float:z;
+			
+			GetPlayerPos(playerid, z, z, z);
+
 			foreach(new i : btn_Index)
 			{
 				if(IsPlayerInDynamicArea(playerid, btn_Data[i][btn_area]))
 				{
-					if(IsValidVehicle(btn_Data[i][btn_attachVehicle]))
+					if(btn_Data[i][btn_posZ]-btn_Data[i][btn_size] <= z <= btn_Data[i][btn_posZ]+btn_Data[i][btn_size])
 					{
-						new
-							Float:px,
-							Float:py,
-							Float:pz,
-							Float:vx,
-							Float:vy,
-							Float:vz,
-							Float:vr,
-							Float:angle;
-
-						GetVehiclePos(btn_Data[i][btn_attachVehicle], vx, vy, vz);
-						GetVehicleZAngle(btn_Data[i][btn_attachVehicle], vr);
-						GetPlayerPos(playerid, px, py, pz);
-
-						angle = -(90-(atan2((py - vy), (px - vx))));
-
-						if(-btn_Data[i][btn_attachAngleRange] < (btn_Data[i][btn_attachAngle] - (vr-angle)) < btn_Data[i][btn_attachAngleRange])
-						{
-							SetPlayerPos(playerid, px, py, pz);
-							SetPlayerFacingAngle(playerid, angle-180.0);
-							ClearAnimations(playerid);
-							Internal_OnButtonPress(playerid, i);
-						}
+						Internal_OnButtonPress(playerid, i);
+						break;
 					}
-					else Internal_OnButtonPress(playerid, i);
-					break;
 				}
 			}
 		}
@@ -769,7 +719,6 @@ Internal_OnButtonPress(playerid, buttonid)
 		return 0;
 
 	new id = btn_Data[buttonid][btn_link];
-
 
 	if(Iter_Contains(btn_Index, id))
 	{
@@ -818,9 +767,18 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 	{
 		if(areaid == btn_Data[i][btn_area])
 		{
-			ShowMsgBox(playerid, btn_Data[i][btn_text]);
-			CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, i);
-			break;
+			new
+				Float:z;
+
+			GetPlayerPos(playerid, z, z, z); // We only need the Z
+
+			if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
+			{
+				ShowMsgBox(playerid, btn_Data[i][btn_text]);
+				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, i);
+
+				break;
+			}
 		}
 	}
 
@@ -841,9 +799,17 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 	{
 		if(areaid == btn_Data[i][btn_area])
 		{
-			CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, i);
-			HideMsgBox(playerid);
-			break;
+			new
+				Float:z;
+
+			GetPlayerPos(playerid, z, z, z); // We only need the Z
+
+			if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
+			{
+				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, i);
+				HideMsgBox(playerid);
+				break;
+			}
 		}
 	}
 
@@ -1011,33 +977,6 @@ stock SetButtonText(buttonid, text[])
 	return 1;
 }
 
-// btn_attachVehicle
-stock GetButtonAttachedVehicle(buttonid)
-{
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	return btn_Data[buttonid][btn_attachVehicle];
-}
-
-// btn_attachAngle
-stock GetButtonAttachAngle(buttonid)
-{
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	return btn_Data[buttonid][btn_attachAngle];
-}
-
-// btn_attachAngleRange
-stock GetButtonAttachAngleRange(buttonid)
-{
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	return btn_Data[buttonid][btn_attachAngleRange];
-}
-
 // btn_CurrentlyPressing
 stock GetPlayerPressingButton(playerid)
 {
@@ -1102,4 +1041,40 @@ stock DestroyButtonLabel(buttonid)
 	btn_Data[buttonid][btn_label] = INVALID_3DTEXT_ID;
 
 	return 1;
+}
+
+stock Float:GetPlayerAngleToButton(playerid, buttonid)
+{
+	if(!Iter_Contains(btn_Index, buttonid))
+		return 0.0;
+
+	if(!IsPlayerConnected(playerid))
+		return 0.0;
+
+	new
+		Float:x,
+		Float:y,
+		Float:z;
+
+	GetPlayerPos(playerid, x, y, z);
+
+	return sif_GetAngleToPoint(x, y, btn_Data[buttonid][btn_posX], btn_Data[buttonid][btn_posY]);
+}
+
+stock Float:GetButtonAngleToPlayer(playerid, buttonid)
+{
+	if(!Iter_Contains(btn_Index, buttonid))
+		return 0.0;
+
+	if(!IsPlayerConnected(playerid))
+		return 0.0;
+
+	new
+		Float:x,
+		Float:y,
+		Float:z;
+
+	GetPlayerPos(playerid, x, y, z);
+
+	return sif_GetAngleToPoint(btn_Data[buttonid][btn_posX], btn_Data[buttonid][btn_posY], x, y);
 }
