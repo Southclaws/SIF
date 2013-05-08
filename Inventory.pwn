@@ -447,13 +447,15 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 
 new
-	inv_Data					[MAX_PLAYERS][INV_MAX_SLOTS],
-	inv_ViewingInventory		[MAX_PLAYERS],
-	inv_SelectedSlot			[MAX_PLAYERS],
-	inv_ExtraItemList			[MAX_PLAYERS][128],
-	inv_ExtraItemCount			[MAX_PLAYERS],
-	inv_OptionsList				[MAX_PLAYERS][128],
-	inv_OptionsCount			[MAX_PLAYERS];
+		inv_Data					[MAX_PLAYERS][INV_MAX_SLOTS],
+		inv_ViewingInventory		[MAX_PLAYERS],
+		inv_SelectedSlot			[MAX_PLAYERS],
+		inv_ExtraItemList			[MAX_PLAYERS][128],
+		inv_ExtraItemCount			[MAX_PLAYERS],
+		inv_OptionsList				[MAX_PLAYERS][128],
+		inv_OptionsCount			[MAX_PLAYERS],
+		inv_PutAwayTick				[MAX_PLAYERS],
+Timer:	inv_PutAwayTimer			[MAX_PLAYERS];
 
 
 forward OnPlayerOpenInventory(playerid);
@@ -614,13 +616,18 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	}
 	if(newkeys & KEY_YES)
 	{
+		if(tickcount() - inv_PutAwayTick[playerid] < 1000)
+			return 0;
+
+		inv_PutAwayTick[playerid] = tickcount();
+
 		new itemid = GetPlayerItem(playerid);
 
 		if(IsValidItem(itemid))
 		{
 			if(GetItemTypeSize(GetItemType(itemid)) != ITEM_SIZE_SMALL)
 			{
-				ShowMsgBox(playerid, " >  That item is too big for your inventory", 3000, 150);
+				ShowMsgBox(playerid, "Item too big for inventory", 3000, 150);
 			}
 			else
 			{
@@ -632,7 +639,8 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				{
 					ShowMsgBox(playerid, "Item added to inventory", 3000, 150);
 					ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
-					defer PlayerPutItemInInventory(playerid, itemid);
+					stop inv_PutAwayTimer[playerid];
+					inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
 				}
 			}
 		}

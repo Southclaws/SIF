@@ -561,7 +561,7 @@ stock CreateDoor(model, buttonids[],
 	Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz,
 	Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz,
 	Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids),
-	movesound = -1, stopsound = -1,
+	movesound = 1186, stopsound = 1186,
 	worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED)
 {
 	new id = Iter_Free(dr_Index);
@@ -722,12 +722,11 @@ timer CloseDoor[ dr_Data[doorid][dr_closeDelay] ](doorid)
 	return 1;
 }
 
-dr_PlaySoundForAll(sound, Float:x, Float:y, Float:z, Float:range = 30.0)
+dr_PlaySoundForAll(sound, Float:x, Float:y, Float:z)
 {
 	foreach(new i : Player)
 	{
-		if(IsPlayerInRangeOfPoint(i, range, x, y, z))
-			PlayerPlaySound(i, sound, x, y, z);
+		PlayerPlaySound(i, sound, x, y, z);
 	}
 	return 1;
 }

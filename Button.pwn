@@ -989,7 +989,17 @@ stock GetPlayerPressingButton(playerid)
 stock GetPlayerButtonID(playerid)
 {
 	foreach(new i : btn_Index)
-		if(IsPlayerInDynamicArea(playerid, btn_Data[i][btn_area]))return i;
+	{
+		if(IsPlayerInDynamicArea(playerid, btn_Data[i][btn_area]))
+		{
+			new Float:z;
+			
+			GetPlayerPos(playerid, z, z, z);
+
+			if(btn_Data[i][btn_posZ]-btn_Data[i][btn_size] <= z <= btn_Data[i][btn_posZ]+btn_Data[i][btn_size])
+				return i;
+		}
+	}
 
 	return INVALID_BUTTON_ID;
 }

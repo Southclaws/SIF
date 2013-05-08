@@ -858,7 +858,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Internal events called by player actions done by using features from
 		this script.
 
-		CreateItemInWorld(itemid, Float:x, Float:y, Float:z, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
+		CreateItemInWorld(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
 		{
 			Description:
 				Creates an item that is already added to the item index in the
@@ -1149,9 +1149,10 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	return id;
 }
 
-stock DestroyItem(itemid)
+stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 {
-	if(!Iter_Contains(itm_Index, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
 
 	CallLocalFunction("OnItemDestroy", "d", itemid);
 
@@ -1167,11 +1168,15 @@ stock DestroyItem(itemid)
 	}
 	else
 	{
-		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
-		DestroyButton(itm_Data[itemid][itm_button]);
-		itm_Data[itemid][itm_objId] = -1;
-		itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
+		if(Iter_Contains(itm_WorldIndex, itemid))
+		{
+			DestroyDynamicObject(itm_Data[itemid][itm_objId]);
+			DestroyButton(itm_Data[itemid][itm_button]);
+		}
 	}
+
+	itm_Data[itemid][itm_objId] = -1;
+	itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
 
 	itm_Data[itemid][itm_type] = INVALID_ITEM_TYPE;
 	itm_Data[itemid][itm_posX] = 0.0;
@@ -1186,8 +1191,8 @@ stock DestroyItem(itemid)
 	itm_Holder[itemid]			= INVALID_PLAYER_ID;
 	itm_Interactor[itemid]		= INVALID_PLAYER_ID;
 
-	Iter_Remove(itm_Index, itemid);
-	Iter_Remove(itm_WorldIndex, itemid);
+	Iter_SafeRemove(itm_Index, itemid, indexid);
+	Iter_SafeRemove(itm_WorldIndex, itemid, worldindexid);
 
 	// CallLocalFunction("OnItemDestroyed", "d", itemid);
 
@@ -1348,8 +1353,14 @@ stock PlayerDropItem(playerid)
 	return 1;
 }
 
-stock PlayerGiveItem(playerid, targetid, call)
+stock PlayerGiveItem(playerid, targetid, call = true)
 {
+	if(!(0 <= playerid < MAX_PLAYERS))
+		return 0;
+
+	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+		return 0;
+
 	new itemid = itm_Holding[playerid];
 
 	if(call)
@@ -1358,8 +1369,11 @@ stock PlayerGiveItem(playerid, targetid, call)
 			return 0;
 	}
 
-	if(!Iter_Contains(itm_Index, itemid))return 0;
-	if(Iter_Contains(itm_Index, itm_Holding[targetid]))return -1;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	if(Iter_Contains(itm_Index, itm_Holding[targetid]))
+		return -1;
 
 	new
 		Float:x1,
@@ -1672,23 +1686,26 @@ internal_OnPlayerUseItem(playerid, itemid)
 
 public OnButtonPress(playerid, buttonid)
 {
-	if(itm_Interacting[playerid] == INVALID_ITEM_ID)// && GetPlayerWeapon(playerid) == 0)
+	if(itm_Interacting[playerid] == INVALID_ITEM_ID)
 	{
 		new item = itm_Holding[playerid];
 
 		foreach(new i : itm_WorldIndex)
 		{
-			if(buttonid == itm_Data[i][itm_button] && itm_Holder[i] == INVALID_PLAYER_ID && itm_Interactor[i] == INVALID_PLAYER_ID)
+			if(buttonid == itm_Data[i][itm_button])
 			{
-				if(Iter_Contains(itm_Index, item))
-					return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, item, i);
+				if(itm_Holder[i] == INVALID_PLAYER_ID && itm_Interactor[i] == INVALID_PLAYER_ID)
+				{
+					if(Iter_Contains(itm_Index, item))
+						return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, item, i);
 
-				if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, i))
-					return 0;
+					if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, i))
+						return 0;
 
-				PlayerPickUpItem(playerid, i);
+					PlayerPickUpItem(playerid, i);
 
-				return 1;
+					return 1;
+				}
 			}
 		}
 	}
@@ -1768,8 +1785,6 @@ timer GiveItemDelay[500](playerid, targetid)
 	id = itm_Holding[playerid];
 	type = itm_Data[id][itm_type];
 
-	CallLocalFunction("OnPlayerGivenItem", "ddd", playerid, targetid, id);
-
 	itm_Holding[playerid] = INVALID_ITEM_ID;
 	itm_Interacting[playerid] = INVALID_ITEM_ID;
 	itm_Interacting[targetid] = INVALID_ITEM_ID;
@@ -1784,6 +1799,8 @@ timer GiveItemDelay[500](playerid, targetid)
 
 	itm_Holding[targetid] = id;
 	itm_Holder[id] = targetid;
+
+	CallLocalFunction("OnPlayerGivenItem", "ddd", playerid, targetid, id);
 }
 
 public OnPlayerDeath(playerid, killerid, reason)
@@ -2020,7 +2037,7 @@ stock GetPlayerItem(playerid)
 stock IsItemInWorld(itemid)
 {
 	if(!Iter_Contains(itm_Index, itemid))
-		return 0;
+		return -1;
 
 	if(!Iter_Contains(itm_WorldIndex, itemid))
 		return 0;

@@ -1250,42 +1250,74 @@ stock WillItemTypeFitInContainer(containerid, ItemType:itemtype)
 
 	new
 		i,
-		count;
+		count,
+		size = GetItemTypeSize(itemtype);
 
-	while(i < cnt_Data[containerid][cnt_size])
+	if(size == ITEM_SIZE_MEDIUM)
 	{
-		if(IsValidItem(cnt_Items[containerid][i]))
+		if(cnt_Data[containerid][cnt_maxOfSize][0] == -1)
+			return 1;
+
+		if(cnt_Data[containerid][cnt_maxOfSize][0] == 0)
+			return 0;
+
+		while(i < cnt_Data[containerid][cnt_size])
 		{
-			if(GetItemTypeSize(itemtype) == ITEM_SIZE_MEDIUM && cnt_Data[containerid][cnt_maxOfSize][0] != -1)
-			{
-				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_MEDIUM)
-					count++;
+			if(!IsValidItem(cnt_Items[containerid][i]))
+				break;
 
-				if(count >= cnt_Data[containerid][cnt_maxOfSize][0])
-					return 0;
-			}
-			else if(GetItemTypeSize(itemtype) == ITEM_SIZE_LARGE && cnt_Data[containerid][cnt_maxOfSize][1] != -1)
-			{
-				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_LARGE)
-					count++;
+			if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_MEDIUM)
+				count++;
 
-				if(count >= cnt_Data[containerid][cnt_maxOfSize][1])
-					return 0;
-			}
-			else if(GetItemTypeSize(itemtype) == ITEM_SIZE_CARRY && cnt_Data[containerid][cnt_maxOfSize][2] != -1)
-			{
-				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_CARRY)
-					count++;
+			if(count >= cnt_Data[containerid][cnt_maxOfSize][0])
+				return 0;
 
-				if(count >= cnt_Data[containerid][cnt_maxOfSize][2])
-					return 0;
-			}
+			i++;
 		}
-		else
+	}
+	if(size == ITEM_SIZE_LARGE)
+	{
+		if(cnt_Data[containerid][cnt_maxOfSize][1] == -1)
+			return 1;
+
+		if(cnt_Data[containerid][cnt_maxOfSize][1] == 0)
+			return 0;
+
+		while(i < cnt_Data[containerid][cnt_size])
 		{
-			break;
+			if(!IsValidItem(cnt_Items[containerid][i]))
+				break;
+
+			if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_LARGE)
+				count++;
+
+			if(count >= cnt_Data[containerid][cnt_maxOfSize][1])
+				return 0;
+
+			i++;
 		}
-		i++;
+	}
+	if(size == ITEM_SIZE_CARRY)
+	{
+		if(cnt_Data[containerid][cnt_maxOfSize][2] == -1)
+			return 1;
+
+		if(cnt_Data[containerid][cnt_maxOfSize][2] == 0)
+			return 0;
+
+		while(i < cnt_Data[containerid][cnt_size])
+		{
+			if(!IsValidItem(cnt_Items[containerid][i]))
+				break;
+
+			if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_CARRY)
+				count++;
+
+			if(count >= cnt_Data[containerid][cnt_maxOfSize][2])
+				return 0;
+
+			i++;
+		}
 	}
 	
 	return 1;

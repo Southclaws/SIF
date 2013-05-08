@@ -114,7 +114,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #include <YSI\y_hooks>
 
 
-#define CFT_MAX_COMBO (16)
+#define CFT_MAX_COMBO (64)
 #define DIALOG_COMBINE_ITEM (9004)
 
 
@@ -161,7 +161,6 @@ stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnite
 
 	return id;
 }
-
 
 /*==============================================================================
 
@@ -253,7 +252,7 @@ DisplayCombineInventory(playerid, listtype)
 
 			else
 			{
-				GetItemTypeName(GetItemType(GetInventorySlotItem(playerid, i)), tmp);
+				GetItemName(GetInventorySlotItem(playerid, i), tmp);
 				strcat(list, tmp);
 				strcat(list, "\n");
 			}
@@ -270,7 +269,7 @@ DisplayCombineInventory(playerid, listtype)
 
 			else
 			{
-				GetItemTypeName(GetItemType(GetContainerSlotItem(containerid, i)), tmp);
+				GetItemName(GetContainerSlotItem(containerid, i), tmp);
 				strcat(list, tmp);
 				strcat(list, "\n");
 			}
@@ -293,7 +292,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		if(cft_ListType[playerid] == 0)
 		{
 			// If the player picks the same inventory item as the one he is trying to combine
-			// Or if he picks an empty slot, re-render the dialog.
+			// Or if they pick an empty slot, re-render the dialog.
 			// You can't combine something with itself or nothing, that's like dividing by zero!
 
 			if(listitem == GetPlayerSelectedInventorySlot(playerid) || !IsInventorySlotUsed(playerid, listitem))
@@ -320,6 +319,28 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				DisplayCombineInventory(playerid, 0);
 				return 0;
+			}
+
+			if(cft_Data[result][cft_result] == GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))))
+			{
+				new
+					itemid1,
+					itemid2,
+					exdata1,
+					exdata2;
+
+				itemid1 = GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid)),
+				itemid2 = GetInventorySlotItem(playerid, listitem);
+				exdata1 = GetItemExtraData(itemid1),
+				exdata2 = GetItemExtraData(itemid2);
+
+				SetItemExtraData(itemid1, exdata1 + exdata2);
+
+				DestroyItem(itemid2);
+				RemoveItemFromInventory(playerid, listitem);
+				DisplayPlayerInventory(playerid);
+
+				return 1;
 			}
 
 			itemtype = cft_Data[result][cft_result];
@@ -420,6 +441,18 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				DisplayCombineInventory(playerid, 1);
 				return 0;
+			}
+
+			if(cft_Data[result][cft_result] == GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))))
+			{
+				SetItemExtraData(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid)),
+					GetItemExtraData(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))) + 
+					GetItemExtraData(GetContainerSlotItem(containerid, listitem)));
+
+				DestroyItem(GetContainerSlotItem(containerid, listitem));
+				RemoveItemFromContainer(containerid, listitem);
+
+				return 1;
 			}
 
 			itemtype = cft_Data[result][cft_result];
