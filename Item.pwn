@@ -302,11 +302,51 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native OnItemCreate(itemid)
 		{
 			Called:
+				As an item is created.
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID handle of the newly created item.
+
+			Returns:
+				(nothing)
+		}
+
+		native OnItemCreated(itemid)
+		{
+			Called:
 				After an item is created.
 
 			Parameters:
 				<itemid> (int, itemid)
 					The ID handle of the newly created item.
+
+			Returns:
+				(nothing)
+		}
+
+		native OnItemDestroy(itemid)
+		{
+			Called:
+				Before an item is destroyed, the itemid is still valid and
+				existing.
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID handle of the destroyed item.
+
+			Returns:
+				(nothing)
+		}
+
+		native OnItemDestroyed(itemid)
+		{
+			Called:
+				After an item is destroyed, itemid is now invalid.
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID handle of the destroyed item.
 
 			Returns:
 				(nothing)
@@ -1063,7 +1103,9 @@ Timer:		itm_InteractTimer	[MAX_PLAYERS];
 
 
 forward OnItemCreate(itemid);
+forward OnItemCreated(itemid);
 forward OnItemDestroy(itemid);
+forward OnItemDestroyed(itemid);
 forward OnItemCreateInWorld(itemid);
 forward OnPlayerUseItem(playerid, itemid);
 forward OnPlayerUseItemWithItem(playerid, itemid, withitemid);
@@ -1139,12 +1181,15 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 
 	CallLocalFunction("OnItemCreate", "d", id);
 
+	if(!Iter_Contains(itm_Index, id))
+		return INVALID_ITEM_ID;
+
 	CreateItemInWorld(id,
 		Float:x, Float:y, Float:z,
 		Float:rx, Float:ry, Float:rz,
 		Float:zoffset, world, interior, label);
 
-	// CallLocalFunction("OnItemCreated", "d", id);
+	CallLocalFunction("OnItemCreated", "d", id);
 
 	return id;
 }
@@ -1194,7 +1239,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	Iter_SafeRemove(itm_Index, itemid, indexid);
 	Iter_SafeRemove(itm_WorldIndex, itemid, worldindexid);
 
-	// CallLocalFunction("OnItemDestroyed", "d", itemid);
+	CallLocalFunction("OnItemDestroyed", "d", itemid);
 
 	return 1;
 }
@@ -1526,11 +1571,13 @@ CreateItemInWorld(itemid,
 	Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0,
 	Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
 {
-	if(!Iter_Contains(itm_Index, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
 
 	new ItemType:itemtype = itm_Data[itemid][itm_type];
 
-	if(!IsValidItemType(itemtype))return 0;
+	if(!IsValidItemType(itemtype))
+		return 0;
 
 	if(rx == 1000.0)
 		rx = itm_TypeData[itemtype][itm_defaultRotX];
@@ -1688,16 +1735,14 @@ public OnButtonPress(playerid, buttonid)
 {
 	if(itm_Interacting[playerid] == INVALID_ITEM_ID)
 	{
-		new item = itm_Holding[playerid];
-
 		foreach(new i : itm_WorldIndex)
 		{
 			if(buttonid == itm_Data[i][itm_button])
 			{
 				if(itm_Holder[i] == INVALID_PLAYER_ID && itm_Interactor[i] == INVALID_PLAYER_ID)
 				{
-					if(Iter_Contains(itm_Index, item))
-						return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, item, i);
+					if(Iter_Contains(itm_Index, itm_Holding[playerid]))
+						return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], i);
 
 					if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, i))
 						return 0;
