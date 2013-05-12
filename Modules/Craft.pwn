@@ -357,7 +357,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				if(GetInventoryFreeSlots(playerid) < 1)
 				{
-					ShowMsgBox(playerid, "Not enough free space", 3000);
+					ShowActionText(playerid, "Not enough free space", 3000);
 					DisplayCombineInventory(playerid, 0);
 					return 0;
 				}
@@ -365,7 +365,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			if(GetItemTypeSize(itemtype) != ITEM_SIZE_SMALL)
 			{
-				ShowMsgBox(playerid, "Result item is too large", 3000);
+				ShowActionText(playerid, "Result item is too large", 3000);
 				DisplayCombineInventory(playerid, 0);
 				return 0;
 			}
@@ -469,7 +469,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			{
 				if(GetContainerFreeSlots(playerid) < 1)
 				{
-					ShowMsgBox(playerid, "Not enough free space", 3000);
+					ShowActionText(playerid, "Not enough free space", 3000);
 					DisplayCombineInventory(playerid, 1);
 					return 0;
 				}
@@ -477,7 +477,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 			if(!WillItemTypeFitInContainer(containerid, itemtype))
 			{
-				ShowMsgBox(playerid, "Result item won't fit", 3000);
+				ShowActionText(playerid, "Result item won't fit", 3000);
 				DisplayCombineInventory(playerid, 1);
 				return 0;
 			}

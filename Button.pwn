@@ -636,8 +636,8 @@ stock DestroyButton(buttonid)
 	btn_Data[buttonid][btn_text][0]		= EOS;
 
 	foreach(new i : Player)
-		if(IsPlayerViewingMsgBox(i))
-			HideMsgBox(i);
+		if(IsPlayerViewingActionText(i))
+			HideActionText(i);
 
 	Iter_Remove(btn_Index, buttonid);
 	return 1;
@@ -695,8 +695,8 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				{
 					if(btn_Data[i][btn_posZ]-btn_Data[i][btn_size] <= z <= btn_Data[i][btn_posZ]+btn_Data[i][btn_size])
 					{
-						Internal_OnButtonPress(playerid, i);
-						break;
+						if(Internal_OnButtonPress(playerid, i))
+							break;
 					}
 				}
 			}
@@ -723,7 +723,7 @@ Internal_OnButtonPress(playerid, buttonid)
 	if(Iter_Contains(btn_Index, id))
 	{
 		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
-			return 0;
+			return 1;
 
 		TogglePlayerControllable(playerid, false);
 		defer btn_Unfreeze(playerid);
@@ -751,9 +751,12 @@ Internal_OnButtonPress(playerid, buttonid)
 		SetPlayerFacingAngle(playerid, a);
 
 		btn_CurrentlyPressing[playerid] = buttonid;
-		CallLocalFunction("OnButtonPress", "dd", playerid, buttonid);
+
+		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
+			return 1;
 	}
-	return 1;
+
+	return 0;
 }
 
 timer btn_Unfreeze[1000](playerid)
@@ -774,7 +777,7 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 
 			if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
 			{
-				ShowMsgBox(playerid, btn_Data[i][btn_text]);
+				ShowActionText(playerid, btn_Data[i][btn_text]);
 				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, i);
 
 				break;
@@ -807,7 +810,7 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 			if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
 			{
 				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, i);
-				HideMsgBox(playerid);
+				HideActionText(playerid);
 				break;
 			}
 		}
@@ -1014,7 +1017,7 @@ stock SetButtonMessage(buttonid, msg[])
 
 	foreach(new i : Player)
 		if(IsPlayerViewingMsgBox(i))
-			ShowMsgBox(playerid, btn_Data[i][btn_text]);
+			ShowActionText(playerid, btn_Data[i][btn_text]);
 
 	return 1;
 }

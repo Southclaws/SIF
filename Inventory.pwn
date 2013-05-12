@@ -535,13 +535,16 @@ stock AddItemToInventory(playerid, itemid)
 */
 	return 1;
 }
-stock RemoveItemFromInventory(playerid, slotid)
+stock RemoveItemFromInventory(playerid, slotid, call = 1)
 {
 	if(!(0 <= slotid < INV_MAX_SLOTS))
 		return 0;
 
-	if(CallLocalFunction("OnPlayerRemoveFromInventory", "dd", playerid, slotid))
-		return 0;
+	if(call)
+	{
+		if(CallLocalFunction("OnPlayerRemoveFromInventory", "dd", playerid, slotid))
+			return 0;
+	}
 
 	inv_Data[playerid][slotid] = INVALID_ITEM_ID;
 	
@@ -553,7 +556,8 @@ stock RemoveItemFromInventory(playerid, slotid)
 		inv_Data[playerid][(INV_MAX_SLOTS - 1)] = INVALID_ITEM_ID;
 	}
 
-	CallLocalFunction("OnPlayerRemovedFromInventory", "dd", playerid, slotid);
+	if(call)
+		CallLocalFunction("OnPlayerRemovedFromInventory", "dd", playerid, slotid);
 
 	return 1;
 }
@@ -627,17 +631,17 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		{
 			if(GetItemTypeSize(GetItemType(itemid)) != ITEM_SIZE_SMALL)
 			{
-				ShowMsgBox(playerid, "Item too big for inventory", 3000, 150);
+				ShowActionText(playerid, "Item too big for inventory", 3000, 150);
 			}
 			else
 			{
 				if(IsPlayerInventoryFull(playerid))
 				{
-					ShowMsgBox(playerid, "Inventory full", 3000, 100);
+					ShowActionText(playerid, "Inventory full", 3000, 100);
 				}
 				else
 				{
-					ShowMsgBox(playerid, "Item added to inventory", 3000, 150);
+					ShowActionText(playerid, "Item added to inventory", 3000, 150);
 					ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
 					stop inv_PutAwayTimer[playerid];
 					inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
@@ -738,7 +742,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 				else
 				{
-					ShowMsgBox(playerid, "You are already holding something", 3000, 200);
+					ShowActionText(playerid, "You are already holding something", 3000, 200);
 					DisplayPlayerInventory(playerid);
 				}
 			}
@@ -761,7 +765,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 				else
 				{
-					ShowMsgBox(playerid, "You are already holding something", 3000, 200);
+					ShowActionText(playerid, "You are already holding something", 3000, 200);
 					DisplayPlayerInventory(playerid);
 				}
 			}
@@ -784,7 +788,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 				else
 				{
-					ShowMsgBox(playerid, "You are already holding something", 3000, 200);
+					ShowActionText(playerid, "You are already holding something", 3000, 200);
 					DisplayPlayerInventory(playerid);
 				}
 			}

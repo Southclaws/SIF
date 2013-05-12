@@ -1690,7 +1690,7 @@ public OnPlayerEnterPlayerArea(playerid, targetid)
 {
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 	{
-		ShowMsgBox(playerid, "Press N to give item");
+		ShowActionText(playerid, "Press N to give item");
 	}
 
 	return CallLocalFunction("itm_OnPlayerEnterPlayerArea", "dd", playerid, targetid);
@@ -1707,7 +1707,7 @@ public OnPlayerLeavePlayerArea(playerid, targetid)
 {
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 	{
-		HideMsgBox(playerid);
+		HideActionText(playerid);
 	}
 
 	return CallLocalFunction("itm_OnPlayerLeavePlayerArea", "dd", playerid, targetid);
@@ -1769,7 +1769,7 @@ timer PickUpItemDelay[400](playerid, id, animtype)
 	if(animtype == 0)
 		ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
 
-	HideMsgBox(playerid);
+	HideActionText(playerid);
 	
 	itm_Interacting[playerid] = INVALID_ITEM_ID;
 

@@ -255,6 +255,28 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+		native OnMoveItemToContainer(playerid, itemid, containerid);
+		{
+			Called:
+				-
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+		native OnMoveItemToInventory(playerid, itemid, containerid);
+		{
+			Called:
+				-
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
 	}
 
 	SIF/Container/Interface Functions
@@ -595,6 +617,8 @@ forward OnItemRemoveFromContainer(containerid, slotid, playerid);
 forward OnItemRemovedFromContainer(containerid, slotid, playerid);
 forward OnPlayerViewContainerOpt(playerid, containerid);
 forward OnPlayerSelectContainerOpt(playerid, containerid, option);
+forward OnMoveItemToContainer(playerid, itemid, containerid);
+forward OnMoveItemToInventory(playerid, itemid, containerid);
 
 /*==============================================================================
 
@@ -740,13 +764,16 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 	return 1;
 }
 
-stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
+stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID, call = 1)
 {
 	if(!(0 <= slotid < cnt_Data[containerid][cnt_size]))
 		return 0;
 
-	if(CallLocalFunction("OnItemRemoveFromContainer", "ddd", containerid, slotid, playerid))
-		return 1;
+	if(call)
+	{
+		if(CallLocalFunction("OnItemRemoveFromContainer", "ddd", containerid, slotid, playerid))
+			return 1;
+	}
 
 	cnt_Items[containerid][slotid] = INVALID_ITEM_ID;
 	
@@ -758,7 +785,8 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
 		cnt_Items[containerid][(cnt_Data[containerid][cnt_size] - 1)] = INVALID_ITEM_ID;
 	}
 
-	CallLocalFunction("OnItemRemovedFromContainer", "ddd", containerid, slotid, playerid);
+	if(call)
+		CallLocalFunction("OnItemRemovedFromContainer", "ddd", containerid, slotid, playerid);
 
 	return 1;
 }
@@ -909,7 +937,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				}
 				else
 				{
-					ShowMsgBox(playerid, "You are already holding something", 3000, 200);
+					ShowActionText(playerid, "You are already holding something", 3000, 200);
 					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 				}
 			}
@@ -921,18 +949,23 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					return 1;
 				}
 
-				new id = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
+				new itemid = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
 
-				if(IsPlayerInventoryFull(playerid) || !IsValidItem(id))
+				if(IsPlayerInventoryFull(playerid) || !IsValidItem(itemid))
 				{
-					ShowMsgBox(playerid, "Inventory full", 3000, 100);
+					ShowActionText(playerid, "Inventory full", 3000, 100);
 					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 					return 0;
 				}
 
-				RemoveItemFromContainer(cnt_CurrentContainer[playerid], cnt_SelectedSlot[playerid], playerid);
-				AddItemToInventory(playerid, id);
+				if(CallLocalFunction("OnMoveItemToInventory", "ddd", playerid, itemid, cnt_CurrentContainer[playerid]))
+					return 0;
+
+				RemoveItemFromContainer(cnt_CurrentContainer[playerid], cnt_SelectedSlot[playerid], playerid, 0);
+				AddItemToInventory(playerid, itemid);
 				DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
+
+				return 1;
 			}
 			default:
 			{
@@ -1000,9 +1033,14 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 				return 0;
 			}
 
-			RemoveItemFromInventory(playerid, slot);
+			if(CallLocalFunction("OnMoveItemToContainer", "ddd", playerid, itemid, cnt_CurrentContainer[playerid]))
+				return 0;
+
+			RemoveItemFromInventory(playerid, slot, 0);
 			AddItemToContainer(cnt_CurrentContainer[playerid], itemid, playerid);
 			DisplayPlayerInventory(playerid);
+
+			return 1;
 		}
 	}
 

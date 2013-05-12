@@ -138,9 +138,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 new
 			gPlayerArea			[MAX_PLAYERS],
-PlayerText:	MsgBox,
-bool:		gViewingMsgBox		[MAX_PLAYERS],
-Timer:		gPlayerMsgBoxTimer	[MAX_PLAYERS];
+PlayerText:	ActionText,
+bool:		gViewingActionText		[MAX_PLAYERS],
+Timer:		gPlayerActionTextTimer	[MAX_PLAYERS];
 
 
 forward OnPlayerEnterPlayerArea(playerid, targetid);
@@ -159,13 +159,13 @@ hook OnPlayerConnect(playerid)
 	if(!IsValidDynamicArea(gPlayerArea[playerid]))
 		gPlayerArea[playerid] = CreateDynamicSphere(0.0, 0.0, 0.0, 2.0);
 
-	MsgBox					=CreatePlayerTextDraw(playerid, 24.0, 180.0, "Test message Box");
-	PlayerTextDrawUseBox	(playerid, MsgBox, 1);
-	PlayerTextDrawBoxColor	(playerid, MsgBox, 0x00000055);
-	PlayerTextDrawTextSize	(playerid, MsgBox, 150.0, 300.0);
-	PlayerTextDrawFont		(playerid, MsgBox, 1);
-	PlayerTextDrawLetterSize(playerid, MsgBox, 0.3, 1.4);
-	PlayerTextDrawSetShadow	(playerid, MsgBox, 1);
+	ActionText						=CreatePlayerTextDraw(playerid, 320.000000, 320.000000, "_");
+	PlayerTextDrawAlignment			(playerid, ActionText, 2);
+	PlayerTextDrawBackgroundColor	(playerid, ActionText, 255);
+	PlayerTextDrawFont				(playerid, ActionText, 1);
+	PlayerTextDrawLetterSize		(playerid, ActionText, 0.300000, 1.499999);
+	PlayerTextDrawColor				(playerid, ActionText, -1);
+	PlayerTextDrawSetOutline		(playerid, ActionText, 1);
 }
 
 hook OnPlayerDisconnect(playerid)
@@ -173,7 +173,7 @@ hook OnPlayerDisconnect(playerid)
 	DestroyDynamicArea(gPlayerArea[playerid]);
 	gPlayerArea[playerid] = -1;
 
-	PlayerTextDrawDestroy(playerid, MsgBox);
+	PlayerTextDrawDestroy(playerid, ActionText);
 }
 
 hook OnPlayerSpawn(playerid)
@@ -263,36 +263,36 @@ stock IsPlayerInPlayerArea(playerid, targetid)
 ==============================================================================*/
 
 
-stock ShowMsgBox(playerid, message[], time=0, width=200)
+stock ShowActionText(playerid, message[], time=0, width=200)
 {
-	PlayerTextDrawSetString(playerid, MsgBox, message);
-	PlayerTextDrawTextSize(playerid, MsgBox, width, 300);
-	PlayerTextDrawShow(playerid, MsgBox);
+	PlayerTextDrawSetString(playerid, ActionText, message);
+	PlayerTextDrawTextSize(playerid, ActionText, width, 300);
+	PlayerTextDrawShow(playerid, ActionText);
 	if(time != 0)
 	{
-	    stop gPlayerMsgBoxTimer[playerid];
-		gPlayerMsgBoxTimer[playerid] = defer Internal_HideMsgBox(playerid, time);
+	    stop gPlayerActionTextTimer[playerid];
+		gPlayerActionTextTimer[playerid] = defer Internal_HideActionText(playerid, time);
 	}
-	gViewingMsgBox[playerid] = true;
+	gViewingActionText[playerid] = true;
 }
-timer Internal_HideMsgBox[time](playerid, time)
+timer Internal_HideActionText[time](playerid, time)
 {
 #pragma unused time
-	HideMsgBox(playerid);
+	HideActionText(playerid);
 }
 
-stock HideMsgBox(playerid)
+stock HideActionText(playerid)
 {
-	PlayerTextDrawHide(playerid, MsgBox);
-	gViewingMsgBox[playerid] = false;
+	PlayerTextDrawHide(playerid, ActionText);
+	gViewingActionText[playerid] = false;
 }
 
-stock bool:IsPlayerViewingMsgBox(playerid)
+stock bool:IsPlayerViewingActionText(playerid)
 {
 	if(!IsPlayerConnected(playerid))
 		return false;
 
-	return gViewingMsgBox[playerid];
+	return gViewingActionText[playerid];
 }
 
 
