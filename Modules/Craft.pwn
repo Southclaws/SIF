@@ -553,3 +553,32 @@ GetItemComboResult(ItemType:item1, ItemType:item2)
 
 	return -1;
 }
+
+WriteAllCombosToFile()
+{
+	new
+		File:file = fopen("itemcombos.txt", io_write),
+		item1[32],
+		item2[32],
+		result[32],
+		str[512];
+
+	fwrite(file, "{| border=\"1\" cellpadding=\"1\" cellspacing=\"1\" class=\"article-table\" style=\"width: 500px;\"\n\
+			|-\n\
+			! scope=\"col\"|Item 1\n\
+			! scope=\"col\"|Item 2\n\
+			! scope=\"col\"|Result\n\
+			|-\n");
+
+	foreach(new i : cft_Index)
+	{
+		GetItemTypeName(cft_Data[i][cft_item1], item1);
+		GetItemTypeName(cft_Data[i][cft_item2], item2);
+		GetItemTypeName(cft_Data[i][cft_result], result);
+
+		format(str, 512, "|[[%s]]\n|[[%s]]\n|[[%s]]\n|-\n", item1, item2, result);
+		fwrite(file, str);
+	}
+
+	fclose(file);
+}
