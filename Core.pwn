@@ -319,3 +319,9 @@ stock Float:sif_absoluteangle(Float:angle)
 stock Float:sif_GetAngleToPoint(Float:fPointX, Float:fPointY, Float:fDestX, Float:fDestY)
 	return sif_absoluteangle(-(90-(atan2((fDestY - fPointY), (fDestX - fPointX)))));
 
+/*
+	Distance between 2 points in 3D space
+*/
+stock Float:sif_Distance(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2)
+	return floatsqroot((((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2))+((z1-z2)*(z1-z2))));
+

@@ -1033,7 +1033,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define ITM_MAX_TEXT		(32)
 #define ITM_ATTACH_INDEX	(0)
 
-#define FLOOR_OFFSET		(0.8568)
+#define FLOOR_OFFSET		(0.96)
 #define ITEM_BTN_OFFSET_Z	(0.6)
 #define INVALID_ITEM_ID		(-1)
 #define INVALID_ITEM_TYPE	(ItemType:-1)
@@ -1548,11 +1548,11 @@ stock RemoveCurrentItem(playerid)
 	CreateItemInWorld(itemid,
 		x + (0.5 * floatsin(-r, degrees)),
 		y + (0.5 * floatcos(-r, degrees)),
-		z - 0.868,
+		z - FLOOR_OFFSET,
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
-		0.7, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
+		FLOOR_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 	return itemid;
 
@@ -1745,7 +1745,7 @@ public OnButtonPress(playerid, buttonid)
 						return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], i);
 
 					if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, i))
-						return 0;
+						return 1;
 
 					PlayerPickUpItem(playerid, i);
 
@@ -1810,7 +1810,7 @@ timer DropItemDelay[400](playerid)
 	CreateItemInWorld(itemid,
 		x + (0.5 * floatsin(-r, degrees)),
 		y + (0.5 * floatcos(-r, degrees)),
-		z - 0.868,
+		z - FLOOR_OFFSET,
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
@@ -1866,11 +1866,11 @@ public OnPlayerDeath(playerid, killerid, reason)
 		CreateItemInWorld(itemid,
 			x + (0.5 * floatsin(-r, degrees)),
 			y + (0.5 * floatcos(-r, degrees)),
-			z - 0.868,
+			z - FLOOR_OFFSET,
 			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
 			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
 			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
-			0.868, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
+			FLOOR_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
 	}

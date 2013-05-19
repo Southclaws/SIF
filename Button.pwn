@@ -33,6 +33,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Streamer Plugin
 		YSI\y_hooks
 		YSI\y_timers
+		md-sort
 	}
 
 	SIF/Button/Credits
@@ -41,6 +42,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		SA:MP Community					- Inspiration and support
 		Incognito						- Very useful streamer plugin
 		Y_Less							- YSI framework
+		Slice							- Multidimensional Array Sorting
 	}
 
 	SIF/Button/Core Functions
@@ -511,6 +513,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #include <YSI\y_timers>
 #include <YSI\y_hooks>
 #include <streamer>
+#include <md-sort>
 
 #define _SIF_BUTTON_INCLUDED
 
@@ -524,6 +527,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 #define BTN_MAX			(8192)
 #define BTN_MAX_TEXT	(128)
+#define BTN_MAX_INRANGE	(8)
 
 #define INVALID_BUTTON_ID	(-1)
 
@@ -540,6 +544,12 @@ Float:		btn_size,
 			btn_interior,
 			btn_link,
 			btn_text[BTN_MAX_TEXT]
+}
+
+enum e_button_range_data
+{
+			btn_buttonId,
+Float:		btn_distance
 }
 
 
@@ -685,19 +695,40 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	{
 		if(newkeys & 16)
 		{
-			new Float:z;
+			new
+				Float:x,
+				Float:y,
+				Float:z,
+				Float:distance,
+				list[BTN_MAX_INRANGE][e_button_range_data],
+				index;
 			
-			GetPlayerPos(playerid, z, z, z);
+			GetPlayerPos(playerid, x, y, z);
 
 			foreach(new i : btn_Index)
 			{
-				if(IsPlayerInDynamicArea(playerid, btn_Data[i][btn_area]))
+				if(index >= BTN_MAX_INRANGE)
+					break;
+
+				distance = sif_Distance(x, y, z, btn_Data[i][btn_posX], btn_Data[i][btn_posY], btn_Data[i][btn_posZ]);
+
+				if(distance < btn_Data[i][btn_size])
 				{
-					if(btn_Data[i][btn_posZ]-btn_Data[i][btn_size] <= z <= btn_Data[i][btn_posZ]+btn_Data[i][btn_size])
-					{
-						if(Internal_OnButtonPress(playerid, i))
-							break;
-					}
+					list[index][btn_buttonId] = i;
+					list[index][btn_distance] = distance;
+
+					index++;
+				}
+			}
+
+			SortDeepArray(list, btn_distance);
+
+			for(new i = BTN_MAX_INRANGE - index; i < BTN_MAX_INRANGE; i++)
+			{
+				if(btn_Data[list[i][btn_buttonId]][btn_posZ] - btn_Data[list[i][btn_buttonId]][btn_size] <= z <= btn_Data[list[i][btn_buttonId]][btn_posZ] + btn_Data[list[i][btn_buttonId]][btn_size])
+				{
+					if(Internal_OnButtonPress(playerid, list[i][btn_buttonId]))
+						break;
 				}
 			}
 		}
