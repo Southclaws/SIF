@@ -1649,7 +1649,7 @@ stock RemoveItemFromWorld(itemid)
 
 hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
-	if(IsPlayerInAnyVehicle(playerid))
+	if(IsPlayerInAnyVehicle(playerid) || GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
 		return 1;
 
 	if(newkeys & KEY_NO)
@@ -1660,10 +1660,22 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		{
 			foreach(new i : Player)
 			{
-				if(i == playerid || itm_Holding[i] != INVALID_ITEM_ID || itm_Interacting[i] != INVALID_ITEM_ID)
+				if(i == playerid)
 					continue;
 
-				if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]) && !IsPlayerInAnyVehicle(i) && GetPlayerWeapon(i) == 0)
+				if(itm_Holding[i] != INVALID_ITEM_ID)
+					continue;
+
+				if(itm_Interacting[i] != INVALID_ITEM_ID)
+					continue;
+
+				if(IsPlayerInAnyVehicle(i))
+					continue;
+
+				if(GetPlayerWeapon(i) == 0)
+					continue;
+
+				if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]))
 				{
 					PlayerGiveItem(playerid, i, 1);
 					return 1;

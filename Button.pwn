@@ -797,21 +797,24 @@ timer btn_Unfreeze[1000](playerid)
 
 public OnPlayerEnterDynamicArea(playerid, areaid)
 {
-	foreach(new i : btn_Index)
+	if(!IsPlayerInAnyVehicle(playerid))
 	{
-		if(areaid == btn_Data[i][btn_area])
+		foreach(new i : btn_Index)
 		{
-			new
-				Float:z;
-
-			GetPlayerPos(playerid, z, z, z); // We only need the Z
-
-			if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
+			if(areaid == btn_Data[i][btn_area])
 			{
-				ShowActionText(playerid, btn_Data[i][btn_text]);
-				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, i);
+				new
+					Float:z;
 
-				break;
+				GetPlayerPos(playerid, z, z, z); // We only need the Z
+
+				if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
+				{
+					ShowActionText(playerid, btn_Data[i][btn_text]);
+					CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, i);
+
+					break;
+				}
 			}
 		}
 	}
@@ -829,20 +832,23 @@ forward btn_OnPlayerEnterDynamicArea(playerid, areaid);
 
 public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
-	foreach(new i : btn_Index)
+	if(!IsPlayerInAnyVehicle(playerid))
 	{
-		if(areaid == btn_Data[i][btn_area])
+		foreach(new i : btn_Index)
 		{
-			new
-				Float:z;
-
-			GetPlayerPos(playerid, z, z, z); // We only need the Z
-
-			if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
+			if(areaid == btn_Data[i][btn_area])
 			{
-				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, i);
-				HideActionText(playerid);
-				break;
+				new
+					Float:z;
+
+				GetPlayerPos(playerid, z, z, z); // We only need the Z
+
+				if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
+				{
+					CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, i);
+					HideActionText(playerid);
+					break;
+				}
 			}
 		}
 	}
