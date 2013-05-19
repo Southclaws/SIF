@@ -554,7 +554,7 @@ GetItemComboResult(ItemType:item1, ItemType:item2)
 	return -1;
 }
 
-WriteAllCombosToFile()
+stock WriteAllCombosToFile()
 {
 	new
 		File:file = fopen("itemcombos.txt", io_write),
