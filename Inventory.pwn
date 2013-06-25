@@ -41,7 +41,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Inventory/Core
 		native -
 
-		native AddItemToInventory(playerid, itemid)
+		native AddItemToInventory(playerid, itemid, call)
 		{
 			Description:
 				Adds the specified item to a players inventory and removes the
@@ -53,6 +53,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 				<itemid> (int, itemid)
 					The ID handle of the item to add.
+
+				<call>
+					Determines whether or not to call OnPlayerAddToInventory.
 
 			Returns:
 				0
@@ -507,13 +510,16 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock AddItemToInventory(playerid, itemid)
+stock AddItemToInventory(playerid, itemid, call = 1)
 {
 	if(!IsValidItem(itemid))
 		return 0;
 
-	if(CallLocalFunction("OnPlayerAddToInventory", "dd", playerid, itemid))
-		return 0;
+	if(call)
+	{
+		if(CallLocalFunction("OnPlayerAddToInventory", "dd", playerid, itemid))
+			return -1;
+	}
 
 	new i;
 	while(i < INV_MAX_SLOTS)
@@ -522,7 +528,7 @@ stock AddItemToInventory(playerid, itemid)
 		i++;
 	}
 	if(i == INV_MAX_SLOTS)
-		return -1;
+		return -2;
 	
 	inv_Data[playerid][i] = itemid;
 
