@@ -626,31 +626,34 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	}
 	if(newkeys & KEY_YES)
 	{
-		if(tickcount() - inv_PutAwayTick[playerid] < 1000)
-			return 0;
-
-		inv_PutAwayTick[playerid] = tickcount();
-
-		new itemid = GetPlayerItem(playerid);
-
-		if(IsValidItem(itemid))
+		if(!IsPlayerInAnyVehicle(playerid))
 		{
-			if(GetItemTypeSize(GetItemType(itemid)) != ITEM_SIZE_SMALL)
+			if(tickcount() - inv_PutAwayTick[playerid] < 1000)
+				return 0;
+	
+			inv_PutAwayTick[playerid] = tickcount();
+	
+			new itemid = GetPlayerItem(playerid);
+	
+			if(IsValidItem(itemid))
 			{
-				ShowActionText(playerid, "Item too big for inventory", 3000, 150);
-			}
-			else
-			{
-				if(IsPlayerInventoryFull(playerid))
+				if(GetItemTypeSize(GetItemType(itemid)) != ITEM_SIZE_SMALL)
 				{
-					ShowActionText(playerid, "Inventory full", 3000, 100);
+					ShowActionText(playerid, "Item too big for inventory", 3000, 150);
 				}
 				else
 				{
-					ShowActionText(playerid, "Item added to inventory", 3000, 150);
-					ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
-					stop inv_PutAwayTimer[playerid];
-					inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
+					if(IsPlayerInventoryFull(playerid))
+					{
+						ShowActionText(playerid, "Inventory full", 3000, 100);
+					}
+					else
+					{
+						ShowActionText(playerid, "Item added to inventory", 3000, 150);
+						ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
+						stop inv_PutAwayTimer[playerid];
+						inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
+					}
 				}
 			}
 		}
