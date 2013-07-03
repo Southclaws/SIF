@@ -686,7 +686,13 @@ stock DestroyContainer(containerid)
 	cnt_Data[containerid][cnt_button] = INVALID_BUTTON_ID;
 
 	for(new i; i < cnt_Data[containerid][cnt_size]; i++)
+	{
+		if(cnt_Items[containerid][i] == INVALID_ITEM_ID)
+			break;
+
 		DestroyItem(cnt_Items[containerid][i]);
+		cnt_Items[containerid][i] = INVALID_ITEM_ID;
+	}
 
 	cnt_Data[containerid][cnt_name][0]	= EOS;
 	cnt_Data[containerid][cnt_posX]		= 0.0;
