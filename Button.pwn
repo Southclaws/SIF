@@ -2,6 +2,8 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
+	Version: 1.0.0
+
 
 	SIF/Overview
 	{
@@ -604,7 +606,7 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 	if(id == -1)
 		return INVALID_BUTTON_ID;
 
-	btn_Data[id][btn_area]				= CreateDynamicCircle(x, y, areasize, world, interior);
+	btn_Data[id][btn_area]				= CreateDynamicSphere(x, y, z, areasize, world, interior);
 
 	strcpy(btn_Data[id][btn_text], text, BTN_MAX_TEXT);
 	btn_Data[id][btn_posX]				= x;
@@ -622,6 +624,7 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 		btn_Data[id][btn_label] = Text3D:INVALID_3DTEXT_ID;
 
 	Iter_Add(btn_Index, id);
+
 	return id;
 }
 stock DestroyButton(buttonid)
@@ -645,11 +648,8 @@ stock DestroyButton(buttonid)
 	btn_Data[buttonid][btn_link]		= INVALID_BUTTON_ID;
 	btn_Data[buttonid][btn_text][0]		= EOS;
 
-	foreach(new i : Player)
-		if(IsPlayerViewingActionText(i))
-			HideActionText(i);
-
 	Iter_Remove(btn_Index, buttonid);
+
 	return 1;
 }
 
@@ -732,6 +732,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				}
 			}
 		}
+
 		if(oldkeys & 16)
 		{
 			if(btn_CurrentlyPressing[playerid] != INVALID_BUTTON_ID)
@@ -803,18 +804,10 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 		{
 			if(areaid == btn_Data[i][btn_area])
 			{
-				new
-					Float:z;
+				ShowActionText(playerid, btn_Data[i][btn_text]);
+				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, i);
 
-				GetPlayerPos(playerid, z, z, z); // We only need the Z
-
-				if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
-				{
-					ShowActionText(playerid, btn_Data[i][btn_text]);
-					CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, i);
-
-					break;
-				}
+				break;
 			}
 		}
 	}
@@ -838,17 +831,10 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 		{
 			if(areaid == btn_Data[i][btn_area])
 			{
-				new
-					Float:z;
+				HideActionText(playerid);
+				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, i);
 
-				GetPlayerPos(playerid, z, z, z); // We only need the Z
-
-				if(-(btn_Data[i][btn_size] / 2.0) <= (z - btn_Data[i][btn_posZ]) <= (btn_Data[i][btn_size] / 2.0))
-				{
-					CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, i);
-					HideActionText(playerid);
-					break;
-				}
+				break;
 			}
 		}
 	}
@@ -992,7 +978,7 @@ stock GetButtonLinkedID(buttonid)
 	if(!Iter_Contains(btn_Index, buttonid))
 		return INVALID_BUTTON_ID;
 
-	return btn_Data[buttonid2][btn_link];
+	return btn_Data[buttonid][btn_link];
 }
 
 // btn_text
@@ -1002,7 +988,7 @@ stock GetButtonText(buttonid, text[])
 		return 0;
 
 	text[0] = EOS;
-	strcat(text, btn_Data[buttonid2][btn_text]);
+	strcat(text, btn_Data[buttonid][btn_text], BTN_MAX_TEXT);
 
 	return 1;
 }
@@ -1011,8 +997,8 @@ stock SetButtonText(buttonid, text[])
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
-	btn_Data[buttonid2][btn_text][0] = EOS;
-	strcat(btn_Data[buttonid2][btn_text], text);
+	btn_Data[buttonid][btn_text][0] = EOS;
+	strcat(btn_Data[buttonid][btn_text], text, BTN_MAX_TEXT);
 
 	return 1;
 }
@@ -1032,12 +1018,7 @@ stock GetPlayerButtonID(playerid)
 	{
 		if(IsPlayerInDynamicArea(playerid, btn_Data[i][btn_area]))
 		{
-			new Float:z;
-			
-			GetPlayerPos(playerid, z, z, z);
-
-			if(btn_Data[i][btn_posZ]-btn_Data[i][btn_size] <= z <= btn_Data[i][btn_posZ]+btn_Data[i][btn_size])
-				return i;
+			return i;
 		}
 	}
 

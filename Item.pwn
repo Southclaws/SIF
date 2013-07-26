@@ -2,6 +2,8 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
+	Version: 1.0.0
+
 
 	SIF/Overview
 	{
@@ -1034,7 +1036,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define ITM_ATTACH_INDEX	(0)
 
 #define FLOOR_OFFSET		(0.96)
-#define ITEM_BTN_OFFSET_Z	(0.6)
+#define ITEM_BUTTON_OFFSET	(0.7)
 #define INVALID_ITEM_ID		(-1)
 #define INVALID_ITEM_TYPE	(ItemType:-1)
 
@@ -1091,7 +1093,8 @@ static
 			itm_Holder			[ITM_MAX];
 new
 Iterator:	itm_Index<ITM_MAX>,
-Iterator:	itm_WorldIndex<ITM_MAX>;
+Iterator:	itm_WorldIndex<ITM_MAX>,
+			itm_ButtonIndex[BTN_MAX];
 
 static
 			itm_TypeData		[ITM_MAX_TYPES][E_ITEM_TYPE_DATA];
@@ -1133,15 +1136,22 @@ hook OnFilterScriptInit()
 hook OnGameModeInit()
 #endif
 {
-	for(new i;i<MAX_PLAYERS;i++)
+	for(new i; i < MAX_PLAYERS; i++)
 	{
 		itm_Holding[i] = INVALID_ITEM_ID;
 		itm_Interacting[i] = INVALID_ITEM_ID;
 	}
-	for(new i;i<ITM_MAX;i++)
+
+	for(new i; i < ITM_MAX; i++)
 	{
 		itm_Holder[i] = INVALID_PLAYER_ID;
 	}
+
+	for(new i; i < BTN_MAX; i++)
+	{
+		itm_ButtonIndex[i] = INVALID_ITEM_ID;
+	}
+
 	return 1;
 }
 
@@ -1217,6 +1227,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 		{
 			DestroyDynamicObject(itm_Data[itemid][itm_objId]);
 			DestroyButton(itm_Data[itemid][itm_button]);
+			itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
 		}
 	}
 
@@ -1501,6 +1512,8 @@ GiveWorldItemToPlayer(playerid, itemid, call = 1)
 	{
 		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
 		DestroyButton(itm_Data[itemid][itm_button]);
+		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
+
 		itm_Data[itemid][itm_objId] = -1;
 		itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
 	}
@@ -1603,11 +1616,14 @@ CreateItemInWorld(itemid,
 		itm_Holding[itm_Holder[itemid]]			= INVALID_ITEM_ID;
 		itm_Interacting[itm_Holder[itemid]]		= INVALID_ITEM_ID;
 	}
+
 	itm_Interactor[itemid]						= INVALID_PLAYER_ID;
 	itm_Holder[itemid]							= INVALID_PLAYER_ID;
 
 	itm_Data[itemid][itm_objId]					= CreateDynamicObject(itm_TypeData[itemtype][itm_model], x, y, z + itm_TypeData[itemtype][itm_offsetZ], rx, ry, rz, world, interior);
 	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + zoffset, "Press F to pick up", world, interior, 1.0);
+
+	itm_ButtonIndex[itm_Data[itemid][itm_button]] = itemid;
 
 	if(label)
 		SetButtonLabel(itm_Data[itemid][itm_button], itm_TypeData[itemtype][itm_name], .range = 2.0);
@@ -1638,6 +1654,8 @@ stock RemoveItemFromWorld(itemid)
 
 		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
 		DestroyButton(itm_Data[itemid][itm_button]);
+		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
+
 		itm_Data[itemid][itm_objId] = -1;
 		itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
 	}
@@ -1747,19 +1765,21 @@ public OnButtonPress(playerid, buttonid)
 {
 	if(itm_Interacting[playerid] == INVALID_ITEM_ID)
 	{
-		foreach(new i : itm_WorldIndex)
+		if(itm_ButtonIndex[buttonid] != INVALID_ITEM_ID)
 		{
-			if(buttonid == itm_Data[i][itm_button])
+			if(Iter_Contains(itm_Index, itm_ButtonIndex[buttonid]))
 			{
-				if(itm_Holder[i] == INVALID_PLAYER_ID && itm_Interactor[i] == INVALID_PLAYER_ID)
+				new itemid = itm_ButtonIndex[buttonid];
+
+				if(itm_Holder[itemid] == INVALID_PLAYER_ID && itm_Interactor[itemid] == INVALID_PLAYER_ID)
 				{
 					if(Iter_Contains(itm_Index, itm_Holding[playerid]))
-						return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], i);
+						return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid);
 
-					if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, i))
+					if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, itemid))
 						return 1;
 
-					PlayerPickUpItem(playerid, i);
+					PlayerPickUpItem(playerid, itemid);
 
 					return 1;
 				}
@@ -1826,9 +1846,11 @@ timer DropItemDelay[400](playerid)
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
 		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
-		0.7, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
+		ITEM_BUTTON_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 	ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
+
+	Streamer_Update(playerid);
 
 	return 1;
 }

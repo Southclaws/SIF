@@ -226,7 +226,11 @@ public OnPlayerSelectExtraItem(playerid, item)
 #define OnPlayerSelectExtraItem nbk_OnPlayerSelectExtraItem
 forward OnPlayerSelectExtraItem(playerid, item);
 
+#if defined FILTERSCRIPT
+hook OnFilterScriptInit()
+#else
 hook OnGameModeInit()
+#endif
 {
 	nbk_PageLeft				=TextDrawCreate(280.000000, 320.000000, "<");
 	TextDrawAlignment			(nbk_PageLeft, 2);
@@ -257,7 +261,11 @@ hook OnGameModeInit()
 	TextDrawSetSelectable		(nbk_PageRight, true);
 }
 
+#if defined FILTERSCRIPT
+hook OnFilterScriptExit()
+#else
 hook OnGameModeExit()
+#endif
 {
 	TextDrawDestroy(nbk_PageLeft);
 	TextDrawDestroy(nbk_PageRight);

@@ -2,6 +2,8 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
+	Version: 1.0.0
+
 
 	SIF/Overview
 	{
@@ -479,7 +481,11 @@ forward OnPlayerSelectInventoryOpt(playerid, option);
 ==============================================================================*/
 
 
+#if defined FILTERSCRIPT
+hook OnFilterScriptInit()
+#else
 hook OnGameModeInit()
+#endif
 {
 	for(new i; i < MAX_PLAYERS; i++)
 	{

@@ -2,6 +2,8 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
+	Version: 1.0.0
+
 
 	SIF/Overview
 	{
@@ -154,7 +156,23 @@ forward OnPlayerLeavePlayerArea(playerid, targetid);
 ==============================================================================*/
 
 
+#if defined FILTERSCRIPT
+hook OnFilterScriptInit()
+{
+	for(new i; i < MAX_PLAYERS; i++)
+	{
+		if(IsPlayerConnected(i))
+			sif_SetUpPlayer(i);
+	}
+}
+#endif
+
 hook OnPlayerConnect(playerid)
+{
+	sif_SetUpPlayer(playerid);
+}
+
+sif_SetUpPlayer(playerid)
 {
 	if(!IsValidDynamicArea(gPlayerArea[playerid]))
 		gPlayerArea[playerid] = CreateDynamicSphere(0.0, 0.0, 0.0, 2.0);
