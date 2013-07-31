@@ -513,6 +513,18 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+
+		native GetItemContainer(itemid)
+		{
+			Description:
+				Returns the ID of a container if <itemid> is stored inside it.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
 	}
 
 	SIF/Container/Internal Functions
@@ -600,7 +612,8 @@ Float:		cnt_posZ,
 static
 			cnt_Data					[CNT_MAX][E_CONTAINER_DATA],
 			cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
-Iterator:	cnt_Index<CNT_MAX>;
+Iterator:	cnt_Index<CNT_MAX>,
+			cnt_ItemContainer			[ITM_MAX];
 
 static
 			cnt_CurrentContainer		[MAX_PLAYERS],
@@ -632,6 +645,9 @@ forward OnMoveItemToInventory(playerid, itemid, containerid);
 hook OnPlayerConnect(playerid)
 {
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
+
+	for(new i; i < ITM_MAX; i++)
+		cnt_ItemContainer[i] = INVALID_CONTAINER_ID;
 }
 
 
@@ -764,6 +780,7 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 		return -2;
 
 	cnt_Items[containerid][i] = itemid;
+	cnt_ItemContainer[itemid] = containerid;
 
 	RemoveItemFromWorld(itemid);
 
@@ -783,8 +800,9 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 			return 1;
 	}
 
+	cnt_ItemContainer[cnt_Items[containerid][slotid]] = INVALID_CONTAINER_ID;
 	cnt_Items[containerid][slotid] = INVALID_ITEM_ID;
-	
+
 	if(slotid < (cnt_Data[containerid][cnt_size] - 1))
 	{
 		for(new i = slotid; i < (cnt_Data[containerid][cnt_size] - 1); i++)
@@ -1102,6 +1120,20 @@ public OnPlayerSelectExtraItem(playerid, item)
 #define OnPlayerSelectExtraItem cnt_OnPlayerSelectExtraItem
 forward OnPlayerSelectExtraItem(playerid, item);
 
+public OnItemDestroy(itemid)
+{
+	cnt_ItemContainer[itemid] = INVALID_CONTAINER_ID;
+
+	return CallLocalFunction("cnt_OnItemDestroy", "dd", itemid);
+}
+#if defined _ALS_OnItemDestroy
+	#undef OnItemDestroy
+#else
+	#define _ALS_OnItemDestroy
+#endif
+#define OnItemDestroy cnt_OnItemDestroy
+forward OnItemDestroy(itemid);
+
 
 /*==============================================================================
 
@@ -1388,4 +1420,12 @@ stock GetContainerFreeSlots(containerid)
 			return cnt_Data[containerid][cnt_size] - (i + 1);
 	}
 	return 0;
+}
+
+stock GetItemContainer(itemid)
+{
+	if(!IsValidItem(itemid))
+		return INVALID_CONTAINER_ID;
+
+	return cnt_ItemContainer[itemid];
 }

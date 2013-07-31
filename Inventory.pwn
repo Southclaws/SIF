@@ -390,6 +390,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+
+		native GetItemPlayerInventory(itemid)
+		{
+			Description:
+				Returns the ID of a player if <itemid> is stored in their
+				inventory.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
 	}
 
 	SIF/Inventory/Internal Functions
@@ -410,6 +423,15 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Hooked functions or callbacks, either SA:MP natives or from other
 		scripts or plugins.
 
+		SAMP/OnPlayerConnect
+		{
+			Reason:
+				Zeroing variables relating to players.
+		}
+		SAMP/OnPlayerDisconnect
+		{
+			Emptying player inventory and clearing memory space.
+		}
 		SAMP/OnPlayerKeyStateChange
 		{
 			Reason:
@@ -422,6 +444,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				To handle the dialogs used in the script for listing inventory
 				items and item options.
 		}
+		OnItemDestroy
 	}
 
 ==============================================================================*/
@@ -451,8 +474,11 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define DIALOG_INVENTORY_OPTIONS	(9001)
 
 
-new
+static
 		inv_Data					[MAX_PLAYERS][INV_MAX_SLOTS],
+		inv_ItemPlayer				[ITM_MAX];
+
+static
 		inv_ViewingInventory		[MAX_PLAYERS],
 		inv_SelectedSlot			[MAX_PLAYERS],
 		inv_ExtraItemList			[MAX_PLAYERS][128],
@@ -495,6 +521,9 @@ hook OnGameModeInit()
 			inv_SelectedSlot[i] = -1;
 		}
 	}
+
+	for(new i; i < ITM_MAX; i++)
+		inv_ItemPlayer[i] = INVALID_PLAYER_ID;
 }
 
 hook OnPlayerConnect(playerid)
@@ -537,6 +566,7 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 		return -2;
 	
 	inv_Data[playerid][i] = itemid;
+	inv_ItemPlayer[itemid] = playerid;
 
 	RemoveItemFromWorld(itemid);
 
@@ -557,6 +587,9 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 		if(CallLocalFunction("OnPlayerRemoveFromInventory", "dd", playerid, slotid))
 			return 0;
 	}
+
+	if(IsValidItem(inv_Data[playerid][slotid]))
+		inv_ItemPlayer[inv_Data[playerid][slotid]] = INVALID_PLAYER_ID;
 
 	inv_Data[playerid][slotid] = INVALID_ITEM_ID;
 	
@@ -816,6 +849,29 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return 1;
 }
 
+public OnItemDestroy(itemid)
+{
+	inv_ItemPlayer[itemid] = INVALID_PLAYER_ID;
+
+	return CallLocalFunction("inv_OnItemDestroy", "dd", itemid);
+}
+#if defined _ALS_OnItemDestroy
+	#undef OnItemDestroy
+#else
+	#define _ALS_OnItemDestroy
+#endif
+#define OnItemDestroy inv_OnItemDestroy
+forward OnItemDestroy(itemid);
+
+hook OnPlayerDisconnect(playerid)
+{
+	for(new i; i < INV_MAX_SLOTS; i++)
+	{
+		DestroyItem(inv_Data[playerid][0]);
+		RemoveItemFromInventory(playerid, 0);
+	}
+}
+
 
 /*==============================================================================
 
@@ -897,4 +953,12 @@ stock GetInventoryFreeSlots(playerid)
 			return INV_MAX_SLOTS - (i + 1);
 	}
 	return 0;
+}
+
+stock GetItemPlayerInventory(itemid)
+{
+	if(!IsValidItem(itemid))
+		return INVALID_PLAYER_ID;
+
+	return inv_ItemPlayer[itemid];
 }
