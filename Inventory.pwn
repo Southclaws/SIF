@@ -865,11 +865,16 @@ forward OnItemDestroy(itemid);
 
 hook OnPlayerDisconnect(playerid)
 {
+	defer DestroyPlayerInventoryItems(playerid);
+}
+
+timer DestroyPlayerInventoryItems[1](id)
+{
 	for(new i; i < INV_MAX_SLOTS; i++)
 	{
-		DestroyItem(inv_Data[playerid][0]);
-		RemoveItemFromInventory(playerid, 0);
-	}
+		DestroyItem(inv_Data[id][0]);
+		RemoveItemFromInventory(id, 0);
+	}	
 }
 
 
