@@ -1490,15 +1490,6 @@ GiveWorldItemToPlayer(playerid, itemid, call = 1)
 	new
 		ItemType:type = itm_Data[itemid][itm_type];
 
-	if(call)
-	{
-		if(CallLocalFunction("OnPlayerPickedUpItem", "dd", playerid, itemid))
-			return 0;
-
-		if(!Iter_Contains(itm_Index, itemid))
-			return 0;
-	}
-
 	itm_Data[itemid][itm_posX]		= 0.0;
 	itm_Data[itemid][itm_posY]		= 0.0;
 	itm_Data[itemid][itm_posZ]		= 0.0;
@@ -1527,6 +1518,15 @@ GiveWorldItemToPlayer(playerid, itemid, call = 1)
 		SetPlayerSpecialAction(playerid, SPECIAL_ACTION_CARRY);
 
 	Iter_Remove(itm_WorldIndex, itemid);
+
+	if(call)
+	{
+		if(CallLocalFunction("OnPlayerPickedUpItem", "dd", playerid, itemid))
+			return 0;
+
+		if(!Iter_Contains(itm_Index, itemid))
+			return 0;
+	}
 
 	return 1;
 }
