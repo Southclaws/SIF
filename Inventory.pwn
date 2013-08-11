@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.0
+	Version: 1.1.1
 
 
 	SIF/Overview

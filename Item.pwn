@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.0
+	Version: 1.1.1
 
 
 	SIF/Overview
@@ -1076,14 +1076,16 @@ Float:		itm_defaultRotY,
 Float:		itm_defaultRotZ,
 Float:		itm_offsetZ,
 
-			itm_attachBone,
 Float:		itm_attachPosX,
 Float:		itm_attachPosY,
 Float:		itm_attachPosZ,
 
 Float:		itm_attachRotX,
 Float:		itm_attachRotY,
-Float:		itm_attachRotZ
+Float:		itm_attachRotZ,
+
+			itm_colour,
+			itm_attachBone
 }
 
 
@@ -1255,7 +1257,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	return 1;
 }
 
-stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, boneid = 6)
+stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, colour = -1, boneid = 6)
 {
 	new ItemType:id;
 
@@ -1278,8 +1280,6 @@ stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty 
 	itm_TypeData[id][itm_defaultRotZ]	= rotz;
 	itm_TypeData[id][itm_offsetZ]		= zoffset;
 
-	itm_TypeData[id][itm_attachBone]	= boneid;
-
 	itm_TypeData[id][itm_attachPosX]	= attx;
 	itm_TypeData[id][itm_attachPosY]	= atty;
 	itm_TypeData[id][itm_attachPosZ]	= attz;
@@ -1287,6 +1287,9 @@ stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty 
 	itm_TypeData[id][itm_attachRotX]	= attrx;
 	itm_TypeData[id][itm_attachRotY]	= attry;
 	itm_TypeData[id][itm_attachRotZ]	= attrz;
+
+	itm_TypeData[id][itm_colour]		= colour;
+	itm_TypeData[id][itm_attachBone]	= boneid;
 
 	return id;
 }
@@ -1512,7 +1515,8 @@ GiveWorldItemToPlayer(playerid, itemid, call = 1)
 	SetPlayerAttachedObject(
 		playerid, ITM_ATTACH_INDEX, itm_TypeData[type][itm_model], itm_TypeData[type][itm_attachBone],
 		itm_TypeData[type][itm_attachPosX], itm_TypeData[type][itm_attachPosY], itm_TypeData[type][itm_attachPosZ],
-		itm_TypeData[type][itm_attachRotX], itm_TypeData[type][itm_attachRotY], itm_TypeData[type][itm_attachRotZ]);
+		itm_TypeData[type][itm_attachRotX], itm_TypeData[type][itm_attachRotY], itm_TypeData[type][itm_attachRotZ],
+		.materialcolor1 = itm_TypeData[type][itm_colour], .materialcolor2 = itm_TypeData[type][itm_colour]);
 
 	if(itm_TypeData[type][itm_size] == ITEM_SIZE_CARRY)
 		SetPlayerSpecialAction(playerid, SPECIAL_ACTION_CARRY);
@@ -1624,6 +1628,9 @@ CreateItemInWorld(itemid,
 	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + zoffset, "Press F to pick up", world, interior, 1.0);
 
 	itm_ButtonIndex[itm_Data[itemid][itm_button]] = itemid;
+
+	if(itm_TypeData[itemtype][itm_colour] != -1)
+		SetDynamicObjectMaterial(itm_Data[itemid][itm_objId], 0, itm_TypeData[itemtype][itm_model], "invalid", "invalid", itm_TypeData[itemtype][itm_colour]);
 
 	if(label)
 		SetButtonLabel(itm_Data[itemid][itm_button], itm_TypeData[itemtype][itm_name], .range = 2.0);
@@ -1872,7 +1879,8 @@ timer GiveItemDelay[500](playerid, targetid)
 	SetPlayerAttachedObject(
 		targetid, ITM_ATTACH_INDEX, itm_TypeData[type][itm_model], itm_TypeData[type][itm_attachBone],
 		itm_TypeData[type][itm_attachPosX], itm_TypeData[type][itm_attachPosY], itm_TypeData[type][itm_attachPosZ],
-		itm_TypeData[type][itm_attachRotX], itm_TypeData[type][itm_attachRotY], itm_TypeData[type][itm_attachRotZ]);
+		itm_TypeData[type][itm_attachRotX], itm_TypeData[type][itm_attachRotY], itm_TypeData[type][itm_attachRotZ],
+		.materialcolor1 = itm_TypeData[type][itm_colour], .materialcolor2 = itm_TypeData[type][itm_colour]);
 
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_NONE);
 
@@ -2090,6 +2098,24 @@ stock GetItemTypeSize(ItemType:itemtype)
 		return INVALID_ITEM_SIZE;
 
 	return itm_TypeData[itemtype][itm_size];
+}
+
+// itm_colour
+stock GetItemTypeColour(ItemType:itemtype)
+{
+	if(!IsValidItemType(itemtype))
+		return INVALID_ITEM_SIZE;
+
+	return itm_TypeData[itemtype][itm_colour];
+}
+
+// itm_attachBone
+stock GetItemTypeBone(ItemType:itemtype)
+{
+	if(!IsValidItemType(itemtype))
+		return INVALID_ITEM_SIZE;
+
+	return itm_TypeData[itemtype][itm_attachBone];
 }
 
 // itm_Holder
