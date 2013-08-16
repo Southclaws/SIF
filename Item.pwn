@@ -893,6 +893,34 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the item ID handle is invalid.
 		}
+		native GetPlayerInteractingItem(playerid)
+		{
+			Description:
+				Returns the ID handle of the item that <playerid> is interacting
+				with. This means either picking up, dropping or giving.
+
+			Parameters:
+				<playerid> (int)
+					The player ID to check.
+
+			Returns:
+				(int)
+					ID handle of the item that <playerid> is interacting with.
+		}
+		native GetNextItemID()
+		{
+			Description:
+				Returns the next item ID in the index that is unused.
+				Useful for determining what ID an item will have before calling
+				CreateItem and thus OnItemCreated.
+
+			Parameters:
+				-
+
+			Returns:
+				(int)
+					An item ID between 0 and ITM_MAX that is not yet assigned.
+		}
 	}
 
 	SIF/Item/Internal Functions
@@ -2187,4 +2215,9 @@ stock GetPlayerInteractingItem(playerid)
 		return INVALID_ITEM_ID;
 
 	return itm_Interacting[playerid];
+}
+
+stock GetNextItemID()
+{
+	return Iter_Free(itm_Index);
 }
