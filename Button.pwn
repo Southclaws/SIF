@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.0
+	Version: 1.0.1
 
 
 	SIF/Overview
@@ -555,9 +555,11 @@ Float:		btn_distance
 }
 
 
-static
+new
 			btn_Data[BTN_MAX][E_BTN_DATA],
-Iterator:	btn_Index<BTN_MAX>,
+Iterator:	btn_Index<BTN_MAX>;
+
+static
 			btn_CurrentlyPressing[MAX_PLAYERS];
 
 

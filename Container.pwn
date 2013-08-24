@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.0
+	Version: 1.1.1
 
 
 	SIF/Overview
@@ -609,7 +609,7 @@ Float:		cnt_posZ,
 }
 
 
-static
+new
 			cnt_Data					[CNT_MAX][E_CONTAINER_DATA],
 			cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
 Iterator:	cnt_Index<CNT_MAX>,
