@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.0
+	Version: 1.1.0
 
 
 	SIF/Overview
@@ -139,8 +139,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 
 new
-			gPlayerArea			[MAX_PLAYERS],
-PlayerText:	ActionText,
+			gPlayerArea				[MAX_PLAYERS],
+PlayerText:	ActionText				[MAX_PLAYERS],
 bool:		gViewingActionText		[MAX_PLAYERS],
 Timer:		gPlayerActionTextTimer	[MAX_PLAYERS];
 
@@ -165,6 +165,15 @@ hook OnFilterScriptInit()
 			sif_SetUpPlayer(i);
 	}
 }
+
+hook OnFilterScriptExit()
+{
+	for(new i; i < MAX_PLAYERS; i++)
+	{
+		if(IsPlayerConnected(i))
+			sif_UnloadPlayer(i, true);
+	}
+}
 #endif
 
 hook OnPlayerConnect(playerid)
@@ -177,21 +186,30 @@ sif_SetUpPlayer(playerid)
 	if(!IsValidDynamicArea(gPlayerArea[playerid]))
 		gPlayerArea[playerid] = CreateDynamicSphere(0.0, 0.0, 0.0, 2.0);
 
-	ActionText						=CreatePlayerTextDraw(playerid, 320.000000, 320.000000, "_");
-	PlayerTextDrawAlignment			(playerid, ActionText, 2);
-	PlayerTextDrawBackgroundColor	(playerid, ActionText, 255);
-	PlayerTextDrawFont				(playerid, ActionText, 1);
-	PlayerTextDrawLetterSize		(playerid, ActionText, 0.300000, 1.499999);
-	PlayerTextDrawColor				(playerid, ActionText, -1);
-	PlayerTextDrawSetOutline		(playerid, ActionText, 1);
+	ActionText[playerid]			=CreatePlayerTextDraw(playerid, 320.000000, 320.000000, "_");
+	PlayerTextDrawAlignment			(playerid, ActionText[playerid], 2);
+	PlayerTextDrawBackgroundColor	(playerid, ActionText[playerid], 255);
+	PlayerTextDrawFont				(playerid, ActionText[playerid], 1);
+	PlayerTextDrawLetterSize		(playerid, ActionText[playerid], 0.300000, 1.499999);
+	PlayerTextDrawColor				(playerid, ActionText[playerid], -1);
+	PlayerTextDrawSetOutline		(playerid, ActionText[playerid], 1);
 }
 
-hook OnPlayerDisconnect(playerid)
+sif_UnloadPlayer(playerid, doTD = false)
 {
 	DestroyDynamicArea(gPlayerArea[playerid]);
 	gPlayerArea[playerid] = -1;
 
-	PlayerTextDrawDestroy(playerid, ActionText);
+	if(doTD)
+	{
+		PlayerTextDrawHide(playerid, ActionText[playerid]);
+		PlayerTextDrawDestroy(playerid, ActionText[playerid]);
+	}
+}
+
+hook OnPlayerDisconnect(playerid)
+{
+	sif_UnloadPlayer(playerid);
 }
 
 hook OnPlayerSpawn(playerid)
@@ -301,9 +319,9 @@ stock IsPlayerInPlayerArea(playerid, targetid)
 
 stock ShowActionText(playerid, message[], time=0, width=200)
 {
-	PlayerTextDrawSetString(playerid, ActionText, message);
-	PlayerTextDrawTextSize(playerid, ActionText, width, 300);
-	PlayerTextDrawShow(playerid, ActionText);
+	PlayerTextDrawSetString(playerid, ActionText[playerid], message);
+	PlayerTextDrawTextSize(playerid, ActionText[playerid], width, 300);
+	PlayerTextDrawShow(playerid, ActionText[playerid]);
 	if(time != 0)
 	{
 	    stop gPlayerActionTextTimer[playerid];
@@ -319,7 +337,7 @@ timer Internal_HideActionText[time](playerid, time)
 
 stock HideActionText(playerid)
 {
-	PlayerTextDrawHide(playerid, ActionText);
+	PlayerTextDrawHide(playerid, ActionText[playerid]);
 	gViewingActionText[playerid] = false;
 }
 

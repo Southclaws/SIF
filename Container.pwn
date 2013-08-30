@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.1
+	Version: 1.1.2
 
 
 	SIF/Overview
@@ -642,12 +642,19 @@ forward OnMoveItemToInventory(playerid, itemid, containerid);
 ==============================================================================*/
 
 
+#if defined FILTERSCRIPT
+hook OnFilterScriptInit()
+#else
+hook OnGameModeInit()
+#endif
+{
+	for(new i; i < ITM_MAX; i++)
+		cnt_ItemContainer[i] = INVALID_CONTAINER_ID;
+}
+
 hook OnPlayerConnect(playerid)
 {
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
-
-	for(new i; i < ITM_MAX; i++)
-		cnt_ItemContainer[i] = INVALID_CONTAINER_ID;
 }
 
 
