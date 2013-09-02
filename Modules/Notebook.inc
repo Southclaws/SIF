@@ -18,6 +18,9 @@
 #endif
 
 #define INVALID_NOTEBOOK_PAGE	(-1)
+#define DIALOG_NOTEBOOK_PAGE	(9004)
+#define DIALOG_NOTEBOOK_EDIT	(9005)
+#define DIALOG_NOTEBOOK_ERROR	(9006)
 
 
 new
@@ -39,10 +42,10 @@ ShowPlayerNotebook(playerid, page)
 	format(pagetitle, 8, "Page %d", page+1);
 
 	if(isnull(nbk_Data[playerid][page]))
-		ShowPlayerDialog(playerid, d_NotebookPage, DIALOG_STYLE_MSGBOX, pagetitle, "(This page is empty)", "Close", "Edit");
+		ShowPlayerDialog(playerid, DIALOG_NOTEBOOK_PAGE, DIALOG_STYLE_MSGBOX, pagetitle, "(This page is empty)", "Close", "Edit");
 
 	else
-		ShowPlayerDialog(playerid, d_NotebookPage, DIALOG_STYLE_MSGBOX, pagetitle, nbk_Data[playerid][page], "Close", "Edit");
+		ShowPlayerDialog(playerid, DIALOG_NOTEBOOK_PAGE, DIALOG_STYLE_MSGBOX, pagetitle, nbk_Data[playerid][page], "Close", "Edit");
 
 	TextDrawShowForPlayer(playerid, nbk_PageLeft);
 	TextDrawShowForPlayer(playerid, nbk_PageRight);
@@ -71,10 +74,10 @@ EditNotebookPage(playerid)
 	format(pagetitle, 13, "Edit Page %d", nbk_CurrentPage[playerid]+1);
 
 	if(isnull(nbk_Data[playerid][nbk_CurrentPage[playerid]]))
-		ShowPlayerDialog(playerid, d_NotebookEdit, DIALOG_STYLE_INPUT, pagetitle, "(This page is empty)", "Accept", "Cancel");
+		ShowPlayerDialog(playerid, DIALOG_NOTEBOOK_EDIT, DIALOG_STYLE_INPUT, pagetitle, "(This page is empty)", "Accept", "Cancel");
 
 	else
-		ShowPlayerDialog(playerid, d_NotebookEdit, DIALOG_STYLE_INPUT, pagetitle, nbk_Data[playerid][nbk_CurrentPage[playerid]], "Accept", "Cancel");
+		ShowPlayerDialog(playerid, DIALOG_NOTEBOOK_EDIT, DIALOG_STYLE_INPUT, pagetitle, nbk_Data[playerid][nbk_CurrentPage[playerid]], "Accept", "Cancel");
 
 	TextDrawHideForPlayer(playerid, nbk_PageLeft);
 	TextDrawHideForPlayer(playerid, nbk_PageRight);
@@ -84,7 +87,7 @@ EditNotebookPage(playerid)
 
 hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
-	if(dialogid == d_NotebookPage)
+	if(dialogid == DIALOG_NOTEBOOK_PAGE)
 	{
 		if(response)
 		{
@@ -96,13 +99,13 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			EditNotebookPage(playerid);
 		}
 	}
-	if(dialogid == d_NotebookEdit)
+	if(dialogid == DIALOG_NOTEBOOK_EDIT)
 	{
 		if(response)
 		{
 			if(strlen(inputtext) >= MAX_NOTE_TEXT)
 			{
-				ShowPlayerDialog(playerid, d_NotebookError, DIALOG_STYLE_MSGBOX, "Error", "You exceeded the character limit of "#MAX_NOTE_TEXT" characters.", "Back", "");
+				ShowPlayerDialog(playerid, DIALOG_NOTEBOOK_ERROR, DIALOG_STYLE_MSGBOX, "Error", "You exceeded the character limit of "#MAX_NOTE_TEXT" characters.", "Back", "");
 				return 1;
 			}
 
@@ -115,7 +118,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			ShowPlayerNotebook(playerid, nbk_CurrentPage[playerid]);
 		}
 	}
-	if(dialogid == d_NotebookError)
+	if(dialogid == DIALOG_NOTEBOOK_ERROR)
 	{
 		EditNotebookPage(playerid);
 	}
