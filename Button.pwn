@@ -47,6 +47,21 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Slice							- Multidimensional Array Sorting
 	}
 
+	SIF/Button/Constants
+	{
+		These can be altered by defining their values before the include line.
+
+		BTN_MAX
+			Maximum amount of buttons that can be created.
+
+		BTN_MAX_TEXT
+			Maximum string length for labels and action-text strings.
+
+		BTN_MAX_INRANGE
+			Maximum amount of buttons to load into the list of buttons that the
+			player is in range of when they press the interact key.
+	}
+
 	SIF/Button/Core Functions
 	{
 		The functions that control the core features of this script.
@@ -527,9 +542,18 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#define BTN_MAX			(8192)
-#define BTN_MAX_TEXT	(128)
-#define BTN_MAX_INRANGE	(8)
+#if !defined BTN_MAX
+	#define BTN_MAX			(8192)
+#endif
+
+#if !defined BTN_MAX_TEXT
+	#define BTN_MAX_TEXT	(128)
+#endif
+
+#if !defined BTN_MAX_INRANGE
+	#define BTN_MAX_INRANGE	(8)
+#endif
+
 
 #define INVALID_BUTTON_ID	(-1)
 

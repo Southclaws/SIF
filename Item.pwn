@@ -50,6 +50,27 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Cagatay							- Testing
 	}
 
+	SIF/Item/Constants
+	{
+		These can be altered by defining their values before the include line.
+
+		ITM_MAX
+			Maximum amount of items that can be created.
+
+		ITM_MAX_TYPES
+			Maximum amount of item types that can be defined.
+
+		ITM_MAX_NAME
+			Maximum string length for item type names.
+
+		ITM_MAX_TEXT
+			Maximum string length for item specific extra text.
+
+		ITM_ATTACH_INDEX
+			Item attachment index for SetPlayerAttachedObject native.
+
+	}
+
 	SIF/Item/Core Functions
 	{
 		The functions that control the core features of this script.
@@ -1057,11 +1078,26 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#define ITM_MAX				(10000)
-#define ITM_MAX_TYPES		(ItemType:256)
-#define ITM_MAX_NAME		(32)
-#define ITM_MAX_TEXT		(32)
-#define ITM_ATTACH_INDEX	(0)
+#if !defined ITM_MAX
+	#define ITM_MAX				(10000)
+#endif
+
+#if !defined ITM_MAX_TYPES
+	#define ITM_MAX_TYPES		(ItemType:256)
+#endif
+
+#if !defined ITM_MAX_NAME
+	#define ITM_MAX_NAME		(32)
+#endif
+
+#if !defined ITM_MAX_TEXT
+	#define ITM_MAX_TEXT		(32)
+#endif
+
+#if !defined ITM_ATTACH_INDEX
+	#define ITM_ATTACH_INDEX	(0)
+#endif
+
 
 #define FLOOR_OFFSET		(0.96)
 #define ITEM_BUTTON_OFFSET	(0.7)

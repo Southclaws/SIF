@@ -35,6 +35,21 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Y_Less							- YSI framework
 	}
 
+	SIF/Inventory/Constants
+	{
+		These can be altered by defining their values before the include line.
+
+		INV_MAX_SLOTS
+			Maximum amount of item slots available in a player inventory.
+
+		DIALOG_INVENTORY_LIST
+			Dialog ID for inventory screen.
+
+		DIALOG_INVENTORY_OPTIONS
+			Dialog ID for inventory item options menu.
+
+	}
+
 	SIF/Inventory/Core Functions
 	{
 		The functions that control the core features of this script.
@@ -469,9 +484,18 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#define INV_MAX_SLOTS				(4)
-#define DIALOG_INVENTORY_LIST		(9000)
-#define DIALOG_INVENTORY_OPTIONS	(9001)
+#if !defined INV_MAX_SLOTS
+	#define INV_MAX_SLOTS				(4)
+#endif
+
+#if !defined DIALOG_INVENTORY_LIST
+	#define DIALOG_INVENTORY_LIST		(9000)
+#endif
+
+#if !defined DIALOG_INVENTORY_OPTIONS
+	#define DIALOG_INVENTORY_OPTIONS	(9001)
+#endif
+
 
 
 static

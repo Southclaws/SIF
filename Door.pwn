@@ -37,6 +37,17 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Y_Less							- YSI framework
 	}
 
+	SIF/Door/Constants
+	{
+		These can be altered by defining their values before the include line.
+
+		DR_MAX
+			Maximum amount of doors that can be created.
+
+		DR_MAX_BUTTONS_PER
+			Maximum amount of buttons that can be assigned to a door.
+	}
+
 	SIF/Door/Core Functions
 	{
 		The functions that control the core features of this script.
@@ -505,10 +516,16 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#define DR_MAX					(64)
-#define DR_MAX_BUTTONS_PER		(4)
-#define INVALID_DOOR_ID			(-1)
+#if !defined DR_MAX
+	#define DR_MAX				(64)
+#endif
 
+#if !defined DR_MAX_BUTTONS_PER
+	#define DR_MAX_BUTTONS_PER	(4)
+#endif
+
+
+#define INVALID_DOOR_ID			(-1)
 #define DR_STATE_INVALID		(-1)
 #define DR_STATE_OPEN			(0)
 #define DR_STATE_CLOSED			(1)

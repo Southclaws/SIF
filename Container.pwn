@@ -43,6 +43,27 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Y_Less							- YSI framework
 	}
 
+	SIF/Container/Constants
+	{
+		These can be altered by defining their values before the include line.
+
+		CNT_MAX
+			Maximum amount of containers that can be created.
+
+		CNT_MAX_NAME
+			Maximum string length for container names.
+
+		CNT_MAX_SLOTS
+			Maximum slot size amount for containers.
+
+		DIALOG_CONTAINER_LIST
+			Dialog ID for container inventory list.
+
+		DIALOG_CONTAINER_OPTIONS
+			Dialog ID for container inventory item options menu.
+
+	}
+
 	SIF/Container/Core Functions
 	{
 		The functions that control the core features of this script.
@@ -587,11 +608,27 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#define CNT_MAX						(4096)
-#define CNT_MAX_NAME				(32)
-#define CNT_MAX_SLOTS				(24)
-#define DIALOG_CONTAINER_LIST		(9002)
-#define DIALOG_CONTAINER_OPTIONS	(9003)
+#if !defined CNT_MAX
+	#define CNT_MAX						(4096)
+#endif
+
+#if !defined CNT_MAX_NAME
+	#define CNT_MAX_NAME				(32)
+#endif
+
+#if !defined CNT_MAX_SLOTS
+	#define CNT_MAX_SLOTS				(24)
+#endif
+
+#if !defined DIALOG_CONTAINER_LIST
+	#define DIALOG_CONTAINER_LIST		(9002)
+#endif
+
+#if !defined DIALOG_CONTAINER_OPTIONS
+	#define DIALOG_CONTAINER_OPTIONS	(9003)
+#endif
+
+
 #define INVALID_CONTAINER_ID		(-1)
 
 
