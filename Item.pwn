@@ -2142,7 +2142,7 @@ stock GetItemNameExtra(itemid, string[])
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
-	string = EOS;
+	string[0] = EOS;
 	strcat(string, itm_Data[itemid][itm_nameEx], ITM_MAX_TEXT);
 
 	return 1;
