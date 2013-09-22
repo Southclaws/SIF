@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.1
+	Version: 1.2.1
 
 
 	SIF/Overview
@@ -782,7 +782,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
-		native SetItemExtraText(itemid, string[])
+		native SetItemNameExtra(itemid, string[])
 		{
 			Description:
 				Gives the item a unique string of text.
@@ -798,7 +798,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
-		native GetItemExtraText(itemid, string[])
+		native GetItemNameExtra(itemid, string[])
 		{
 			Description:
 				Retrieves the unique string of text assigned to an item.
@@ -2125,6 +2125,29 @@ stock GetItemExtraData(itemid)
 	return itm_Data[itemid][itm_exData];
 }
 
+// itm_nameEx
+stock SetItemNameExtra(itemid, string[])
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	itm_Data[itemid][itm_nameEx][0] = EOS;
+	strcat(itm_Data[itemid][itm_nameEx], string, ITM_MAX_TEXT);
+
+	return 1;
+}
+
+stock GetItemNameExtra(itemid, string[])
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	string = EOS;
+	strcat(string, itm_Data[itemid][itm_nameEx], ITM_MAX_TEXT);
+
+	return 1;
+}
+
 // itm_used
 stock IsValidItemType(ItemType:itemtype)
 {
@@ -2210,17 +2233,6 @@ stock IsItemInWorld(itemid)
 
 	if(!Iter_Contains(itm_WorldIndex, itemid))
 		return 0;
-
-	return 1;
-}
-
-stock SetItemNameExtra(itemid, string[])
-{
-	if(!Iter_Contains(itm_Index, itemid))
-		return 0;
-
-	itm_Data[itemid][itm_nameEx][0] = EOS;
-	strcat(itm_Data[itemid][itm_nameEx], string, ITM_MAX_TEXT);
 
 	return 1;
 }

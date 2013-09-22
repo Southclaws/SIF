@@ -105,7 +105,7 @@ public OnButtonPress(playerid, buttonid)
 		{
 			if(GetPlayerMoney(playerid) < dsp_TypeData[ dsp_Data[i][dsp_type] ][dsp_price])
 			{
-				MsgF(playerid, ORANGE,
+				MsgF(playerid, 0xFFFF00FF,
 					" >  You need another "#C_RED"$%d "#C_ORANGE"to buy that.",
 					dsp_TypeData[ dsp_Data[i][dsp_type] ][dsp_price] - GetPlayerMoney(playerid));
 

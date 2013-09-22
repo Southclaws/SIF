@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.1
+	Version: 1.0.2
 
 
 	SIF/Overview
@@ -786,13 +786,13 @@ Internal_OnButtonPress(playerid, buttonid)
 		TogglePlayerControllable(playerid, false);
 		defer btn_Unfreeze(playerid);
 
-		SetPlayerVirtualWorld(playerid, btn_Data[id][btn_world]);
-		SetPlayerInterior(playerid, btn_Data[id][btn_interior]);
-		SetPlayerPos(playerid, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
-
 		Streamer_UpdateEx(playerid,
 			btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ],
 			btn_Data[id][btn_world], btn_Data[id][btn_interior]);
+
+		SetPlayerVirtualWorld(playerid, btn_Data[id][btn_world]);
+		SetPlayerInterior(playerid, btn_Data[id][btn_interior]);
+		SetPlayerPos(playerid, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
 	}
 	else
 	{
