@@ -653,7 +653,7 @@ stock DisplayPlayerInventory(playerid)
 
 	if(CallLocalFunction("OnPlayerOpenInventory", "d", playerid))
 		return 0;
-	
+
 	if(!isnull(inv_ExtraItemList[playerid]))
 		strcat(list, inv_ExtraItemList[playerid]);
 

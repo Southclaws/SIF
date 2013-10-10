@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.2.1
+	Version: 1.2.2
 
 
 	SIF/Overview
@@ -1761,7 +1761,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				if(IsPlayerInAnyVehicle(i))
 					continue;
 
-				if(GetPlayerWeapon(i) == 0)
+				if(GetPlayerWeapon(i) != 0)
 					continue;
 
 				if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]))

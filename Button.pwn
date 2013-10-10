@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.2
+	Version: 1.0.3
 
 
 	SIF/Overview
@@ -728,7 +728,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				Float:distance,
 				list[BTN_MAX_INRANGE][e_button_range_data],
 				index;
-			
+
 			GetPlayerPos(playerid, x, y, z);
 
 			foreach(new i : btn_Index)
@@ -796,18 +796,6 @@ Internal_OnButtonPress(playerid, buttonid)
 	}
 	else
 	{
-		new
-			Float:x,
-			Float:y,
-			Float:z,
-			Float:a;
-
-		GetPlayerPos(playerid, x, y, z);
-		GetPlayerFacingAngle(playerid, a);
-
-		SetPlayerPos(playerid, x, y, z);
-		SetPlayerFacingAngle(playerid, a);
-
 		btn_CurrentlyPressing[playerid] = buttonid;
 
 		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
