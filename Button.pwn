@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.3
+	Version: 1.1.3
 
 
 	SIF/Overview
@@ -60,6 +60,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		BTN_MAX_INRANGE
 			Maximum amount of buttons to load into the list of buttons that the
 			player is in range of when they press the interact key.
+
+		BTN_STREAMER_AREA_IDENTIFIER
+			A value to identify streamer object EXTRA_ID data array type.
 	}
 
 	SIF/Button/Core Functions
@@ -554,6 +557,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#define BTN_MAX_INRANGE	(8)
 #endif
 
+#if !defined BTN_STREAMER_AREA_IDENTIFIER
+	#define BTN_STREAMER_AREA_IDENTIFIER (100)
+#endif
+
 
 #define INVALID_BUTTON_ID	(-1)
 
@@ -584,6 +591,8 @@ new
 Iterator:	btn_Index<BTN_MAX>;
 
 static
+			btn_CurrentlyNear[MAX_PLAYERS][BTN_MAX_INRANGE],
+Iterator:	btn_CurrentlyNearIndex[MAX_PLAYERS]<BTN_MAX_INRANGE>,
 			btn_CurrentlyPressing[MAX_PLAYERS];
 
 
@@ -606,6 +615,8 @@ hook OnFilterScriptInit()
 hook OnGameModeInit()
 #endif
 {
+	Iter_Init(btn_CurrentlyNearIndex);
+
 	for(new i; i < MAX_PLAYERS; i++)
 	{
 		btn_CurrentlyPressing[i] = INVALID_BUTTON_ID;
@@ -649,13 +660,27 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 	else
 		btn_Data[id][btn_label] = Text3D:INVALID_3DTEXT_ID;
 
+	new data[2];
+
+	data[0] = BTN_STREAMER_AREA_IDENTIFIER;
+	data[1] = id;
+
+	Streamer_SetArrayData(STREAMER_TYPE_AREA, btn_Data[id][btn_area], E_STREAMER_EXTRA_ID, data, 2);
+
 	Iter_Add(btn_Index, id);
 
 	return id;
 }
 stock DestroyButton(buttonid)
 {
-	if(!Iter_Contains(btn_Index, buttonid))return 0;
+	if(!Iter_Contains(btn_Index, buttonid))
+		return 0;
+
+	foreach(new i : Player)
+	{
+		if(IsPlayerInDynamicArea(i, btn_Data[buttonid][btn_area]))
+			process_LeaveDynamicArea(i, btn_Data[buttonid][btn_area]);
+	}
 
 	DestroyDynamicArea(btn_Data[buttonid][btn_area]);
 
@@ -717,11 +742,12 @@ stock UnLinkTP(buttonid1, buttonid2)
 
 hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
-	if(!IsPlayerInAnyVehicle(playerid) && IsPlayerInAnyDynamicArea(playerid))
+	if(newkeys & 16)
 	{
-		if(newkeys & 16)
+		if(!IsPlayerInAnyVehicle(playerid) && IsPlayerInAnyDynamicArea(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
 		{
 			new
+				id,
 				Float:x,
 				Float:y,
 				Float:z,
@@ -731,16 +757,18 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 			GetPlayerPos(playerid, x, y, z);
 
-			foreach(new i : btn_Index)
+			foreach(new i : btn_CurrentlyNearIndex[playerid])
 			{
 				if(index >= BTN_MAX_INRANGE)
 					break;
 
-				distance = sif_Distance(x, y, z, btn_Data[i][btn_posX], btn_Data[i][btn_posY], btn_Data[i][btn_posZ]);
+				id = btn_CurrentlyNear[playerid][i];
 
-				if(distance < btn_Data[i][btn_size])
+				distance = sif_Distance(x, y, z, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
+
+				if(distance < btn_Data[id][btn_size])
 				{
-					list[index][btn_buttonId] = i;
+					list[index][btn_buttonId] = id;
 					list[index][btn_distance] = distance;
 
 					index++;
@@ -812,16 +840,31 @@ timer btn_Unfreeze[1000](playerid)
 
 public OnPlayerEnterDynamicArea(playerid, areaid)
 {
-	if(!IsPlayerInAnyVehicle(playerid))
+	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) < BTN_MAX_INRANGE)
 	{
-		foreach(new i : btn_Index)
-		{
-			if(areaid == btn_Data[i][btn_area])
-			{
-				ShowActionText(playerid, btn_Data[i][btn_text]);
-				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, i);
+		new data[2];
 
-				break;
+		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
+
+		// Due to odd streamer behavior reversing data arrays:
+		new tmp = data[0];
+		data[0] = data[1];
+		data[1] = tmp;
+		// end
+
+		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
+		{
+			if(Iter_Contains(btn_Index, data[1]))
+			{
+
+				new cell = Iter_Free(btn_CurrentlyNearIndex[playerid]);
+
+
+				btn_CurrentlyNear[playerid][cell] = data[1];
+				Iter_Add(btn_CurrentlyNearIndex[playerid], cell);
+
+				ShowActionText(playerid, btn_Data[data[1]][btn_text]);
+				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, data[1]);
 			}
 		}
 	}
@@ -839,16 +882,38 @@ forward btn_OnPlayerEnterDynamicArea(playerid, areaid);
 
 public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
+	process_LeaveDynamicArea(playerid, areaid);
+}
+
+process_LeaveDynamicArea(playerid, areaid)
+{
 	if(!IsPlayerInAnyVehicle(playerid))
 	{
-		foreach(new i : btn_Index)
+		new data[2];
+
+		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
+
+		// Due to odd streamer behavior reversing data arrays:
+		new tmp = data[0];
+		data[0] = data[1];
+		data[1] = tmp;
+		// end
+
+		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
 		{
-			if(areaid == btn_Data[i][btn_area])
+			if(Iter_Contains(btn_Index, data[1]))
 			{
 				HideActionText(playerid);
-				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, i);
+				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
 
-				break;
+				foreach(new i : btn_CurrentlyNearIndex[playerid])
+				{
+					if(btn_CurrentlyNear[playerid][i] == data[1])
+					{
+						Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
+						break;
+					}
+				}
 			}
 		}
 	}
