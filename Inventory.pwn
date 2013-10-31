@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.1
+	Version: 1.2.1
 
 
 	SIF/Overview
@@ -392,6 +392,67 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				0
 					If the options string can't fit the specified option.
+		}
+
+		native GetInventoryListItems(playerid)
+		{
+			Description:
+				Returns the extra inventory list items as a string.
+
+			Parameters:
+				-
+
+			Returns:
+				A string containing the list items separated by '\n'
+		}
+
+		native GetInventoryOptions(playerid)
+		{
+			Description:
+				Returns the extra inventory options as a string.
+
+			Parameters:
+				-
+
+			Returns:
+				A string containing the inventory options separated by '\n'
+		}
+
+		native GetInventoryListItemCount(playerid)
+		{
+			Description:
+				Returns the number of extrainventory list items.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetInventoryOptionCount(playerid)
+		{
+			Description:
+				Returns the number of extra inventory options.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+
+		native IsPlayerViewingInventory(playerid)
+		{
+			Description:
+				Checks if a player is viewing his inventory menu.
+
+			Parameters:
+				-
+
+			Returns:
+				-
 		}
 
 		native GetInventoryFreeSlots(playerid)
@@ -930,7 +991,7 @@ stock IsInventorySlotUsed(playerid, slotid)
 
 stock GetPlayerSelectedInventorySlot(playerid)
 {
-	if(!(0 <= playerid < MAX_PLAYERS))
+	if(!IsPlayerConnected(playerid))
 		return -1;
 
 	return inv_SelectedSlot[playerid];
@@ -938,7 +999,7 @@ stock GetPlayerSelectedInventorySlot(playerid)
 
 stock IsPlayerInventoryFull(playerid)
 {
-	if(!(0 <= playerid < MAX_PLAYERS))
+	if(!IsPlayerConnected(playerid))
 		return 0;
 
 	return IsValidItem(inv_Data[playerid][INV_MAX_SLOTS-1]);
@@ -966,9 +1027,41 @@ stock AddInventoryOption(playerid, option[])
 	return inv_OptionsCount[playerid]++;
 }
 
+stock GetInventoryListItems(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_ExtraItemList[playerid];
+}
+
+stock GetInventoryOptions(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_OptionsList[playerid];
+}
+
+stock GetInventoryListItemCount(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_ExtraItemCount[playerid];
+}
+
+stock GetInventoryOptionCount(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_OptionsCount[playerid];
+}
+
 stock IsPlayerViewingInventory(playerid)
 {
-	if(!(0 <= playerid < MAX_PLAYERS))
+	if(!IsPlayerConnected(playerid))
 		return 0;
 
 	return inv_ViewingInventory[playerid];

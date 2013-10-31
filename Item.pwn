@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.2.2
+	Version: 1.2.3
 
 
 	SIF/Overview
@@ -1512,10 +1512,6 @@ stock PlayerGiveItem(playerid, targetid, call = true)
 
 	angle = sif_GetAngleToPoint(x2, y2, x1, y1);
 
-	SetPlayerPos(targetid,
-		x2 + (0.5 * floatsin(-angle, degrees)),
-		y2 + (0.5 * floatcos(-angle, degrees)), z2);
-
 	SetPlayerFacingAngle(playerid, angle);
 	SetPlayerFacingAngle(targetid, angle+180.0);
 
@@ -1933,6 +1929,10 @@ timer GiveItemDelay[500](playerid, targetid)
 		ItemType:type;
 
 	id = itm_Holding[playerid];
+
+	if(id == -1)
+		return;
+
 	type = itm_Data[id][itm_type];
 
 	itm_Holding[playerid] = INVALID_ITEM_ID;
@@ -1952,6 +1952,8 @@ timer GiveItemDelay[500](playerid, targetid)
 	itm_Holder[id] = targetid;
 
 	CallLocalFunction("OnPlayerGivenItem", "ddd", playerid, targetid, id);
+
+	return;
 }
 
 public OnPlayerDeath(playerid, killerid, reason)
