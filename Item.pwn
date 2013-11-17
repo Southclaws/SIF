@@ -1428,6 +1428,9 @@ stock PlayerPickUpItem(playerid, itemid)
 		Float:z;
 
 	GetPlayerPos(playerid, x, y, z);
+
+	ClearAnimations(playerid);
+	SetPlayerPos(playerid, x, y, z);
 	SetPlayerFacingAngle(playerid, sif_GetAngleToPoint(x, y, itm_Data[itemid][itm_posX], itm_Data[itemid][itm_posY]));
 
 	if((z - itm_Data[itemid][itm_posZ]) < 0.3) // If the height between the player and the item is below 0.5 units

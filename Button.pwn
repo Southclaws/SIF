@@ -57,6 +57,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		BTN_MAX_TEXT
 			Maximum string length for labels and action-text strings.
 
+		BTN_DEFAULT_STREAMDIST
+			Default maximum stream range for button label text.
+
 		BTN_MAX_INRANGE
 			Maximum amount of buttons to load into the list of buttons that the
 			player is in range of when they press the interact key.
@@ -73,7 +76,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Button/Core
 		native -
 
-		native CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = 10.0)
+		native CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST)
 		{
 			Description:
 				Creates an interactive button players can activate by pressing F.
@@ -408,7 +411,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If <buttonid> is an invalid button ID handle.
 		}
 
-		native SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = 10.0)
+		native SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
 		{
 			Description:
 				Creates a 3D Text Label at the specified button ID handle, if
@@ -553,6 +556,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#define BTN_MAX_TEXT	(128)
 #endif
 
+#if !defined BTN_DEFAULT_STREAMDIST
+	#define BTN_DEFAULT_STREAMDIST	(4.0)
+#endif
+
 #if !defined BTN_MAX_INRANGE
 	#define BTN_MAX_INRANGE	(8)
 #endif
@@ -636,7 +643,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = 4.0)
+stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST)
 {
 	new id = Iter_Free(btn_Index);
 
@@ -1119,7 +1126,7 @@ stock SetButtonMessage(buttonid, msg[])
 	return 1;
 }
 
-stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = 10.0)
+stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
 {
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
