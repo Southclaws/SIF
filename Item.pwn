@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.2.3
+	Version: 1.3.3
 
 
 	SIF/Overview
@@ -79,7 +79,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native SIF/Item/Core
 		native -
 
-		native CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
+		native CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
 		{
 			Description:
 				Creates an item in the game world at the specified coordinates
@@ -112,6 +112,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 				<label> (boolean)
 					True to show a label with the item name at the item.
+
+				<applyrotoffsets> (boolean)
+					False to make <rx>, <ry>, <rz> rotation values absolute.
 
 			Returns:
 				(int, itemid)
@@ -1235,7 +1238,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
+stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
 {
 	new id = Iter_Free(itm_Index);
 
@@ -1260,10 +1263,7 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	if(!Iter_Contains(itm_Index, id))
 		return INVALID_ITEM_ID;
 
-	CreateItemInWorld(id,
-		Float:x, Float:y, Float:z,
-		Float:rx, Float:ry, Float:rz,
-		Float:zoffset, world, interior, label);
+	CreateItemInWorld(id, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
 
 	CallLocalFunction("OnItemCreated", "d", id);
 
@@ -1624,14 +1624,11 @@ stock RemoveCurrentItem(playerid)
 	GetPlayerPos(playerid, x, y, z);
 	GetPlayerFacingAngle(playerid, r);
 
-
 	CreateItemInWorld(itemid,
 		x + (0.5 * floatsin(-r, degrees)),
 		y + (0.5 * floatcos(-r, degrees)),
 		z - FLOOR_OFFSET,
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
+		0.0, 0.0, r,
 		FLOOR_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 	return itemid;
@@ -1649,7 +1646,7 @@ stock RemoveCurrentItem(playerid)
 CreateItemInWorld(itemid,
 	Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0,
-	Float:zoffset = 0.0, world = 0, interior = 0, label = 1)
+	Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
 {
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -1658,15 +1655,6 @@ CreateItemInWorld(itemid,
 
 	if(!IsValidItemType(itemtype))
 		return 0;
-
-	if(rx == 1000.0)
-		rx = itm_TypeData[itemtype][itm_defaultRotX];
-
-	if(ry == 1000.0)
-		ry = itm_TypeData[itemtype][itm_defaultRotY];
-
-	if(rz == 1000.0)
-		rz = itm_TypeData[itemtype][itm_defaultRotZ];
 
 	itm_Data[itemid][itm_posX]					= x;
 	itm_Data[itemid][itm_posY]					= y;
@@ -1687,7 +1675,26 @@ CreateItemInWorld(itemid,
 	itm_Interactor[itemid]						= INVALID_PLAYER_ID;
 	itm_Holder[itemid]							= INVALID_PLAYER_ID;
 
-	itm_Data[itemid][itm_objId]					= CreateDynamicObject(itm_TypeData[itemtype][itm_model], x, y, z + itm_TypeData[itemtype][itm_offsetZ], rx, ry, rz, world, interior);
+	if(applyrotoffsets)
+	{
+		itm_Data[itemid][itm_objId]				= CreateDynamicObject(itm_TypeData[itemtype][itm_model],
+			x, y, z + itm_TypeData[itemtype][itm_offsetZ],
+			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx + itm_TypeData[itemtype][itm_defaultRotX]),
+			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry + itm_TypeData[itemtype][itm_defaultRotY]),
+			(rz == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotZ]) : (rz + itm_TypeData[itemtype][itm_defaultRotZ]),
+			world, interior);
+	}
+	else
+	{
+		itm_Data[itemid][itm_objId]				= CreateDynamicObject(itm_TypeData[itemtype][itm_model],
+			x, y, z + itm_TypeData[itemtype][itm_offsetZ],
+			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx),
+			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry),
+			(rz == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotZ]) : (rz),
+			world, interior);
+	}
+
+
 	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + zoffset, "Press F to pick up", world, interior, 1.0);
 
 	itm_ButtonIndex[itm_Data[itemid][itm_button]] = itemid;
@@ -1913,9 +1920,7 @@ timer DropItemDelay[400](playerid)
 		x + (0.5 * floatsin(-r, degrees)),
 		y + (0.5 * floatcos(-r, degrees)),
 		z - FLOOR_OFFSET,
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
-		itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
+		0.0, 0.0, r,
 		ITEM_BUTTON_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 	ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
@@ -1978,9 +1983,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 			x + (0.5 * floatsin(-r, degrees)),
 			y + (0.5 * floatcos(-r, degrees)),
 			z - FLOOR_OFFSET,
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX],
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY],
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + r,
+			0.0, 0.0, r,
 			FLOOR_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
