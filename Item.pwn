@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.3.3
+	Version: 1.3.4
 
 
 	SIF/Overview
@@ -1932,6 +1932,9 @@ timer DropItemDelay[400](playerid)
 
 timer GiveItemDelay[500](playerid, targetid)
 {
+	if(!Iter_Contains(itm_Index, itm_Holding[targetid]))
+		return;
+
 	new
 		id,
 		ItemType:type;
