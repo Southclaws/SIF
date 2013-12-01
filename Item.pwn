@@ -1932,7 +1932,7 @@ timer DropItemDelay[400](playerid)
 
 timer GiveItemDelay[500](playerid, targetid)
 {
-	if(!Iter_Contains(itm_Index, itm_Holding[targetid]))
+	if(Iter_Contains(itm_Index, itm_Holding[targetid]))
 		return;
 
 	if(!IsPlayerConnected(targetid)) // In case the 'receiver' quits within the 500ms time window.
