@@ -1,0 +1,87 @@
+# SIF - Southclaw's Interaction Framework
+SIF is a collection of high-level include scripts to make the development of
+interactive features easy for the developer while maintaining quality front-end
+gameplay for players.
+
+# The Libraries
+
+SIF Comes with 5 main libraries (and one core library utilised by the other 5),
+each of which can be individually included and their dependencies will be
+managed automatically.
+
+
+## Button
+A simple framework using streamer areas and key checks to give the in-game
+effect of physical buttons that players must press instead of using a command.
+It was created as an alternative to the default GTA:SA spinning pickups for a
+few reasons:
+
+1. A player might want to stand where a pickup is but not use it
+(if the	pickup is a building entrance or interior warp, he might
+want to stand in the doorway without being teleported.)
+
+2. Making hidden doors or secrets that can only be found by walking
+near the button area and seeing the textdraw. (or spamming F!)
+
+3. Spinning objects don't really add immersion to a role-play
+environment!
+
+
+## Door
+A simple object movement manager that supports buttons as the default method of
+interacting. Doors support multiple buttons, so a button on the inside and
+outside of a door is possible. Doors can be opened and closed manually by
+calling OpenDoor or CloseDoor. The door state change callbacks can be used to
+restrict the use of doors by returning 1.
+
+
+## Item
+A complex and flexible script to replace the use of pickups as a means of
+displaying objects that the player can pick up and use. Item offers picking up,
+dropping and even giving items to other players. Items in the game world consist
+of static objects combined with buttons from SIF/Button to provide a means of
+interacting.
+
+Item aims to be an extremely flexible script offering a callback for almost
+every action the player can do with an item. The script also allows the ability
+to add the standard GTA:SA weapons as items that can be dropped, given and
+anything else you script items to do.
+
+When picked up, items will appear on the character model bone specified in the
+item definition. This combines the visible aspect of weapons and items that are
+already in the game with the scriptable versatility of server created and
+scriptable entities.
+
+
+## Inventory
+Offers extended item functionality using the virtual item feature in SIF/Item.
+This enables multiple items to be stored by players and retrieved when needed.
+It contains functions and callbacks for complete control from external scripts
+over inventory actions by players.
+
+
+## Container
+A complex script that allows 'virtual inventories' to be created in order to
+store items in. Containers can be interacted with just like anything else with a
+button or a virtual container can be created without a way of interacting in the
+game world so the contents of if can be shown from a script function instead.
+
+This script hooks a lot of Inventory functions and uses the interface functions
+to allow players to switch between a container item list and their own inventory
+to make swapping items or looting quick and easy.
+
+
+## Core
+A fundamental library with features used by multiple SIF scripts.
+
+
+# Installation
+Simply create a folder titled 'SIF' inside 'Pawno/includes/'
+Then dump all the files from the repository into that folder.
+Use this line in scripts to start using SIF:
+	#include <SIF/SIF>
+
+
+You are welcome to fork, submit issues and improve the code any way you like!
+
+Contact: SouthclawJK@gmail.com
