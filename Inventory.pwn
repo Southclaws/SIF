@@ -938,7 +938,9 @@ public OnItemDestroy(itemid)
 {
 	inv_ItemPlayer[itemid] = INVALID_PLAYER_ID;
 
-	return CallLocalFunction("inv_OnItemDestroy", "dd", itemid);
+	#if defined inv_OnItemDestroy
+		return inv_OnItemDestroy(itemid);
+	#endif
 }
 #if defined _ALS_OnItemDestroy
 	#undef OnItemDestroy
@@ -946,7 +948,9 @@ public OnItemDestroy(itemid)
 	#define _ALS_OnItemDestroy
 #endif
 #define OnItemDestroy inv_OnItemDestroy
-forward OnItemDestroy(itemid);
+#if defined inv_OnItemDestroy
+	forward inv_OnItemDestroy(itemid);
+#endif
 
 hook OnPlayerDisconnect(playerid)
 {

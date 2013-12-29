@@ -1800,7 +1800,9 @@ public OnPlayerEnterPlayerArea(playerid, targetid)
 		ShowActionText(playerid, "Press N to give item");
 	}
 
-	return CallLocalFunction("itm_OnPlayerEnterPlayerArea", "dd", playerid, targetid);
+	#if defined itm_OnPlayerEnterPlayerArea
+		return itm_OnPlayerEnterPlayerArea(playerid, targetid);
+	#endif
 }
 #if defined _ALS_OnPlayerEnterPlayerArea
 	#undef OnPlayerEnterPlayerArea
@@ -1808,7 +1810,9 @@ public OnPlayerEnterPlayerArea(playerid, targetid)
 	#define _ALS_OnPlayerEnterPlayerArea
 #endif
 #define OnPlayerEnterPlayerArea itm_OnPlayerEnterPlayerArea
-forward itm_OnPlayerEnterPlayerArea(playerid, targetid);
+#if defined itm_OnPlayerEnterPlayerArea
+	forward itm_OnPlayerEnterPlayerArea(playerid, targetid);
+#endif
 
 public OnPlayerLeavePlayerArea(playerid, targetid)
 {
@@ -1817,7 +1821,9 @@ public OnPlayerLeavePlayerArea(playerid, targetid)
 		HideActionText(playerid);
 	}
 
-	return CallLocalFunction("itm_OnPlayerLeavePlayerArea", "dd", playerid, targetid);
+	#if defined itm_OnPlayerLeavePlayerArea
+		return itm_OnPlayerLeavePlayerArea(playerid, targetid);
+	#endif
 }
 #if defined _ALS_OnPlayerLeavePlayerArea
 	#undef OnPlayerLeavePlayerArea
@@ -1825,7 +1831,9 @@ public OnPlayerLeavePlayerArea(playerid, targetid)
 	#define _ALS_OnPlayerLeavePlayerArea
 #endif
 #define OnPlayerLeavePlayerArea itm_OnPlayerLeavePlayerArea
-forward itm_OnPlayerLeavePlayerArea(playerid, targetid);
+#if defined itm_OnPlayerLeavePlayerArea
+	forward itm_OnPlayerLeavePlayerArea(playerid, targetid);
+#endif
 
 internal_OnPlayerUseItem(playerid, itemid)
 {
@@ -1834,7 +1842,9 @@ internal_OnPlayerUseItem(playerid, itemid)
 	if(buttonid != -1)
 		return CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, buttonid, itm_Holding[playerid]);
 
-	return CallLocalFunction("OnPlayerUseItem", "dd", playerid, itemid);
+	#if defined OnPlayerUseItem
+		return OnPlayerUseItem(playerid, itemid);
+	#endif
 }
 
 
@@ -1863,7 +1873,9 @@ public OnButtonPress(playerid, buttonid)
 			}
 		}
 	}
-	return CallLocalFunction("itm_OnButtonPress", "dd", playerid, buttonid);
+	#if defined itm_OnButtonPress
+		return itm_OnButtonPress(playerid, buttonid);
+	#endif
 }
 #if defined _ALS_OnButtonPress
 	#undef OnButtonPress
@@ -1871,7 +1883,9 @@ public OnButtonPress(playerid, buttonid)
 	#define _ALS_OnButtonPress
 #endif
 #define OnButtonPress itm_OnButtonPress
-forward itm_OnButtonPress(playerid, buttonid);
+#if defined itm_OnButtonPress
+	forward itm_OnButtonPress(playerid, buttonid);
+#endif
 
 timer PickUpItemDelay[400](playerid, id, animtype)
 {
@@ -1994,7 +2008,9 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
 	}
-	return CallLocalFunction("itm_OnPlayerDeath", "ddd", playerid, killerid, reason);
+	#if defined itm_OnPlayerDeath
+		return itm_OnPlayerDeath(playerid, killerid, reason);
+	#endif
 }
 #if defined _ALS_OnPlayerDeath
 	#undef OnPlayerDeath
@@ -2002,7 +2018,9 @@ public OnPlayerDeath(playerid, killerid, reason)
 	#define _ALS_OnPlayerDeath
 #endif
 #define OnPlayerDeath itm_OnPlayerDeath
-forward itm_OnPlayerDeath(playerid, killerid, reason);
+#if defined itm_OnPlayerDeath
+	forward itm_OnPlayerDeath(playerid, killerid, reason);
+#endif
 
 
 /*==============================================================================

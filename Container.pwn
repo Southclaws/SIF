@@ -941,7 +941,9 @@ public OnButtonPress(playerid, buttonid)
 		}
 	}
 
-	return CallLocalFunction("cnt_OnButtonPress", "dd", playerid, buttonid);
+	#if defined cnt_OnButtonPress
+		return cnt_OnButtonPress(playerid, buttonid);
+	#endif
 }
 #if defined _ALS_OnButtonPress
 	#undef OnButtonPress
@@ -949,7 +951,9 @@ public OnButtonPress(playerid, buttonid)
 	#define _ALS_OnButtonPress
 #endif
 #define OnButtonPress cnt_OnButtonPress
-forward OnButtonPress(playerid, buttonid);
+#if defined cnt_OnButtonPress
+	forward cnt_OnButtonPress(playerid, buttonid);
+#endif
 
 hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
@@ -1074,7 +1078,9 @@ public OnPlayerViewInventoryOpt(playerid)
 		cnt_InventoryOptionID[playerid] = AddInventoryOption(playerid, str);
 	}
 
-	return CallLocalFunction("cnt_OnPlayerViewInventoryOpt", "d", playerid);
+	#if defined cnt_OnPlayerViewInventoryOpt
+		return cnt_OnPlayerViewInventoryOpt(playerid);
+	#endif
 }
 #if defined _ALS_OnPlayerViewInventoryOpt
 	#undef OnPlayerViewInventoryOpt
@@ -1082,7 +1088,9 @@ public OnPlayerViewInventoryOpt(playerid)
 	#define _ALS_OnPlayerViewInventoryOpt
 #endif
 #define OnPlayerViewInventoryOpt cnt_OnPlayerViewInventoryOpt
-forward OnPlayerViewInventoryOpt(playerid);
+#if defined cnt_OnPlayerViewInventoryOpt
+	forward cnt_OnPlayerViewInventoryOpt(playerid);
+#endif
 
 public OnPlayerSelectInventoryOpt(playerid, option)
 {
@@ -1114,7 +1122,9 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 		}
 	}
 
-	return CallLocalFunction("cnt_OnPlayerSelectInventoryOpt", "dd", playerid, option);
+	#if defined cnt_OnPlayerSelectInventoryOpt
+		return cnt_OnPlayerSelectInventoryOpt(playerid, option);
+	#endif
 }
 #if defined _ALS_OnPlayerSelectInventoryOpt
 	#undef OnPlayerSelectInventoryOpt
@@ -1122,7 +1132,9 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 	#define _ALS_OnPlayerSelectInventoryOpt
 #endif
 #define OnPlayerSelectInventoryOpt cnt_OnPlayerSelectInventoryOpt
-forward OnPlayerSelectInventoryOpt(playerid, option);
+#if defined cnt_OnPlayerSelectInventoryOpt
+	forward cnt_OnPlayerSelectInventoryOpt(playerid, option);
+#endif
 
 public OnPlayerOpenInventory(playerid)
 {
@@ -1134,7 +1146,9 @@ public OnPlayerOpenInventory(playerid)
 		cnt_InventoryContainerItem[playerid] = AddInventoryListItem(playerid, str);
 	}
 
-	return CallLocalFunction("cnt_OnPlayerOpenInventory", "d", playerid);
+	#if defined cnt_OnPlayerOpenInventory
+		return cnt_OnPlayerOpenInventory(playerid);
+	#endif
 }
 #if defined _ALS_OnPlayerOpenInventory
 	#undef OnPlayerOpenInventory
@@ -1142,7 +1156,9 @@ public OnPlayerOpenInventory(playerid)
 	#define _ALS_OnPlayerOpenInventory
 #endif
 #define OnPlayerOpenInventory cnt_OnPlayerOpenInventory
-forward OnPlayerOpenInventory(playerid);
+#if defined cnt_OnPlayerOpenInventory
+	forward cnt_OnPlayerOpenInventory(playerid);
+#endif
 
 public OnPlayerSelectExtraItem(playerid, item)
 {
@@ -1154,7 +1170,9 @@ public OnPlayerSelectExtraItem(playerid, item)
 		}
 	}
 
-	return CallLocalFunction("cnt_OnPlayerSelectExtraItem", "dd", playerid, item);
+	#if defined cnt_OnPlayerSelectExtraItem
+		return cnt_OnPlayerSelectExtraItem(playerid, item);
+	#endif
 }
 #if defined _ALS_OnPlayerSelectExtraItem
 	#undef OnPlayerSelectExtraItem
@@ -1162,13 +1180,17 @@ public OnPlayerSelectExtraItem(playerid, item)
 	#define _ALS_OnPlayerSelectExtraItem
 #endif
 #define OnPlayerSelectExtraItem cnt_OnPlayerSelectExtraItem
-forward OnPlayerSelectExtraItem(playerid, item);
+#if defined cnt_OnPlayerSelectExtraItem
+	forward cnt_OnPlayerSelectExtraItem(playerid, item);
+#endif
 
 public OnItemDestroy(itemid)
 {
 	cnt_ItemContainer[itemid] = INVALID_CONTAINER_ID;
 
-	return CallLocalFunction("cnt_OnItemDestroy", "dd", itemid);
+	#if defined cnt_OnItemDestroy
+		return cnt_OnItemDestroy(itemid);
+	#endif
 }
 #if defined _ALS_OnItemDestroy
 	#undef OnItemDestroy
@@ -1176,7 +1198,9 @@ public OnItemDestroy(itemid)
 	#define _ALS_OnItemDestroy
 #endif
 #define OnItemDestroy cnt_OnItemDestroy
-forward OnItemDestroy(itemid);
+#if defined cnt_OnItemDestroy
+	forward cnt_OnItemDestroy(itemid);
+#endif
 
 
 /*==============================================================================

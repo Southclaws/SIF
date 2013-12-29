@@ -694,7 +694,9 @@ public OnButtonPress(playerid, buttonid)
 			}
 		}
 	}
-	return CallLocalFunction("dr_OnButtonPress", "dd", playerid, buttonid);
+	#if defined dr_OnButtonPress
+		return dr_OnButtonPress(playerid, buttonid);
+	#endif
 }
 #if defined _ALS_OnButtonPress
 	#undef OnButtonPress
@@ -702,7 +704,9 @@ public OnButtonPress(playerid, buttonid)
 	#define _ALS_OnButtonPress
 #endif
 #define OnButtonPress dr_OnButtonPress
-forward dr_OnButtonPress(playerid, buttonid);
+#if defined dr_OnButtonPress
+	forward dr_OnButtonPress(playerid, buttonid);
+#endif
 
 
 OpenDoor(doorid)
@@ -775,7 +779,9 @@ public OnDynamicObjectMoved(objectid)
 			CallLocalFunction("OnDoorStateChange", "dd", i, DR_STATE_CLOSED);
 		}
 	}
-	return CallLocalFunction("dr_OnDynamicObjectMoved", "d", objectid);
+	#if defined dr_OnDynamicObjectMoved
+		return dr_OnDynamicObjectMoved(objectid);
+	#endif
 }
 #if defined _ALS_OnDynamicObjectMoved
 	#undef OnDynamicObjectMoved
@@ -783,7 +789,9 @@ public OnDynamicObjectMoved(objectid)
 	#define _ALS_OnDynamicObjectMoved
 #endif
 #define OnDynamicObjectMoved dr_OnDynamicObjectMoved
-forward dr_OnDynamicObjectMoved(objectid);
+#if defined dr_OnDynamicObjectMoved
+	forward dr_OnDynamicObjectMoved(objectid);
+#endif
 
 
 /*==============================================================================
