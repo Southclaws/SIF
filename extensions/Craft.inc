@@ -173,7 +173,11 @@ public OnPlayerViewInventoryOpt(playerid)
 {
 	cft_InventoryOptionID[playerid] = AddInventoryOption(playerid, "Combine");
 
-	return CallLocalFunction("cft_OnPlayerViewInventoryOpt", "d", playerid);
+	#if defined cft_OnPlayerViewInventoryOpt
+		return cft_OnPlayerViewInventoryOpt(playerid);
+	#else
+		return 0;
+	#endif
 }
 #if defined _ALS_OnPlayerViewInventoryOpt
 	#undef OnPlayerViewInventoryOpt
@@ -181,7 +185,9 @@ public OnPlayerViewInventoryOpt(playerid)
 	#define _ALS_OnPlayerViewInventoryOpt
 #endif
 #define OnPlayerViewInventoryOpt cft_OnPlayerViewInventoryOpt
-forward OnPlayerViewInventoryOpt(playerid);
+#if defined cft_OnPlayerViewInventoryOpt
+	forward cft_OnPlayerViewInventoryOpt(playerid);
+#endif
 
 public OnPlayerSelectInventoryOpt(playerid, option)
 {
@@ -192,7 +198,11 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 		DisplayCombineInventory(playerid, 0);
 	}
 
-	return CallLocalFunction("cft_OnPlayerSelectInventoryOpt", "dd", playerid, option);
+	#if defined cft_OnPlayerSelectInventoryOpt
+		return cft_OnPlayerSelectInventoryOpt(playerid, option);
+	#else
+		return 0;
+	#endif
 }
 #if defined _ALS_OnPlayerSelectInventoryOpt
 	#undef OnPlayerSelectInventoryOpt
@@ -200,13 +210,17 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 	#define _ALS_OnPlayerSelectInventoryOpt
 #endif
 #define OnPlayerSelectInventoryOpt cft_OnPlayerSelectInventoryOpt
-forward OnPlayerSelectInventoryOpt(playerid, option);
+#if defined cft_OnPlayerSelectInventoryOpt
+	forward cft_OnPlayerSelectInventoryOpt(playerid, option);
+#endif
 
 public OnPlayerViewContainerOpt(playerid, containerid)
 {
 	cft_InventoryOptionID[playerid] = AddContainerOption(playerid, "Combine");
 
-	return CallLocalFunction("cft_OnPlayerViewContainerOpt", "dd", playerid, containerid);
+	#if defined cft_OnPlayerViewContainerOpt
+		return cft_OnPlayerViewContainerOpt(playerid, containerid);
+	#endif
 }
 #if defined _ALS_OnPlayerViewContainerOpt
 	#undef OnPlayerViewContainerOpt
@@ -214,7 +228,9 @@ public OnPlayerViewContainerOpt(playerid, containerid)
 	#define _ALS_OnPlayerViewContainerOpt
 #endif
 #define OnPlayerViewContainerOpt cft_OnPlayerViewContainerOpt
-forward OnPlayerViewContainerOpt(playerid, containerid);
+#if defined cft_OnPlayerViewContainerOpt
+	forward cft_OnPlayerViewContainerOpt(playerid, containerid);
+#endif
 
 public OnPlayerSelectContainerOpt(playerid, containerid, option)
 {
@@ -225,7 +241,9 @@ public OnPlayerSelectContainerOpt(playerid, containerid, option)
 		DisplayCombineInventory(playerid, 1);
 	}
 
-	return CallLocalFunction("cft_OnPlayerSelectContainerOpt", "ddd", playerid, containerid, option);
+	#if defined cft_OnPlayerSelectContainerOpt
+		return cft_OnPlayerSelectContainerOpt(playerid, containerid, option);
+	#endif
 }
 #if defined _ALS_OnPlayerSelectContainerOpt
 	#undef OnPlayerSelectContainerOpt
@@ -233,7 +251,9 @@ public OnPlayerSelectContainerOpt(playerid, containerid, option)
 	#define _ALS_OnPlayerSelectContainerOpt
 #endif
 #define OnPlayerSelectContainerOpt cft_OnPlayerSelectContainerOpt
-forward OnPlayerSelectContainerOpt(playerid, containerid, option);
+#if defined cft_OnPlayerSelectContainerOpt
+	forward cft_OnPlayerSelectContainerOpt(playerid, containerid, option);
+#endif
 
 DisplayCombineInventory(playerid, listtype)
 {

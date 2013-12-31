@@ -202,7 +202,11 @@ public OnPlayerOpenInventory(playerid)
 {
 	nbk_InventoryItem[playerid] = AddInventoryListItem(playerid, "Notebook");
 
-	return CallLocalFunction("nbk_OnPlayerOpenInventory", "d", playerid);
+	#if defined nbk_OnPlayerOpenInventory
+		return nbk_OnPlayerOpenInventory(playerid);
+	#else
+		return 0;
+	#endif
 }
 #if defined _ALS_OnPlayerOpenInventory
 	#undef OnPlayerOpenInventory
@@ -210,7 +214,9 @@ public OnPlayerOpenInventory(playerid)
 	#define _ALS_OnPlayerOpenInventory
 #endif
 #define OnPlayerOpenInventory nbk_OnPlayerOpenInventory
-forward OnPlayerOpenInventory(playerid);
+#if defined nbk_OnPlayerOpenInventory
+	forward nbk_OnPlayerOpenInventory(playerid);
+#endif
 
 public OnPlayerSelectExtraItem(playerid, item)
 {
@@ -219,7 +225,11 @@ public OnPlayerSelectExtraItem(playerid, item)
 		ShowPlayerNotebook(playerid, 0);
 	}
 
-	return CallLocalFunction("nbk_OnPlayerSelectExtraItem", "dd", playerid, item);
+	#if defined nbk_OnPlayerSelectExtraItem
+		return nbk_OnPlayerSelectExtraItem(playerid, item);
+	#else
+		return 0;
+	#endif
 }
 #if defined _ALS_OnPlayerSelectExtraItem
 	#undef OnPlayerSelectExtraItem
@@ -227,7 +237,9 @@ public OnPlayerSelectExtraItem(playerid, item)
 	#define _ALS_OnPlayerSelectExtraItem
 #endif
 #define OnPlayerSelectExtraItem nbk_OnPlayerSelectExtraItem
-forward OnPlayerSelectExtraItem(playerid, item);
+#if defined nbk_OnPlayerSelectExtraItem
+	forward nbk_OnPlayerSelectExtraItem(playerid, item);
+#endif
 
 #if defined FILTERSCRIPT
 hook OnFilterScriptInit()

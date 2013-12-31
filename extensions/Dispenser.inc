@@ -129,7 +129,9 @@ public OnButtonPress(playerid, buttonid)
 			return 1;
 		}
 	}
-    return CallLocalFunction("dsp_OnButtonPress", "dd", playerid, buttonid);
+    #if defined dsp_OnButtonPress
+		return dsp_OnButtonPress(playerid, buttonid);
+	#endif
 }
 #if defined _ALS_OnButtonPress
     #undef OnButtonPress
@@ -137,7 +139,9 @@ public OnButtonPress(playerid, buttonid)
     #define _ALS_OnButtonPress
 #endif
 #define OnButtonPress dsp_OnButtonPress
-forward dsp_OnButtonPress(playerid, buttonid);
+#if defined dsp_OnButtonPress
+	forward dsp_OnButtonPress(playerid, buttonid);
+#endif
 
 public OnPlayerPickUpItem(playerid, itemid)
 {
@@ -164,7 +168,9 @@ public OnPlayerPickUpItem(playerid, itemid)
 			dsp_Data[i][dsp_itemId] = INVALID_ITEM_ID;
 		}
 	}
-    return CallLocalFunction("dsp_OnPlayerPickUpItem", "dd", playerid, itemid);
+    #if defined dsp_OnPlayerPickUpItem
+		return dsp_OnPlayerPickUpItem(playerid, itemid);
+	#endif
 }
 #if defined _ALS_OnPlayerPickUpItem
     #undef OnPlayerPickUpItem
@@ -172,5 +178,7 @@ public OnPlayerPickUpItem(playerid, itemid)
     #define _ALS_OnPlayerPickUpItem
 #endif
 #define OnPlayerPickUpItem dsp_OnPlayerPickUpItem
-forward dsp_OnPlayerPickUpItem(playerid, itemid);
+#if defined dsp_OnPlayerPickUpItem
+	forward dsp_OnPlayerPickUpItem(playerid, itemid);
+#endif
 

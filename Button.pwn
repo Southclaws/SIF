@@ -876,7 +876,11 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 		}
 	}
 
-	return CallLocalFunction("btn_OnPlayerEnterDynamicArea", "dd", playerid, areaid);
+	#if defined btn_OnPlayerEnterDynamicArea
+		return btn_OnPlayerEnterDynamicArea(playerid, areaid);
+	#else
+		return 0;
+	#endif
 }
 #if defined _ALS_OnPlayerEnterDynamicArea
 	#undef OnPlayerEnterDynamicArea
@@ -884,12 +888,14 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 	#define _ALS_OnPlayerEnterDynamicArea
 #endif
 #define OnPlayerEnterDynamicArea btn_OnPlayerEnterDynamicArea
-forward btn_OnPlayerEnterDynamicArea(playerid, areaid);
+#if defined btn_OnPlayerEnterDynamicArea
+	forward btn_OnPlayerEnterDynamicArea(playerid, areaid);
+#endif
 
 
 public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
-	process_LeaveDynamicArea(playerid, areaid);
+	return process_LeaveDynamicArea(playerid, areaid);
 }
 
 process_LeaveDynamicArea(playerid, areaid)
@@ -925,7 +931,11 @@ process_LeaveDynamicArea(playerid, areaid)
 		}
 	}
 
-	return CallLocalFunction("btn_OnPlayerLeaveDynamicArea", "dd", playerid, areaid);
+	#if defined btn_OnPlayerLeaveDynamicArea
+		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+	#else
+		return 0;
+	#endif
 }
 #if defined _ALS_OnPlayerLeaveDynamicArea
 	#undef OnPlayerLeaveDynamicArea
@@ -933,7 +943,9 @@ process_LeaveDynamicArea(playerid, areaid)
 	#define _ALS_OnPlayerLeaveDynamicArea
 #endif
 #define OnPlayerLeaveDynamicArea btn_OnPlayerLeaveDynamicArea
-forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+#if defined btn_OnPlayerLeaveDynamicArea
+	forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+#endif
 
 
 /*==============================================================================

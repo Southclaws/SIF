@@ -247,7 +247,9 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 		}
 	}
 
-	return CallLocalFunction("SIF_OnPlayerEnterDynamicArea", "dd", playerid, areaid);
+	#if defined SIF_OnPlayerEnterDynamicArea
+		return SIF_OnPlayerEnterDynamicArea(playerid, areaid);
+	#endif
 }
 #if defined _ALS_OnPlayerEnterDynamicArea
 	#undef OnPlayerEnterDynamicArea
@@ -255,7 +257,9 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 	#define _ALS_OnPlayerEnterDynamicArea
 #endif
 #define OnPlayerEnterDynamicArea SIF_OnPlayerEnterDynamicArea
-forward SIF_OnPlayerEnterDynamicArea(playerid, areaid);
+#if defined SIF_OnPlayerEnterDynamicArea
+	forward SIF_OnPlayerEnterDynamicArea(playerid, areaid);
+#endif
 
 public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
@@ -279,7 +283,9 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 		}
 	}
 
-	return CallLocalFunction("SIF_OnPlayerLeaveDynamicArea", "dd", playerid, areaid);
+	#if defined SIF_OnPlayerLeaveDynamicArea
+		return SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
+	#endif
 }
 #if defined _ALS_OnPlayerLeaveDynamicArea
 	#undef OnPlayerLeaveDynamicArea
@@ -287,7 +293,9 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 	#define _ALS_OnPlayerLeaveDynamicArea
 #endif
 #define OnPlayerLeaveDynamicArea SIF_OnPlayerLeaveDynamicArea
-forward SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
+#if defined SIF_OnPlayerLeaveDynamicArea
+	forward SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
+#endif
 
 stock IsPlayerInPlayerArea(playerid, targetid)
 {
