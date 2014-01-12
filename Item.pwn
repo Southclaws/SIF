@@ -141,7 +141,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If <itemid> is an invalid item ID handle.
 		}
 
-		native ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, boneid = 6)
+		native ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, colour = -1, boneid = 6)
 		{
 			Description:
 				Defines a new item type with the specified name and model. Item
@@ -167,9 +167,15 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<rotx>, <roty>, <rotz> (float)
 					The default rotation the item object will have when dropped.
 
+				<zoffset>
+					Z offset from the item world position to create item model.
+
 				<attx>, <atty>, <attz>, <attrx>, <attry>, <attrz> (float)
 					The attachment coordinates to use when the object is picked
 					up and held by a player.
+
+				<colour>
+					Item model texture colour.
 
 				<boneid> (int, valid SA:MP bones)
 					The attachment bone to use, by default this is a hand but
