@@ -141,7 +141,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If <itemid> is an invalid item ID handle.
 		}
 
-		native ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, boneid = 6)
+		native ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, colour = -1, boneid = 6)
 		{
 			Description:
 				Defines a new item type with the specified name and model. Item
@@ -167,9 +167,15 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<rotx>, <roty>, <rotz> (float)
 					The default rotation the item object will have when dropped.
 
+				<zoffset>
+					Z offset from the item world position to create item model.
+
 				<attx>, <atty>, <attz>, <attrx>, <attry>, <attrz> (float)
 					The attachment coordinates to use when the object is picked
 					up and held by a player.
+
+				<colour>
+					Item model texture colour.
 
 				<boneid> (int, valid SA:MP bones)
 					The attachment bone to use, by default this is a hand but
@@ -1539,7 +1545,7 @@ stock PlayerGiveItem(playerid, targetid, call = true)
 
 PlayerUseItem(playerid)
 {
-	internal_OnPlayerUseItem(playerid, itm_Holding[playerid]);
+	return internal_OnPlayerUseItem(playerid, itm_Holding[playerid]);
 }
 
 GiveWorldItemToPlayer(playerid, itemid, call = 1)
@@ -1842,9 +1848,7 @@ internal_OnPlayerUseItem(playerid, itemid)
 	if(buttonid != -1)
 		return CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, buttonid, itm_Holding[playerid]);
 
-	#if defined OnPlayerUseItem
-		return OnPlayerUseItem(playerid, itemid);
-	#endif
+	return CallLocalFunction("OnPlayerUseItem", "dd", playerid, itemid);
 }
 
 
@@ -1873,6 +1877,7 @@ public OnButtonPress(playerid, buttonid)
 			}
 		}
 	}
+
 	#if defined itm_OnButtonPress
 		return itm_OnButtonPress(playerid, buttonid);
 	#endif
@@ -2008,6 +2013,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
 	}
+
 	#if defined itm_OnPlayerDeath
 		return itm_OnPlayerDeath(playerid, killerid, reason);
 	#endif

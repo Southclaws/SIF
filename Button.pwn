@@ -878,6 +878,8 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 
 	#if defined btn_OnPlayerEnterDynamicArea
 		return btn_OnPlayerEnterDynamicArea(playerid, areaid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerEnterDynamicArea
@@ -931,6 +933,8 @@ process_LeaveDynamicArea(playerid, areaid)
 
 	#if defined btn_OnPlayerLeaveDynamicArea
 		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerLeaveDynamicArea

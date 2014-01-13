@@ -175,6 +175,8 @@ public OnPlayerViewInventoryOpt(playerid)
 
 	#if defined cft_OnPlayerViewInventoryOpt
 		return cft_OnPlayerViewInventoryOpt(playerid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerViewInventoryOpt
@@ -198,6 +200,8 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 
 	#if defined cft_OnPlayerSelectInventoryOpt
 		return cft_OnPlayerSelectInventoryOpt(playerid, option);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerSelectInventoryOpt

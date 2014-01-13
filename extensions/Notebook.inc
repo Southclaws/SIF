@@ -204,6 +204,8 @@ public OnPlayerOpenInventory(playerid)
 
 	#if defined nbk_OnPlayerOpenInventory
 		return nbk_OnPlayerOpenInventory(playerid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerOpenInventory
@@ -225,6 +227,8 @@ public OnPlayerSelectExtraItem(playerid, item)
 
 	#if defined nbk_OnPlayerSelectExtraItem
 		return nbk_OnPlayerSelectExtraItem(playerid, item);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerSelectExtraItem
