@@ -347,8 +347,8 @@ static
 
 forward OnItemAddToInventory(playerid, itemid, slot);
 forward OnItemAddedToInventory(playerid, itemid, slot);
-forward OnItemRemoveFromInventory(playerid, slotid, slot);
-forward OnItemRemovedFromInventory(playerid, slotid, slot);
+forward OnItemRemoveFromInventory(playerid, itemid, slot);
+forward OnItemRemovedFromInventory(playerid, itemid, slot);
 
 
 /*==============================================================================
