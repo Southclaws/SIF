@@ -1657,10 +1657,13 @@ CreateItemInWorld(itemid,
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
+	if(Iter_Contains(itm_WorldIndex, itemid))
+		return -1;
+
 	new ItemType:itemtype = itm_Data[itemid][itm_type];
 
 	if(!IsValidItemType(itemtype))
-		return 0;
+		return -2;
 
 	itm_Data[itemid][itm_posX]					= x;
 	itm_Data[itemid][itm_posY]					= y;
@@ -1880,6 +1883,8 @@ public OnButtonPress(playerid, buttonid)
 
 	#if defined itm_OnButtonPress
 		return itm_OnButtonPress(playerid, buttonid);
+	#else
+		return 1;
 	#endif
 }
 #if defined _ALS_OnButtonPress

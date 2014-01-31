@@ -632,6 +632,7 @@ hook OnGameModeInit()
 
 hook OnPlayerConnect(playerid)
 {
+	Iter_Free(btn_CurrentlyNearIndex[playerid]);
 	btn_CurrentlyPressing[playerid] = INVALID_BUTTON_ID;
 }
 
@@ -751,8 +752,14 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
 	if(newkeys & 16)
 	{
-		if(!IsPlayerInAnyVehicle(playerid) && IsPlayerInAnyDynamicArea(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
+		if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
 		{
+			if(!IsPlayerInAnyDynamicArea(playerid))
+			{
+				printf("[WARNING] Player %d is not in areas but list isn't empty. Purging list.", playerid);
+				Iter_Free(btn_CurrentlyNearIndex[playerid]);
+			}
+
 			new
 				id,
 				Float:x,
@@ -895,12 +902,28 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 
 public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
-	return process_LeaveDynamicArea(playerid, areaid);
+	process_LeaveDynamicArea(playerid, areaid);
+
+	#if defined btn_OnPlayerLeaveDynamicArea
+		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnPlayerLeaveDynamicArea
+	#undef OnPlayerLeaveDynamicArea
+#else
+	#define _ALS_OnPlayerLeaveDynamicArea
+#endif
+#define OnPlayerLeaveDynamicArea btn_OnPlayerLeaveDynamicArea
+#if defined btn_OnPlayerLeaveDynamicArea
+	forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+#endif
 
 process_LeaveDynamicArea(playerid, areaid)
 {
-	if(!IsPlayerInAnyVehicle(playerid))
+
+	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
 	{
 		new data[2];
 
@@ -930,22 +953,7 @@ process_LeaveDynamicArea(playerid, areaid)
 			}
 		}
 	}
-
-	#if defined btn_OnPlayerLeaveDynamicArea
-		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
-	#else
-		return 0;
-	#endif
 }
-#if defined _ALS_OnPlayerLeaveDynamicArea
-	#undef OnPlayerLeaveDynamicArea
-#else
-	#define _ALS_OnPlayerLeaveDynamicArea
-#endif
-#define OnPlayerLeaveDynamicArea btn_OnPlayerLeaveDynamicArea
-#if defined btn_OnPlayerLeaveDynamicArea
-	forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
-#endif
 
 
 /*==============================================================================
