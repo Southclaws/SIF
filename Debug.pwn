@@ -197,19 +197,19 @@ stock sif_debug(level, msg[], playerid = INVALID_PLAYER_ID)
 		if(!IsPlayerConnected(playerid))
 			return 0;
 
-		if(dbg_PlayerLevel[playerid] < level)
-			return 0;
+		if(level <= dbg_PlayerLevel[playerid] && dbg_PlayerLevel[playerid] != 0)
+		{
+			new name[MAX_PLAYER_NAME];
 
-		new name[MAX_PLAYER_NAME];
+			GetPlayerName(playerid, name, MAX_PLAYER_NAME);
 
-		GetPlayerName(playerid, name, MAX_PLAYER_NAME);
-
-		SendClientMessage(playerid, -1, msg);
-		printf("[DEBUG:SIF%d] %s (%d: %s)", level, msg, playerid, name);
+			SendClientMessage(playerid, -1, msg);
+			printf("[DEBUG:SIF%d] %s (%d: %s)", level, msg, playerid, name);
+		}
 	}
 	else
 	{
-		if(dbg_Level < level)
+		if(level <= dbg_Level && dbg_Level != 0)
 		{
 			printf("[DEBUG:SIF%d] %s", level, msg);
 		}
