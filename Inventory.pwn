@@ -316,6 +316,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if !defined _SIF_DEBUG_INCLUDED
+	#include <SIF/Debug.pwn>
+#endif
+
 #if !defined _SIF_ITEM_INCLUDED
 	#include <SIF/Item.pwn>
 #endif
@@ -432,7 +436,22 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 		return 0;
 
 	if(!IsValidItem(inv_Data[playerid][slotid]))
+	{
+		if(inv_Data[playerid][slotid] != INVALID_ITEM_ID)
+		{
+			inv_Data[playerid][slotid] = INVALID_ITEM_ID;
+
+			if(slotid < (INV_MAX_SLOTS - 1))
+			{
+				for(new i = slotid; i < (INV_MAX_SLOTS - 1); i++)
+				    inv_Data[playerid][i] = inv_Data[playerid][i+1];
+
+				inv_Data[playerid][(INV_MAX_SLOTS - 1)] = INVALID_ITEM_ID;
+			}
+		}
+
 		return -1;
+	}
 
 	new itemid = inv_Data[playerid][slotid];
 

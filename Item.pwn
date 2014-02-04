@@ -69,6 +69,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		ITM_ATTACH_INDEX
 			Item attachment index for SetPlayerAttachedObject native.
 
+		ITM_DROP_ON_DEATH
+			Places an item at a players death position when true.
 	}
 
 	SIF/Item/Core Functions
@@ -1064,6 +1066,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if !defined _SIF_DEBUG_INCLUDED
+	#include <SIF/Debug.pwn>
+#endif
+
 #if !defined _SIF_CORE_INCLUDED
 	#include <SIF/Core.pwn>
 #endif
@@ -1107,6 +1113,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#define ITM_ATTACH_INDEX	(0)
 #endif
 
+#if !defined ITM_DROP_ON_DEATH
+	#define ITM_DROP_ON_DEATH	true
+#endif
+
 
 #define FLOOR_OFFSET		(0.96)
 #define ITEM_BUTTON_OFFSET	(0.7)
@@ -1132,6 +1142,8 @@ Float:		itm_posZ,
 Float:		itm_rotX,
 Float:		itm_rotY,
 Float:		itm_rotZ,
+			itm_world,
+			itm_interior,
 
 			itm_exData,
 			itm_nameEx[ITM_MAX_TEXT]
@@ -1671,6 +1683,8 @@ CreateItemInWorld(itemid,
 	itm_Data[itemid][itm_rotX]					= rx;
 	itm_Data[itemid][itm_rotY]					= ry;
 	itm_Data[itemid][itm_rotZ]					= rz;
+	itm_Data[itemid][itm_world]					= world;
+	itm_Data[itemid][itm_interior]				= interior;
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
@@ -1994,6 +2008,8 @@ timer GiveItemDelay[500](playerid, targetid)
 	return;
 }
 
+#if defined ITM_DROP_ON_DEATH
+
 public OnPlayerDeath(playerid, killerid, reason)
 {
 	new itemid = itm_Holding[playerid];
@@ -2031,6 +2047,8 @@ public OnPlayerDeath(playerid, killerid, reason)
 #define OnPlayerDeath itm_OnPlayerDeath
 #if defined itm_OnPlayerDeath
 	forward itm_OnPlayerDeath(playerid, killerid, reason);
+#endif
+
 #endif
 
 
@@ -2148,6 +2166,56 @@ stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults =
 	}
 
 	return 1;	
+}
+
+// itm_world
+stock SetItemWorld(itemid, world)
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return -1;
+
+	if(!Iter_Contains(itm_WorldIndex, itemid))
+		return -1;
+
+	SetButtonWorld(itm_Data[itemid][itm_button], world);
+	itm_Data[itemid][itm_world] = world;
+
+	return 1;
+}
+stock GetItemWorld(itemid)
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return -1;
+
+	if(!Iter_Contains(itm_WorldIndex, itemid))
+		return -1;
+
+	return itm_Data[itemid][itm_world];
+}
+
+// itm_interior
+stock SetItemInterior(itemid, interior)
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return -1;
+
+	if(!Iter_Contains(itm_WorldIndex, itemid))
+		return -1;
+
+	SetButtonInterior(itm_Data[itemid][itm_button], interior);
+	itm_Data[itemid][itm_interior] = interior;
+
+	return 1;
+}
+stock GetItemInterior(itemid)
+{
+	if(!Iter_Contains(itm_Index, itemid))
+		return -1;
+
+	if(!Iter_Contains(itm_WorldIndex, itemid))
+		return -1;
+
+	return itm_Data[itemid][itm_interior];
 }
 
 // itm_exData

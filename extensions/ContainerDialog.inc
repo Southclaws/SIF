@@ -522,6 +522,8 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 
 	#if defined cnt_OnPlayerSelectInventoryOpt
 		return cnt_OnPlayerSelectInventoryOpt(playerid, option);
+	#else
+		return 1;
 	#endif
 }
 #if defined _ALS_OnPlayerSelectInventoryOpt
