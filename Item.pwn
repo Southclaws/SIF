@@ -1705,7 +1705,7 @@ CreateItemInWorld(itemid,
 			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx + itm_TypeData[itemtype][itm_defaultRotX]),
 			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry + itm_TypeData[itemtype][itm_defaultRotY]),
 			(rz == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotZ]) : (rz + itm_TypeData[itemtype][itm_defaultRotZ]),
-			world, interior);
+			world, interior, .streamdistance = 100.0);
 	}
 	else
 	{
@@ -1714,7 +1714,7 @@ CreateItemInWorld(itemid,
 			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx),
 			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry),
 			(rz == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotZ]) : (rz),
-			world, interior);
+			world, interior, .streamdistance = 100.0);
 	}
 
 
