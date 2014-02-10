@@ -638,7 +638,7 @@ hook OnGameModeInit()
 hook OnPlayerConnect(playerid)
 {
 	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerConnect]", playerid);
-	Iter_Free(btn_CurrentlyNearIndex[playerid]);
+	Iter_Clear(btn_CurrentlyNearIndex[playerid]);
 	btn_CurrentlyPressing[playerid] = INVALID_BUTTON_ID;
 }
 
