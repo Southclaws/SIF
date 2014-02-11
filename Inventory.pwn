@@ -347,8 +347,8 @@ static
 
 forward OnItemAddToInventory(playerid, itemid, slot);
 forward OnItemAddedToInventory(playerid, itemid, slot);
-forward OnItemRemoveFromInventory(playerid, slotid, slot);
-forward OnItemRemovedFromInventory(playerid, slotid, slot);
+forward OnItemRemoveFromInventory(playerid, itemid, slot); // am i right? Prev rev. throws 025 error in pawno
+forward OnItemRemovedFromInventory(playerid, itemid, slot); // same, i suppose
 
 
 /*==============================================================================
