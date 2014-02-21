@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.2
+	Version: 1.1.3
 
 
 	SIF/Overview
@@ -467,6 +467,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if !defined _SIF_DEBUG_INCLUDED
+	#include <SIF/Debug.pwn>
+#endif
+
 #if !defined _SIF_ITEM_INCLUDED
 	#include <SIF/Item.pwn>
 #endif
@@ -701,6 +705,24 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 {
 	if(!(0 <= slotid < cnt_Data[containerid][cnt_size]))
 		return 0;
+
+	if(!IsValidItem(cnt_Items[containerid][slotid]))
+	{
+		if(cnt_Data[containerid][cnt_size] == INVALID_ITEM_ID)
+		{
+			cnt_Data[containerid][cnt_size] = INVALID_ITEM_ID;
+
+			if(slotid < (cnt_Data[containerid][cnt_size] - 1))
+			{
+				for(new i = slotid; i < (cnt_Data[containerid][cnt_size] - 1); i++)
+				    cnt_Items[containerid][i] = cnt_Items[containerid][i+1];
+
+				cnt_Items[containerid][(cnt_Data[containerid][cnt_size] - 1)] = INVALID_ITEM_ID;
+			}
+		}
+
+		return -1;
+	}
 
 	if(call)
 	{

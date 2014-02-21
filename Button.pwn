@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.3
+	Version: 1.2.0
 
 
 	SIF/Overview
@@ -528,6 +528,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if !defined _SIF_DEBUG_INCLUDED
+	#include <SIF/Debug.pwn>
+#endif
+
 #if !defined _SIF_CORE_INCLUDED
 	#include <SIF/Core.pwn>
 #endif
@@ -622,6 +626,7 @@ hook OnFilterScriptInit()
 hook OnGameModeInit()
 #endif
 {
+	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnInit]");
 	Iter_Init(btn_CurrentlyNearIndex);
 
 	for(new i; i < MAX_PLAYERS; i++)
@@ -632,6 +637,8 @@ hook OnGameModeInit()
 
 hook OnPlayerConnect(playerid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerConnect]", playerid);
+	Iter_Clear(btn_CurrentlyNearIndex[playerid]);
 	btn_CurrentlyPressing[playerid] = INVALID_BUTTON_ID;
 }
 
@@ -645,6 +652,7 @@ hook OnPlayerConnect(playerid)
 
 stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST)
 {
+	sif_debug(SIF_DEBUG_LEVEL_CORE, "[CreateButton]");
 	new id = Iter_Free(btn_Index);
 
 	if(id == -1)
@@ -680,6 +688,7 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 }
 stock DestroyButton(buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_CORE, "[DestroyButton]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -713,6 +722,7 @@ stock DestroyButton(buttonid)
 
 stock LinkTP(buttonid1, buttonid2)
 {
+	sif_debug(SIF_DEBUG_LEVEL_CORE, "[LinkTP]");
 	if(!Iter_Contains(btn_Index, buttonid1) || !Iter_Contains(btn_Index, buttonid2))
 		return 0;
 
@@ -724,6 +734,7 @@ stock LinkTP(buttonid1, buttonid2)
 
 stock UnLinkTP(buttonid1, buttonid2)
 {
+	sif_debug(SIF_DEBUG_LEVEL_CORE, "[UnLinkTP]");
 	if(!Iter_Contains(btn_Index, buttonid1) || !Iter_Contains(btn_Index, buttonid2))
 		return 0;
 
@@ -749,10 +760,17 @@ stock UnLinkTP(buttonid1, buttonid2)
 
 hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
+	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerKeyStateChange]", playerid);
 	if(newkeys & 16)
 	{
-		if(!IsPlayerInAnyVehicle(playerid) && IsPlayerInAnyDynamicArea(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
+		if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
 		{
+			if(!IsPlayerInAnyDynamicArea(playerid))
+			{
+				printf("[WARNING] Player %d is not in areas but list isn't empty. Purging list.", playerid);
+				Iter_Clear(btn_CurrentlyNearIndex[playerid]);
+			}
+
 			new
 				id,
 				Float:x,
@@ -808,6 +826,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 Internal_OnButtonPress(playerid, buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERNAL, "[Internal_OnButtonPress]", playerid);
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -847,8 +866,10 @@ timer btn_Unfreeze[1000](playerid)
 
 public OnPlayerEnterDynamicArea(playerid, areaid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerEnterDynamicArea]", playerid);
 	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) < BTN_MAX_INRANGE)
 	{
+		sif_debug(SIF_DEBUG_LEVEL_CALLBACKS_DEEP, "[OnPlayerEnterDynamicArea] player is valid", playerid);
 		new data[2];
 
 		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
@@ -861,11 +882,11 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 
 		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
 		{
+			sif_debug(SIF_DEBUG_LEVEL_CALLBACKS_DEEP, "[OnPlayerEnterDynamicArea] area is valid", playerid);
 			if(Iter_Contains(btn_Index, data[1]))
 			{
-
+				sif_debug(SIF_DEBUG_LEVEL_CALLBACKS_DEEP, "[OnPlayerEnterDynamicArea] in index", playerid);
 				new cell = Iter_Free(btn_CurrentlyNearIndex[playerid]);
-
 
 				btn_CurrentlyNear[playerid][cell] = data[1];
 				Iter_Add(btn_CurrentlyNearIndex[playerid], cell);
@@ -875,6 +896,8 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 			}
 		}
 	}
+
+	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS_DEEP, "[OnPlayerEnterDynamicArea] end", playerid);
 
 	#if defined btn_OnPlayerEnterDynamicArea
 		return btn_OnPlayerEnterDynamicArea(playerid, areaid);
@@ -895,41 +918,7 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 
 public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
-	return process_LeaveDynamicArea(playerid, areaid);
-}
-
-process_LeaveDynamicArea(playerid, areaid)
-{
-	if(!IsPlayerInAnyVehicle(playerid))
-	{
-		new data[2];
-
-		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
-
-		// Due to odd streamer behavior reversing data arrays:
-		new tmp = data[0];
-		data[0] = data[1];
-		data[1] = tmp;
-		// end
-
-		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
-		{
-			if(Iter_Contains(btn_Index, data[1]))
-			{
-				HideActionText(playerid);
-				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
-
-				foreach(new i : btn_CurrentlyNearIndex[playerid])
-				{
-					if(btn_CurrentlyNear[playerid][i] == data[1])
-					{
-						Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
-						break;
-					}
-				}
-			}
-		}
-	}
+	process_LeaveDynamicArea(playerid, areaid);
 
 	#if defined btn_OnPlayerLeaveDynamicArea
 		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
@@ -947,6 +936,47 @@ process_LeaveDynamicArea(playerid, areaid)
 	forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
 #endif
 
+process_LeaveDynamicArea(playerid, areaid)
+{
+	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerLeaveDynamicArea]", playerid);
+	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
+	{
+		sif_debug(SIF_DEBUG_LEVEL_CALLBACKS_DEEP, "[OnPlayerLeaveDynamicArea] player is valid", playerid);
+		new data[2];
+
+		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
+
+		// Due to odd streamer behavior reversing data arrays:
+		new tmp = data[0];
+		data[0] = data[1];
+		data[1] = tmp;
+		// end
+
+		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
+		{
+			sif_debug(SIF_DEBUG_LEVEL_CALLBACKS_DEEP, "[OnPlayerLeaveDynamicArea] area is valid", playerid);
+			if(Iter_Contains(btn_Index, data[1]))
+			{
+				sif_debug(SIF_DEBUG_LEVEL_CALLBACKS_DEEP, "[OnPlayerLeaveDynamicArea] in index", playerid);
+				HideActionText(playerid);
+				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
+
+				foreach(new i : btn_CurrentlyNearIndex[playerid])
+				{
+					sif_debug(SIF_DEBUG_LEVEL_LOOPS, "[OnPlayerLeaveDynamicArea] looping player list", playerid);
+					// ^ Add when debug supports format strings
+					if(btn_CurrentlyNear[playerid][i] == data[1])
+					{
+						sif_debug(SIF_DEBUG_LEVEL_CALLBACKS_DEEP, "[OnPlayerLeaveDynamicArea] removing from player list", playerid);
+						Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
 
 /*==============================================================================
 
@@ -957,6 +987,7 @@ process_LeaveDynamicArea(playerid, areaid)
 
 stock IsValidButton(buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[IsValidButton]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -969,6 +1000,7 @@ stock IsValidButton(buttonid)
 // btn_posZ
 stock GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonPos]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -980,6 +1012,7 @@ stock GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z)
 }
 stock SetButtonPos(buttonid, Float:x, Float:y, Float:z)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonPos]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1004,6 +1037,7 @@ stock SetButtonPos(buttonid, Float:x, Float:y, Float:z)
 // btn_size
 stock Float:GetButtonSize(buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonSize]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0.0;
 
@@ -1011,6 +1045,7 @@ stock Float:GetButtonSize(buttonid)
 }
 stock SetButtonSize(buttonid, Float:size)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonSize]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1023,6 +1058,7 @@ stock SetButtonSize(buttonid, Float:size)
 // btn_world
 stock GetButtonWorld(buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonWorld]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return -1;
 
@@ -1030,6 +1066,7 @@ stock GetButtonWorld(buttonid)
 }
 stock SetButtonWorld(buttonid, world)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonWorld]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1048,6 +1085,7 @@ stock SetButtonWorld(buttonid, world)
 // btn_interior
 stock GetButtonInterior(buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonInterior]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return -1;
 
@@ -1055,14 +1093,15 @@ stock GetButtonInterior(buttonid)
 }
 stock SetButtonInterior(buttonid, interior)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonInterior]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
-	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_INTERIOR, interior);
+	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_INTERIOR_ID, interior);
 
 	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
 	{
-		Streamer_SetIntData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_INTERIOR, interior);
+		Streamer_SetIntData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_INTERIOR_ID, interior);
 	}
 
 	btn_Data[buttonid][btn_interior] = interior;
@@ -1073,6 +1112,7 @@ stock SetButtonInterior(buttonid, interior)
 // btn_link
 stock GetButtonLinkedID(buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonLinkedID]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return INVALID_BUTTON_ID;
 
@@ -1082,6 +1122,7 @@ stock GetButtonLinkedID(buttonid)
 // btn_text
 stock GetButtonText(buttonid, text[])
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonText]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1092,6 +1133,7 @@ stock GetButtonText(buttonid, text[])
 }
 stock SetButtonText(buttonid, text[])
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonText]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1104,6 +1146,7 @@ stock SetButtonText(buttonid, text[])
 // btn_CurrentlyPressing
 stock GetPlayerPressingButton(playerid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetPlayerPressingButton]", playerid);
 	if(!(0 <= playerid < MAX_PLAYERS))
 		return -1;
 
@@ -1112,6 +1155,7 @@ stock GetPlayerPressingButton(playerid)
 
 stock GetPlayerButtonID(playerid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetPlayerButtonID]", playerid);
 	foreach(new i : btn_Index)
 	{
 		if(IsPlayerInDynamicArea(playerid, btn_Data[i][btn_area]))
@@ -1125,6 +1169,7 @@ stock GetPlayerButtonID(playerid)
 
 stock SetButtonMessage(buttonid, msg[])
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonMessage]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1133,13 +1178,14 @@ stock SetButtonMessage(buttonid, msg[])
 
 	foreach(new i : Player)
 		if(IsPlayerViewingMsgBox(i))
-			ShowActionText(playerid, btn_Data[i][btn_text]);
+			ShowActionText(i, btn_Data[i][btn_text]);
 
 	return 1;
 }
 
 stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonLabel]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1160,6 +1206,7 @@ stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DE
 }
 stock DestroyButtonLabel(buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[DestroyButtonLabel]");
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1174,6 +1221,7 @@ stock DestroyButtonLabel(buttonid)
 
 stock Float:GetPlayerAngleToButton(playerid, buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetPlayerAngleToButton]", playerid);
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0.0;
 
@@ -1192,6 +1240,7 @@ stock Float:GetPlayerAngleToButton(playerid, buttonid)
 
 stock Float:GetButtonAngleToPlayer(playerid, buttonid)
 {
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonAngleToPlayer]", playerid);
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0.0;
 
