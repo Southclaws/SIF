@@ -587,7 +587,9 @@ Float:		btn_size,
 			btn_world,
 			btn_interior,
 			btn_link,
-			btn_text[BTN_MAX_TEXT]
+			btn_text[BTN_MAX_TEXT],
+
+			btn_exData
 }
 
 enum e_button_range_data
@@ -1141,6 +1143,24 @@ stock SetButtonText(buttonid, text[])
 	strcat(btn_Data[buttonid][btn_text], text, BTN_MAX_TEXT);
 
 	return 1;
+}
+
+// btn_exData
+stock SetItemExtraData(itemid, data)
+{
+	if(!Iter_Contains(btn_Index, itemid))
+		return 0;
+
+	btn_Data[itemid][btn_exData] = data;
+
+	return 1;
+}
+stock GetItemExtraData(itemid)
+{
+	if(!Iter_Contains(btn_Index, itemid))
+		return 0;
+
+	return btn_Data[itemid][btn_exData];
 }
 
 // btn_CurrentlyPressing
