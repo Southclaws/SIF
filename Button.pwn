@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.3
+	Version: 1.2.0
 
 
 	SIF/Overview
@@ -768,7 +768,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			if(!IsPlayerInAnyDynamicArea(playerid))
 			{
 				printf("[WARNING] Player %d is not in areas but list isn't empty. Purging list.", playerid);
-				Iter_Free(btn_CurrentlyNearIndex[playerid]);
+				Iter_Clear(btn_CurrentlyNearIndex[playerid]);
 			}
 
 			new
