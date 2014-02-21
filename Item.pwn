@@ -2219,7 +2219,7 @@ stock GetItemInterior(itemid)
 }
 
 // itm_exData
-stock SetItemExtraData(itemid, data)
+stock SetButtonExtraData(itemid, data)
 {
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2228,7 +2228,7 @@ stock SetItemExtraData(itemid, data)
 
 	return 1;
 }
-stock GetItemExtraData(itemid)
+stock GetButtonExtraData(itemid)
 {
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
