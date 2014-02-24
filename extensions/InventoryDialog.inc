@@ -533,10 +533,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	if(!IsPlayerInAnyVehicle(playerid))
 	{
 		if(newkeys & KEY_CTRL_BACK)
-		{
-			if(!IsPlayerInAnyVehicle(playerid))
-				DisplayPlayerInventory(playerid);
-		}
+			DisplayPlayerInventory(playerid);
 	}
 
 	return 1;

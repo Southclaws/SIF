@@ -172,12 +172,9 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock sif_debug_level(playerid, level)
+stock sif_debug_level(level)
 {
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	dbg_PlayerLevel[playerid] = level;
+	dbg_Level = level;
 
 	return 1;
 }
