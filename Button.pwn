@@ -658,7 +658,10 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 	new id = Iter_Free(btn_Index);
 
 	if(id == -1)
+	{
+		print("ERROR: BTN_MAX reached, please increase this constant!");
 		return INVALID_BUTTON_ID;
+	}
 
 	btn_Data[id][btn_area]				= CreateDynamicSphere(x, y, z, areasize, world, interior);
 
@@ -996,7 +999,63 @@ stock IsValidButton(buttonid)
 	return 1;
 }
 // btn_area
+stock GetButtonArea(buttonid)
+{
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonWorld]");
+	if(!Iter_Contains(btn_Index, buttonid))
+		return -1;
+
+	return btn_Data[buttonid][btn_area];
+}
+stock SetButtonArea(buttonid, areaid)
+{
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetButtonWorld]");
+	if(!Iter_Contains(btn_Index, buttonid))
+		return 0;
+
+	btn_Data[buttonid][btn_area] = areaid;
+
+	return 1;
+}
+
+
 // btn_label
+stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
+{
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonLabel]");
+	if(!Iter_Contains(btn_Index, buttonid))
+		return 0;
+
+	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
+	{
+		UpdateDynamic3DTextLabelText(btn_Data[buttonid][btn_label], colour, text);
+		return 2;
+	}
+
+	btn_Data[buttonid][btn_label] = CreateDynamic3DTextLabel(text, colour,
+		btn_Data[buttonid][btn_posX],
+		btn_Data[buttonid][btn_posY],
+		btn_Data[buttonid][btn_posZ],
+		range, _, _, 1,
+		btn_Data[buttonid][btn_world], btn_Data[buttonid][btn_interior], _, range);
+
+	return 1;
+}
+stock DestroyButtonLabel(buttonid)
+{
+	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[DestroyButtonLabel]");
+	if(!Iter_Contains(btn_Index, buttonid))
+		return 0;
+
+	if(!IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
+		return -1;
+
+	DestroyDynamic3DTextLabel(btn_Data[buttonid][btn_label]);
+	btn_Data[buttonid][btn_label] = INVALID_3DTEXT_ID;
+
+	return 1;
+}
+
 // btn_posX
 // btn_posY
 // btn_posZ
@@ -1146,7 +1205,7 @@ stock SetButtonText(buttonid, text[])
 }
 
 // btn_exData
-stock SetItemExtraData(itemid, data)
+stock SetButtonExtraData(itemid, data)
 {
 	if(!Iter_Contains(btn_Index, itemid))
 		return 0;
@@ -1155,7 +1214,7 @@ stock SetItemExtraData(itemid, data)
 
 	return 1;
 }
-stock GetItemExtraData(itemid)
+stock GetButtonExtraData(itemid)
 {
 	if(!Iter_Contains(btn_Index, itemid))
 		return 0;
@@ -1199,42 +1258,6 @@ stock SetButtonMessage(buttonid, msg[])
 	foreach(new i : Player)
 		if(IsPlayerViewingMsgBox(i))
 			ShowActionText(i, btn_Data[i][btn_text]);
-
-	return 1;
-}
-
-stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
-{
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetButtonLabel]");
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
-	{
-		UpdateDynamic3DTextLabelText(btn_Data[buttonid][btn_label], colour, text);
-		return 2;
-	}
-
-	btn_Data[buttonid][btn_label] = CreateDynamic3DTextLabel(text, colour,
-		btn_Data[buttonid][btn_posX],
-		btn_Data[buttonid][btn_posY],
-		btn_Data[buttonid][btn_posZ],
-		range, _, _, 1,
-		btn_Data[buttonid][btn_world], btn_Data[buttonid][btn_interior], _, range);
-
-	return 1;
-}
-stock DestroyButtonLabel(buttonid)
-{
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[DestroyButtonLabel]");
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	if(!IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
-		return -1;
-
-	DestroyDynamic3DTextLabel(btn_Data[buttonid][btn_label]);
-	btn_Data[buttonid][btn_label] = INVALID_3DTEXT_ID;
 
 	return 1;
 }

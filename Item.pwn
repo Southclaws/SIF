@@ -1094,7 +1094,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 
 #if !defined ITM_MAX
-	#define ITM_MAX				(10000)
+	#define ITM_MAX				(8192)
 #endif
 
 #if !defined ITM_MAX_TYPES
@@ -1720,6 +1720,12 @@ CreateItemInWorld(itemid,
 
 	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + zoffset, "Press F to pick up", world, interior, 1.0);
 
+	if(itm_Data[itemid][itm_button] == INVALID_BUTTON_ID)
+	{
+		printf("ERROR: Invalid button ID created for item %d.", itemid);
+		return -3;
+	}
+
 	itm_ButtonIndex[itm_Data[itemid][itm_button]] = itemid;
 
 	if(itm_TypeData[itemtype][itm_colour] != -1)
@@ -2219,7 +2225,7 @@ stock GetItemInterior(itemid)
 }
 
 // itm_exData
-stock SetButtonExtraData(itemid, data)
+stock SetItemExtraData(itemid, data)
 {
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2228,7 +2234,7 @@ stock SetButtonExtraData(itemid, data)
 
 	return 1;
 }
-stock GetButtonExtraData(itemid)
+stock GetItemExtraData(itemid)
 {
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
