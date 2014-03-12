@@ -3,7 +3,8 @@
 
 #define MAX_DISPENSER			(64)
 #define MAX_DISPENSER_TYPE		DispenserType:(8)
-#define DISPENSER_REFIL_TIME	(60000)
+#define INVALID_DISPENSER_TYPE	DispenserType:(-1)
+#define INVALID_DISPENSER_ID	(-1)
 
 
 enum E_DISPENSER_DATA
@@ -35,7 +36,9 @@ Iterator:		dsp_Index<MAX_DISPENSER>;
 
 new
 				dsp_TypeData[MAX_DISPENSER_TYPE][E_DISPENSER_TYPE_DATA],
-Iterator:		dsp_TypeIndex<_:MAX_DISPENSER_TYPE>;
+Iterator:		dsp_TypeIndex<_:MAX_DISPENSER_TYPE>,
+				dsp_ButtonDispenser[BTN_MAX],
+				dsp_ItemDispenser[ITM_MAX];
 
 
 forward OnPlayerUseDispenser(playerid, dispenserid);
@@ -54,6 +57,11 @@ stock CreateDispenser(Float:x, Float:y, Float:z, Float:rz, DispenserType:type, w
 
 	dsp_Data[id][dsp_buttonId]	= CreateButton(
 		x, y, z + 0.5, "Press F to buy", worldid, interiorid);
+
+	if(dsp_Data[id][dsp_buttonId] == INVALID_BUTTON_ID)
+		return INVALID_DISPENSER_ID;
+
+	dsp_ButtonDispenser[dsp_Data[id][dsp_buttonId]] = id;
 
 	format(str, sizeof(str), ""#C_YELLOW"%s\n"#C_GREEN"$%d",
 		dsp_TypeData[type][dsp_name],
@@ -74,7 +82,8 @@ stock CreateDispenser(Float:x, Float:y, Float:z, Float:rz, DispenserType:type, w
 }
 stock DestroyDispenser(id)
 {
-	if(!Iter_Contains(dsp_Index, id))return 0;
+	if(!Iter_Contains(dsp_Index, id))
+		return 0;
 
 	DestroyDynamicObject(dsp_Data[id][dsp_objId]);
 	DestroyButton(dsp_Data[id][dsp_buttonId]);
@@ -87,6 +96,9 @@ stock DestroyDispenser(id)
 stock DispenserType:DefineDispenserType(name[], ItemType:type, price)
 {
 	new DispenserType:id = DispenserType:Iter_Free(dsp_TypeIndex);
+
+	if(id == INVALID_DISPENSER_TYPE)
+		return INVALID_DISPENSER_TYPE;
 	
 	format(dsp_TypeData[id][dsp_name], 32, name);
 	dsp_TypeData[id][dsp_itemType] = type;
@@ -99,44 +111,52 @@ stock DispenserType:DefineDispenserType(name[], ItemType:type, price)
 
 public OnButtonPress(playerid, buttonid)
 {
-	foreach(new i : dsp_Index)
+	new dispenserid = dsp_ButtonDispenser[buttonid];
+
+	if(Iter_Contains(dsp_Index, dispenserid))
 	{
-		if(buttonid == dsp_Data[i][dsp_buttonId])
+		if(GetPlayerMoney(playerid) < dsp_TypeData[ dsp_Data[dispenserid][dsp_type] ][dsp_price])
 		{
-			if(GetPlayerMoney(playerid) < dsp_TypeData[ dsp_Data[i][dsp_type] ][dsp_price])
-			{
-				MsgF(playerid, 0xFFFF00FF,
-					" >  You need another "#C_RED"$%d "#C_ORANGE"to buy that.",
-					dsp_TypeData[ dsp_Data[i][dsp_type] ][dsp_price] - GetPlayerMoney(playerid));
+			new str[128];
 
-				return 0;
-			}
-			if(CallLocalFunction("OnPlayerUseDispenser", "dd", playerid, i))
-				return 0;
+			format(str, sizeof(str), " >  You need another "#C_RED"$%d "#C_ORANGE"to buy that.",
+				dsp_TypeData[ dsp_Data[dispenserid][dsp_type] ][dsp_price] - GetPlayerMoney(playerid));
 
-			dsp_Data[i][dsp_itemId] = CreateItem(dsp_TypeData[ dsp_Data[i][dsp_type] ][dsp_itemType],
-				dsp_Data[i][dsp_posX],
-				dsp_Data[i][dsp_posY],
-				dsp_Data[i][dsp_posZ] + 0.5,
-				.rx = 30.0,
-				.rz = dsp_Data[i][dsp_rotZ],
-				.world = dsp_Data[i][dsp_world],
-				.interior = dsp_Data[i][dsp_interior]);
+			SendClientMessage(playerid, 0xFFFF00FF, str);
 
-			DestroyButton(dsp_Data[i][dsp_buttonId]);
-			GivePlayerMoney(playerid, -dsp_TypeData[ dsp_Data[i][dsp_type] ][dsp_price]);
-
-			return 1;
+			return 0;
 		}
+
+		if(CallLocalFunction("OnPlayerUseDispenser", "dd", playerid, dispenserid))
+			return 0;
+
+		dsp_Data[dispenserid][dsp_itemId] = CreateItem(dsp_TypeData[ dsp_Data[dispenserid][dsp_type] ][dsp_itemType],
+			dsp_Data[dispenserid][dsp_posX],
+			dsp_Data[dispenserid][dsp_posY],
+			dsp_Data[dispenserid][dsp_posZ] + 0.5,
+			.rx = 30.0,
+			.rz = dsp_Data[dispenserid][dsp_rotZ],
+			.world = dsp_Data[dispenserid][dsp_world],
+			.interior = dsp_Data[dispenserid][dsp_interior]);
+
+		if(dsp_Data[dispenserid][dsp_itemId] != INVALID_ITEM_ID)
+			dsp_ItemDispenser[dsp_Data[dispenserid][dsp_itemId]] = dispenserid;
+
+		DestroyButton(buttonid);
+		GivePlayerMoney(playerid, -dsp_TypeData[ dsp_Data[dispenserid][dsp_type] ][dsp_price]);
+
+		return 1;
 	}
-    #if defined dsp_OnButtonPress
+	#if defined dsp_OnButtonPress
 		return dsp_OnButtonPress(playerid, buttonid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnButtonPress
-    #undef OnButtonPress
+	#undef OnButtonPress
 #else
-    #define _ALS_OnButtonPress
+	#define _ALS_OnButtonPress
 #endif
 #define OnButtonPress dsp_OnButtonPress
 #if defined dsp_OnButtonPress
@@ -145,37 +165,37 @@ public OnButtonPress(playerid, buttonid)
 
 public OnPlayerPickUpItem(playerid, itemid)
 {
-	foreach(new i : dsp_Index)
+	new dispenserid = dsp_ItemDispenser[itemid];
+
+	if(Iter_Contains(dsp_Index, dispenserid))
 	{
-	    if(itemid == dsp_Data[i][dsp_itemId])
-	    {
-	        new str[64];
+		new str[64];
 
-			dsp_Data[i][dsp_buttonId] = CreateButton(
-				dsp_Data[i][dsp_posX],
-				dsp_Data[i][dsp_posY],
-				dsp_Data[i][dsp_posZ] + 0.5,
-				"Press F to buy",
-				dsp_Data[i][dsp_world],
-				dsp_Data[i][dsp_interior]);
+		dsp_Data[dispenserid][dsp_buttonId] = CreateButton(
+			dsp_Data[dispenserid][dsp_posX],
+			dsp_Data[dispenserid][dsp_posY],
+			dsp_Data[dispenserid][dsp_posZ] + 0.5,
+			"Press F to buy",
+			dsp_Data[dispenserid][dsp_world],
+			dsp_Data[dispenserid][dsp_interior]);
 
-			format(str, sizeof(str), ""#C_YELLOW"%s\n"#C_GREEN"$%d",
-				dsp_TypeData[dsp_Data[i][dsp_type]][dsp_name],
-				dsp_TypeData[dsp_Data[i][dsp_type]][dsp_price]);
+		format(str, sizeof(str), ""#C_YELLOW"%s\n"#C_GREEN"$%d",
+			dsp_TypeData[dsp_Data[dispenserid][dsp_type]][dsp_name],
+			dsp_TypeData[dsp_Data[dispenserid][dsp_type]][dsp_price]);
 
-			SetButtonLabel(dsp_Data[i][dsp_buttonId], str);
-			
-			dsp_Data[i][dsp_itemId] = INVALID_ITEM_ID;
-		}
+		SetButtonLabel(dsp_Data[dispenserid][dsp_buttonId], str);
+
+		dsp_ItemDispenser[itemid] = INVALID_DISPENSER_ID;
+		dsp_Data[dispenserid][dsp_itemId] = INVALID_ITEM_ID;
 	}
-    #if defined dsp_OnPlayerPickUpItem
+	#if defined dsp_OnPlayerPickUpItem
 		return dsp_OnPlayerPickUpItem(playerid, itemid);
 	#endif
 }
 #if defined _ALS_OnPlayerPickUpItem
-    #undef OnPlayerPickUpItem
+	#undef OnPlayerPickUpItem
 #else
-    #define _ALS_OnPlayerPickUpItem
+	#define _ALS_OnPlayerPickUpItem
 #endif
 #define OnPlayerPickUpItem dsp_OnPlayerPickUpItem
 #if defined dsp_OnPlayerPickUpItem

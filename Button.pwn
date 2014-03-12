@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.2.0
+	Version: 1.2.1
 
 
 	SIF/Overview
@@ -675,7 +675,7 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 	btn_Data[id][btn_link]				= INVALID_BUTTON_ID;
 
 	if(label)
-		btn_Data[id][btn_label] = CreateDynamic3DTextLabel(labeltext, labelcolour, x, y, z, streamdist, _, _, 1, world, interior, _, streamdist);
+		btn_Data[id][btn_label] = CreateDynamic3DTextLabel(labeltext, labelcolour, x, y, z, streamdist, _, _, 0, world, interior, _, streamdist);
 
 	else
 		btn_Data[id][btn_label] = Text3D:INVALID_3DTEXT_ID;
@@ -1131,14 +1131,20 @@ stock SetButtonWorld(buttonid, world)
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
-	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_WORLD, world);
-
-	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
+	if(btn_Data[buttonid][btn_world] != world)
 	{
-		Streamer_SetIntData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_WORLD, world);
-	}
+		new tmp[1];
+		tmp[0] = world;
 
-	btn_Data[buttonid][btn_world] = world;
+		Streamer_SetArrayData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_WORLD_ID, tmp);
+
+		if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
+		{
+			Streamer_SetArrayData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_WORLD_ID, tmp);
+		}
+
+		btn_Data[buttonid][btn_world] = world;
+	}
 
 	return 1;
 }
@@ -1158,14 +1164,20 @@ stock SetButtonInterior(buttonid, interior)
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
-	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_INTERIOR_ID, interior);
-
-	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
+	if(btn_Data[buttonid][btn_world] != interior)
 	{
-		Streamer_SetIntData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_INTERIOR_ID, interior);
-	}
+		new tmp[1];
+		tmp[0] = interior;
 
-	btn_Data[buttonid][btn_interior] = interior;
+		Streamer_SetArrayData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_INTERIOR_ID, tmp);
+
+		if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
+		{
+			Streamer_SetArrayData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_INTERIOR_ID, tmp);
+		}
+
+		btn_Data[buttonid][btn_world] = interior;
+	}
 
 	return 1;
 }
