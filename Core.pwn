@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.0
+	Version: 1.1.1
 
 
 	SIF/Overview
@@ -233,7 +233,11 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_SPECTATING && !IsPlayerInAnyVehicle(playerid))
 	{
-		foreach(new i : Character)
+		#if defined _FOREACH_BOT
+			foreach(new i : Character)
+		#else
+			foreach(new i : Player)
+		#endif
 		{
 			if(i == playerid)
 				continue;
@@ -269,7 +273,11 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_SPECTATING && !IsPlayerInAnyVehicle(playerid))
 	{
-		foreach(new i : Character)
+		#if defined _FOREACH_BOT
+			foreach(new i : Character)
+		#else
+			foreach(new i : Player)
+		#endif
 		{
 			if(i == playerid)
 				continue;
