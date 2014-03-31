@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.4.0
+	Version: 1.5.0
 
 
 	SIF/Overview
@@ -1192,6 +1192,7 @@ static
 Timer:		itm_InteractTimer	[MAX_PLAYERS];
 
 
+forward OnItemTypeDefined(ItemType:itemtype);
 forward OnItemCreate(itemid);
 forward OnItemCreated(itemid);
 forward OnItemDestroy(itemid);
@@ -1372,6 +1373,8 @@ stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty 
 
 	itm_TypeData[id][itm_colour]		= colour;
 	itm_TypeData[id][itm_attachBone]	= boneid;
+
+	CallLocalFunction("OnItemTypeDefined", "d", _:id);
 
 	return id;
 }
