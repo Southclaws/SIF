@@ -333,6 +333,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native SIF/Item/Events
 		native -
 
+		native OnItemTypeDefined(ItemType:itemtype)
+		{
+			Called:
+				After an item type is defined.
+
+			Parameters:
+				<itemtype> (int, ItemType)
+					The ID handle of the newly defined item type.
+
+			Returns:
+				(nothing)
+		}
+
 		native OnItemCreate(itemid)
 		{
 			Called:
