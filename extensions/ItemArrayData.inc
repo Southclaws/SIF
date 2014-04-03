@@ -31,8 +31,13 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	{
 		These can be altered by defining their values before the include line.
 
-		ITM_MAX_ARRAY_DATA
+		ITM_ARR_MAX_ARRAY_DATA
 			Maximum size an item type's array can be.
+
+		ITM_ARR_REPLACE_ITEM_EXTRADATA
+			If this is true, this extension will replace instances of
+			GetItemExtraData and SetItemExtraData with GetItemArrayDataAtCell
+			and SetItemArrayDataAtCell.
 	}
 
 	SIF/ItemArrayData/Core Functions
@@ -54,17 +59,34 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 				<size> (int)
 					Size in 32 bit cells to set the size to. Must be less than
-					ITM_MAX_ARRAY_DATA.
+					ITM_ARR_MAX_ARRAY_DATA.
 
 			Returns:
 				0
 					If the item type is invalid.
 
 				-1
-					If the size exceeds ITM_MAX_ARRAY_DATA.
+					If the size exceeds ITM_ARR_MAX_ARRAY_DATA.
 
 				1
 					If successful.
+		}
+
+		native GetItemTypeArrayDataSize(ItemType:itemtype)
+		{
+			Description:
+				Gets an item types max array data size.
+
+			Parameters:
+				<itemtype> (int, ItemType)
+					The item type to get the size from. Must be valid.
+
+			Returns:
+				-1
+					If the item type is invalid.
+
+				(int)
+					The max size for the item type's array data.
 		}
 
 		native SetItemArrayData(itemid, data[], length)
@@ -317,14 +339,28 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#if !defined ITM_MAX_ARRAY_DATA
-	#define ITM_MAX_ARRAY_DATA		(256)
+#if !defined ITM_ARR_MAX_ARRAY_DATA
+	#define ITM_ARR_MAX_ARRAY_DATA			(256)
 #endif
+
+#if !defined ITM_ARR_REPLACE_ITEM_EXTRADATA
+	#define ITM_ARR_REPLACE_ITEM_EXTRADATA	1
+#endif
+
+/*
+	If true, this script will wrap calls of the default extra data functions
+	with single-cell array equivalents.
+*/
+#if ITM_ARR_REPLACE_ITEM_EXTRADATA == 1
+	#define SetItemExtraData(%0,%1) SetItemArrayDataAtCell(%0,%1,0)
+	#define GetItemExtraData(%0) GetItemArrayDataAtCell(%0,0)
+#endif
+
 
 
 static
 	itm_arr_ItemTypeArrayMax[ITM_MAX_TYPES],
-	itm_arr_Data[ITM_MAX][ITM_MAX_ARRAY_DATA],
+	itm_arr_Data[ITM_MAX][ITM_ARR_MAX_ARRAY_DATA],
 	itm_arr_Length[ITM_MAX];
 
 
@@ -372,12 +408,20 @@ stock SetItemTypeMaxArrayData(ItemType:itemtype, size)
 	if(!IsValidItemType(itemtype))
 		return 0;
 
-	if(size > ITM_MAX_ARRAY_DATA)
+	if(size > ITM_ARR_MAX_ARRAY_DATA)
 		return -1;
 
 	itm_arr_ItemTypeArrayMax[itemtype] = size;
 
 	return 1;
+}
+
+stock GetItemTypeArrayDataSize(ItemType:itemtype)
+{
+	if(!IsValidItemType(itemtype))
+		return -1;
+
+	return itm_arr_ItemTypeArrayMax[itemtype];
 }
 
 stock SetItemArrayData(itemid, data[], length)
