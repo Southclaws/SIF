@@ -193,6 +193,22 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					On success.
 		}
 
+		native SetItemArrayDataSize(itemid, size)
+		{
+			Description:
+				Sets the array data length of an item.
+
+			Parameters:
+				-
+
+			Returns:
+				0
+					If the item is invalid.
+
+				1
+					On success.
+		}
+
 		native GetItemArrayDataSize(itemid)
 		{
 			Description:
@@ -352,7 +368,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	with single-cell array equivalents.
 */
 #if ITM_ARR_REPLACE_ITEM_EXTRADATA == 1
-	#define SetItemExtraData(%0,%1) SetItemArrayDataAtCell(%0,%1,0)
+	#define SetItemExtraData(%0,%1) SetItemArrayDataAtCell(%0,%1,0),SetItemArrayDataSize(%0,1)
 	#define GetItemExtraData(%0) GetItemArrayDataAtCell(%0,0)
 #endif
 
@@ -482,6 +498,16 @@ stock GetItemArrayDataAtCell(itemid, cell)
 		return -2;
 
 	return itm_arr_Data[itemid][cell];
+}
+
+stock SetItemArrayDataSize(itemid, size)
+{
+	if(!IsValidItem(itemid))
+		return 0;
+
+	itm_arr_Length[itemid] = size;
+
+	return 1;
 }
 
 stock GetItemArrayDataSize(itemid)
