@@ -248,7 +248,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					ID handle of the item that was created.
 		}
 
-		native SetItemExtraDataFromListItem(itemid, itemlist, index)
+		native SetItemArrayDataFromListItem(itemid, itemlist, index)
 		{
 			Description:
 				Assigns an item's extra data to that stored in the itemlist for
@@ -384,7 +384,7 @@ stock ExtractItemList(list[], length = sizeof(list))
 	if(id == -1)
 		return -1;
 
-	memcpy(itm_lst_List[id], list, list[0] * 4, length * 4);
+	memcpy(itm_lst_List[id], list, 0, length * 4);
 	itm_lst_Size[id] = 1;
 
 	while(itm_lst_Count[id] < list[0])
@@ -392,10 +392,20 @@ stock ExtractItemList(list[], length = sizeof(list))
 		itm_lst_Items[id][itm_lst_Count[id]] = list[itm_lst_Size[id]++];
 		itm_lst_ArraySize[id][itm_lst_Count[id]] = list[itm_lst_Size[id]++];
 
-		printf(" loop %d / %d, id: %d, itm_lst_Count: %d, itemtype: %d, arrsize: %d",
-			itm_lst_Size[id], length, id, itm_lst_Count[id], itm_lst_Items[id][itm_lst_Count[id]], itm_lst_ArraySize[id][itm_lst_Count[id]]);
+		memcpy(itm_lst_Array[id][itm_lst_Count[id]], list[itm_lst_Size[id]], 0, itm_lst_ArraySize[id][itm_lst_Count[id]] * 4);
 
-		memcpy(itm_lst_Array[id][itm_lst_Count[id]], list, itm_lst_Size[id] * 4, itm_lst_ArraySize[id][itm_lst_Count[id]] * 4);
+		/*
+		printf(" loop %d / %d, id: %d, itm_lst_Count: %d, itemtype: %d, arrsize: %d, arr[0]: %d, list[%d]: %d",
+			itm_lst_Size[id],
+			length,
+			id,
+			itm_lst_Count[id],
+			itm_lst_Items[id][itm_lst_Count[id]],
+			itm_lst_ArraySize[id][itm_lst_Count[id]],
+			itm_lst_Array[id][itm_lst_Count[id]][0],
+			itm_lst_Size[id],
+			list[itm_lst_Size[id]]);
+		*/
 
 		itm_lst_Size[id] += itm_lst_ArraySize[id][itm_lst_Count[id]];
 		itm_lst_Count[id]++;
@@ -492,7 +502,7 @@ stock CreateItemFromListItem(itemlist, index)
 	return itemid;
 }
 
-stock SetItemExtraDataFromListItem(itemid, itemlist, index)
+stock SetItemArrayDataFromListItem(itemid, itemlist, index)
 {
 	if(!Iter_Contains(itm_lst_Index, itemlist))
 		return 0;
