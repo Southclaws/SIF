@@ -301,14 +301,28 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#define ITM_LST_MAX_LIST_ITEMS	(256)
 #endif
 
-#define ITM_LST_MAX_LIST_SIZE	(1 + (ITM_LST_MAX_LIST_ITEMS * (2 + ITM_ARR_MAX_ARRAY_DATA))) // 16,513
+#define ITM_LST_MAX_LIST_SIZE	(1 + (ITM_LST_MAX_LIST_ITEMS * (10 + ITM_ARR_MAX_ARRAY_DATA)))
 
-#define ITM_LST_OF_ITEMS(%0)	(1 + (%0 * (2 + ITM_ARR_MAX_ARRAY_DATA)))
+#define ITM_LST_OF_ITEMS(%0)	(1 + (%0 * (10 + ITM_ARR_MAX_ARRAY_DATA)))
 
 
 static
 			// Contains a simple list of item types for lookups.
 			itm_lst_Items[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
+
+			// World position
+Float:		itm_lst_WorldX[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
+Float:		itm_lst_WorldY[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
+Float:		itm_lst_WorldZ[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
+
+				// Rotation
+Float:		itm_lst_RotationX[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
+Float:		itm_lst_RotationY[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
+Float:		itm_lst_RotationZ[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
+
+			// World and Interior
+			itm_lst_VirtualWorld[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
+			itm_lst_Interior[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
 
 			// Contains the item extra data for returning.
 			itm_lst_Array[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS][ITM_ARR_MAX_ARRAY_DATA],
@@ -328,6 +342,14 @@ static
 				item blocks
 				[
 					item type
+					world x
+					world y
+					world z
+					rotation x
+					rotation y
+					rotation z
+					virtual world
+					interior
 					array data size
 					array data[...]
 				]
@@ -361,14 +383,33 @@ stock CreateItemList(items[], maxitems = sizeof(items))
 
 	for(new i; i < maxitems; i++)
 	{
-		itm_lst_Items[id][i] = itm_lst_List[id][itm_lst_Size[id]++] = _:GetItemType(items[i]);
-
-		itm_lst_ArraySize[id][i] = itm_lst_List[id][itm_lst_Size[id]++] = GetItemArrayDataSize(items[i]);
-
-		GetItemArrayData(items[i], itm_lst_List[id][itm_lst_Size[id]]);
+		itm_lst_Items[id][i] = _:GetItemType(items[i]);
+		GetItemPos(items[i], itm_lst_WorldX[id][i], itm_lst_WorldY[id][i], itm_lst_WorldZ[id][i]);
+		GetItemRot(items[i], itm_lst_RotationX[id][i], itm_lst_RotationY[id][i], itm_lst_RotationZ[id][i]);
+		itm_lst_VirtualWorld[id][i] = GetItemWorld(items[i]);
+		itm_lst_Interior[id][i] = GetItemInterior(items[i]);
+		itm_lst_ArraySize[id][i] = GetItemArrayDataSize(items[i]);
 		GetItemArrayData(items[i], itm_lst_Array[id][i]);
 
-		itm_lst_Size[id] += GetItemArrayDataSize(items[i]);
+		itm_lst_List[id][itm_lst_Size[id]++] = itm_lst_Items[id][i];
+
+		itm_lst_List[id][itm_lst_Size[id]++] = _:itm_lst_WorldX[id][i];
+		itm_lst_List[id][itm_lst_Size[id]++] = _:itm_lst_WorldY[id][i];
+		itm_lst_List[id][itm_lst_Size[id]++] = _:itm_lst_WorldZ[id][i];
+
+		itm_lst_List[id][itm_lst_Size[id]++] = _:itm_lst_RotationX[id][i];
+		itm_lst_List[id][itm_lst_Size[id]++] = _:itm_lst_RotationY[id][i];
+		itm_lst_List[id][itm_lst_Size[id]++] = _:itm_lst_RotationZ[id][i];
+
+		itm_lst_List[id][itm_lst_Size[id]++] = itm_lst_VirtualWorld[id][i];
+		itm_lst_List[id][itm_lst_Size[id]++] = itm_lst_Interior[id][i];
+
+		itm_lst_List[id][itm_lst_Size[id]++] = itm_lst_ArraySize[id][i];
+
+		memcpy(itm_lst_List[id], itm_lst_Array[id][i], itm_lst_Size[id] * 4, itm_lst_ArraySize[id][i] * 4);
+
+		itm_lst_Size[id] += itm_lst_ArraySize[id][i];
+
 		itm_lst_Count[id]++;
 	}
 
@@ -390,7 +431,19 @@ stock ExtractItemList(list[], length = sizeof(list))
 	while(itm_lst_Count[id] < list[0])
 	{
 		itm_lst_Items[id][itm_lst_Count[id]] = list[itm_lst_Size[id]++];
-		itm_lst_ArraySize[id][itm_lst_Count[id]] = list[itm_lst_Size[id]++];
+
+		itm_lst_WorldX[id][itm_lst_Count[id]]		= Float:list[itm_lst_Size[id]++];
+		itm_lst_WorldY[id][itm_lst_Count[id]]		= Float:list[itm_lst_Size[id]++];
+		itm_lst_WorldZ[id][itm_lst_Count[id]]		= Float:list[itm_lst_Size[id]++];
+
+		itm_lst_RotationX[id][itm_lst_Count[id]]	= Float:list[itm_lst_Size[id]++];
+		itm_lst_RotationY[id][itm_lst_Count[id]]	= Float:list[itm_lst_Size[id]++];
+		itm_lst_RotationZ[id][itm_lst_Count[id]]	= Float:list[itm_lst_Size[id]++];
+
+		itm_lst_VirtualWorld[id][itm_lst_Count[id]]	= list[itm_lst_Size[id]++];
+		itm_lst_Interior[id][itm_lst_Count[id]]		= list[itm_lst_Size[id]++];
+
+		itm_lst_ArraySize[id][itm_lst_Count[id]]	= list[itm_lst_Size[id]++];
 
 		memcpy(itm_lst_Array[id][itm_lst_Count[id]], list[itm_lst_Size[id]], 0, itm_lst_ArraySize[id][itm_lst_Count[id]] * 4);
 
@@ -469,6 +522,46 @@ stock ItemType:GetItemListItem(itemlist, index)
 		return INVALID_ITEM_TYPE;
 
 	return ItemType:itm_lst_Items[itemlist][index];
+}
+
+stock GetItemListItemPos(itemlist, index, &Float:x, &Float:y, &Float:z)
+{
+	if(!Iter_Contains(itm_lst_Index, itemlist))
+		return 0;
+
+	x = itm_lst_WorldX[itemlist][index];
+	y = itm_lst_WorldY[itemlist][index];
+	z = itm_lst_WorldZ[itemlist][index];
+
+	return 1;
+}
+
+stock GetItemListItemRot(itemlist, index, &Float:x, &Float:y, &Float:z)
+{
+	if(!Iter_Contains(itm_lst_Index, itemlist))
+		return 0;
+
+	x = itm_lst_RotationX[itemlist][index];
+	y = itm_lst_RotationY[itemlist][index];
+	z = itm_lst_RotationZ[itemlist][index];
+
+	return 1;
+}
+
+stock GetItemListItemWorld(itemlist, index)
+{
+	if(!Iter_Contains(itm_lst_Index, itemlist))
+		return 0;
+
+	return itm_lst_VirtualWorld[itemlist][index];
+}
+
+stock GetItemListItemInterior(itemlist, index)
+{
+	if(!Iter_Contains(itm_lst_Index, itemlist))
+		return 0;
+
+	return itm_lst_Interior[itemlist][index];
 }
 
 stock GetItemListItemArrayData(itemlist, index, output[])
