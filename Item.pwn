@@ -1091,6 +1091,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#include <SIF/Button.pwn>
 #endif
 
+//#if defined DEBUG_LABELS_ITEM
+//	#include <SIF/extensions/DebugLabels.pwn>
+//#endif
+
 #include <YSI\y_iterate>
 #include <YSI\y_timers>
 #include <YSI\y_hooks>
@@ -1252,6 +1256,10 @@ hook OnGameModeInit()
 	{
 		itm_ButtonIndex[i] = INVALID_ITEM_ID;
 	}
+
+//	#if defined DEBUG_LABELS_ITEM
+//		DefineDebugLabelType("ITEM", 0xFFFF00FF);
+//	#endif
 
 	return 1;
 }

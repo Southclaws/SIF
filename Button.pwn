@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.2.1
+	Version: 1.2.2
 
 
 	SIF/Overview
@@ -536,6 +536,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#include <SIF/Core.pwn>
 #endif
 
+#if DEBUG_LABELS_BUTTON == true
+	#include <SIF/extensions/DebugLabels.pwn>
+#endif
+
 #include <YSI\y_iterate>
 #include <YSI\y_timers>
 #include <YSI\y_hooks>
@@ -601,7 +605,13 @@ Float:		btn_distance
 
 new
 			btn_Data[BTN_MAX][E_BTN_DATA],
-Iterator:	btn_Index<BTN_MAX>;
+Iterator:	btn_Index<BTN_MAX>
+	#if DEBUG_LABELS_BUTTON
+		,
+			btn_DebugLabelType,
+			btn_DebugLabelID[BTN_MAX]
+	#endif
+		;
 
 static
 			btn_CurrentlyNear[MAX_PLAYERS][BTN_MAX_INRANGE],
@@ -635,6 +645,10 @@ hook OnGameModeInit()
 	{
 		btn_CurrentlyPressing[i] = INVALID_BUTTON_ID;
 	}
+
+	#if DEBUG_LABELS_BUTTON == true
+		btn_DebugLabelType = DefineDebugLabelType("BUTTON", 0xFF0000FF);
+	#endif
 }
 
 hook OnPlayerConnect(playerid)
@@ -689,6 +703,11 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 
 	Iter_Add(btn_Index, id);
 
+	#if DEBUG_LABELS_BUTTON == true
+		btn_DebugLabelID[id] = CreateDebugLabel(btn_DebugLabelType, id, x, y, z);
+		UpdateButtonDebugLabel(id);
+	#endif
+
 	return id;
 }
 stock DestroyButton(buttonid)
@@ -722,6 +741,10 @@ stock DestroyButton(buttonid)
 
 	Iter_Remove(btn_Index, buttonid);
 
+	#if DEBUG_LABELS_BUTTON == true
+		DestroyDebugLabel(btn_DebugLabelID[buttonid]);
+	#endif
+
 	return 1;
 }
 
@@ -733,6 +756,11 @@ stock LinkTP(buttonid1, buttonid2)
 
 	btn_Data[buttonid1][btn_link] = buttonid2;
 	btn_Data[buttonid2][btn_link] = buttonid1;
+
+	#if DEBUG_LABELS_BUTTON == true
+		UpdateButtonDebugLabel(buttonid1);
+		UpdateButtonDebugLabel(buttonid2);
+	#endif
 
 	return 1;
 }
@@ -751,6 +779,11 @@ stock UnLinkTP(buttonid1, buttonid2)
 
 	btn_Data[buttonid1][btn_link] = INVALID_BUTTON_ID;
 	btn_Data[buttonid2][btn_link] = INVALID_BUTTON_ID;
+
+	#if DEBUG_LABELS_BUTTON == true
+		UpdateButtonDebugLabel(buttonid1);
+		UpdateButtonDebugLabel(buttonid2);
+	#endif
 
 	return 1;
 }
@@ -982,6 +1015,16 @@ process_LeaveDynamicArea(playerid, areaid)
 	}
 }
 
+#if DEBUG_LABELS_BUTTON == true
+	UpdateButtonDebugLabel(buttonid)
+	{
+		new string[64];
+
+		format(string, sizeof(string), "EXDATA: %d SIZE: %.1f LINK: %d", btn_Data[buttonid][btn_exData], btn_Data[buttonid][btn_size], btn_Data[buttonid][btn_link]);
+
+		UpdateDebugLabelString(btn_DebugLabelID[buttonid], string);
+	}
+#endif
 
 /*==============================================================================
 
@@ -1113,6 +1156,10 @@ stock SetButtonSize(buttonid, Float:size)
 	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_SIZE, size);
 	btn_Data[buttonid][btn_size]y = size;
 
+	#if DEBUG_LABELS_BUTTON == true
+		UpdateButtonDebugLabel(buttonid);
+	#endif
+
 	return 1;
 }
 
@@ -1224,6 +1271,10 @@ stock SetButtonExtraData(itemid, data)
 
 	btn_Data[itemid][btn_exData] = data;
 
+	#if DEBUG_LABELS_BUTTON == true
+		UpdateButtonDebugLabel(buttonid);
+	#endif
+
 	return 1;
 }
 stock GetButtonExtraData(itemid)
@@ -1247,15 +1298,52 @@ stock GetPlayerPressingButton(playerid)
 stock GetPlayerButtonID(playerid)
 {
 	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetPlayerButtonID]", playerid);
-	foreach(new i : btn_Index)
+
+	if(!IsPlayerConnected(playerid))
+		return INVALID_BUTTON_ID;
+
+	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
+		return INVALID_BUTTON_ID;
+
+	new
+		Float:x,
+		Float:y,
+		Float:z,
+		curid,
+		closestid,
+		Float:curdistance,
+		Float:closetsdistance = 99999.9;
+
+	GetPlayerPos(playerid, x, y, z);
+
+	foreach(new i : btn_CurrentlyNearIndex[playerid])
 	{
-		if(IsPlayerInDynamicArea(playerid, btn_Data[i][btn_area]))
+		curid = btn_CurrentlyNear[playerid][i];
+
+		curdistance = sif_Distance(x, y, z, btn_Data[curid][btn_posX], btn_Data[curid][btn_posY], btn_Data[curid][btn_posZ]);
+
+		if(curdistance < closetsdistance)
 		{
-			return i;
+			closetsdistance = curdistance;
+			closestid = curid;
 		}
 	}
 
-	return INVALID_BUTTON_ID;
+	return closestid;
+}
+
+stock GetPlayerButtonList(playerid, list[], &size)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
+		return 0;
+
+	foreach(new i : btn_CurrentlyNearIndex[playerid])
+		list[size++] = btn_CurrentlyNear[playerid][i];
+
+	return 1;
 }
 
 stock SetButtonMessage(buttonid, msg[])
