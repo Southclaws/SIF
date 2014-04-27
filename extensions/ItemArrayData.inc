@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.0
+	Version: 1.1.0
 
 
 	SIF/Overview
@@ -360,7 +360,11 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #endif
 
 #if !defined ITM_ARR_REPLACE_ITEM_EXTRADATA
-	#define ITM_ARR_REPLACE_ITEM_EXTRADATA	1
+	#define ITM_ARR_REPLACE_ITEM_EXTRADATA	(1)
+#endif
+
+#if !defined ITM_ARR_ARRAY_SIZE_PROTECT
+	#define ITM_ARR_ARRAY_SIZE_PROTECT		(true)
 #endif
 
 /*
@@ -479,7 +483,17 @@ stock SetItemArrayDataAtCell(itemid, data, cell)
 		return -1;
 
 	if(cell > itm_arr_Length[itemid])
-		return -2;
+	{
+		#if ITM_ARR_ARRAY_SIZE_PROTECT == false
+
+			itm_arr_Length[itemid] = cell;
+
+		#else
+
+			return -2;
+
+		#endif
+	}
 
 	itm_arr_Data[itemid][cell] = data;
 
@@ -489,13 +503,26 @@ stock SetItemArrayDataAtCell(itemid, data, cell)
 stock GetItemArrayDataAtCell(itemid, cell)
 {
 	if(!IsValidItem(itemid))
+	{
+		print("[GetItemArrayDataAtCell] ERROR: Invalid item ID");
 		return 0;
+	}
 
 	if(cell > itm_arr_ItemTypeArrayMax[GetItemType(itemid)])
+	{
+		print("[GetItemArrayDataAtCell] ERROR: Cell exceeds item type max");
 		return -1;
+	}
 
-	if(cell > itm_arr_Length[itemid])
-		return -2;
+	#if ITM_ARR_ARRAY_SIZE_PROTECT == true
+
+		if(cell > itm_arr_Length[itemid])
+		{
+			print("[GetItemArrayDataAtCell] ERROR: Cell exceeds item length");
+			return -2;
+		}
+
+	#endif
 
 	return itm_arr_Data[itemid][cell];
 }
