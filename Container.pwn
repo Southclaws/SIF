@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.3
+	Version: 1.1.4
 
 
 	SIF/Overview
@@ -457,6 +457,13 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Reason:
 				-
 		}
+
+		YSI/OnScriptInit
+		{
+			Reason:
+				Zero initialised array cells.
+		}
+
 		SIF/Button/OnButtonPress
 		{
 			Reason:
@@ -552,11 +559,7 @@ forward OnItemRemovedFromContainer(containerid, slotid, playerid);
 ==============================================================================*/
 
 
-#if defined FILTERSCRIPT
-hook OnFilterScriptInit()
-#else
-hook OnGameModeInit()
-#endif
+hook OnScriptInit()
 {
 	for(new i; i < ITM_MAX; i++)
 		cnt_ItemContainer[i] = INVALID_CONTAINER_ID;

@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.0
+	Version: 1.0.1
 
 
 	SIF/Overview
@@ -403,8 +403,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					new id = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
 
 					RemoveItemFromContainer(cnt_CurrentContainer[playerid], cnt_SelectedSlot[playerid], playerid);
-					CreateItemInWorld(id);
-					GiveWorldItemToPlayer(playerid, id, 1);
+					GiveWorldItemToPlayer(playerid, id);
 					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 				}
 				else

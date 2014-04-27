@@ -241,11 +241,7 @@ public OnPlayerSelectExtraItem(playerid, item)
 	forward nbk_OnPlayerSelectExtraItem(playerid, item);
 #endif
 
-#if defined FILTERSCRIPT
-hook OnFilterScriptInit()
-#else
-hook OnGameModeInit()
-#endif
+hook OnScriptInit()
 {
 	nbk_PageLeft				=TextDrawCreate(280.000000, 320.000000, "<");
 	TextDrawAlignment			(nbk_PageLeft, 2);

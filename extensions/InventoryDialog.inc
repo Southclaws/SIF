@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.0
+	Version: 1.0.1
 
 
 	SIF/Overview
@@ -384,7 +384,14 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		SAMP/OnDialogResponse
 		{
 			Reason:
-				-
+				To handle the dialogs used in the script for listing inventory
+				items and item options.
+		}
+
+		YSI/OnScriptInit
+		{
+			Reason:
+				Zero initialised array cells.
 		}
 	}
 
@@ -439,11 +446,7 @@ forward OnPlayerSelectInventoryOpt(playerid, option);
 ==============================================================================*/
 
 
-#if defined FILTERSCRIPT
-hook OnFilterScriptInit()
-#else
-hook OnGameModeInit()
-#endif
+hook OnScriptInit()
 {
 	for(new i; i < MAX_PLAYERS; i++)
 	{
@@ -480,7 +483,11 @@ stock DisplayPlayerInventory(playerid)
 	
 	for(new i; i < INV_MAX_SLOTS; i++)
 	{
-		if(!IsValidItem(GetInventorySlotItem(playerid, i))) strcat(list, "<Empty>\n");
+
+		if(!IsValidItem(GetInventorySlotItem(playerid, i)))
+		{
+			strcat(list, "<Empty>\n");
+		}
 		else
 		{
 			GetItemName(GetInventorySlotItem(playerid, i), tmp);
@@ -616,7 +623,6 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
 					RemoveItemFromInventory(playerid, inv_SelectedSlot[playerid]);
-					CreateItemInWorld(itemid);
 					GiveWorldItemToPlayer(playerid, itemid, 1);
 					DisplayPlayerInventory(playerid);
 				}
@@ -633,7 +639,6 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
 					RemoveItemFromInventory(playerid, inv_SelectedSlot[playerid]);
-					CreateItemInWorld(itemid);
 					GiveWorldItemToPlayer(playerid, itemid, 1);
 
 					PlayerUseItem(playerid);
@@ -656,7 +661,6 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
 					RemoveItemFromInventory(playerid, inv_SelectedSlot[playerid]);
-					CreateItemInWorld(itemid);
 					GiveWorldItemToPlayer(playerid, itemid, 1);
 
 					PlayerDropItem(playerid);

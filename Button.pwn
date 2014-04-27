@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.2.2
+	Version: 1.2.3
 
 
 	SIF/Overview
@@ -507,6 +507,12 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				or OnButtonRelease.
 		}
 
+		YSI/OnScriptInit
+		{
+			Reason:
+				Zero initialised array cells.
+		}
+
 		Streamer/OnPlayerEnterDynamicArea
 		{
 			Reason:
@@ -632,13 +638,9 @@ forward OnPlayerLeaveButtonArea(playerid, buttonid);
 ==============================================================================*/
 
 
-#if defined FILTERSCRIPT
-hook OnFilterScriptInit()
-#else
-hook OnGameModeInit()
-#endif
+hook OnScriptInit()
 {
-	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnInit]");
+	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnScriptInit]");
 	Iter_Init(btn_CurrentlyNearIndex);
 
 	for(new i; i < MAX_PLAYERS; i++)

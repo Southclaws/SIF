@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 2.0.2
+	Version: 2.0.3
 
 
 	SIF/Overview
@@ -304,13 +304,11 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				To detect if a player presses Y to put an item in their
 				inventory or H to access their inventory.
 		}
-		SAMP/OnDialogResponse
+		SIF/Item/OnItemDestroy
 		{
 			Reason:
-				To handle the dialogs used in the script for listing inventory
-				items and item options.
+				To remove an itemid from the inventory list when destroyed.
 		}
-		OnItemDestroy
 	}
 
 ==============================================================================*/
@@ -362,11 +360,7 @@ forward OnItemRemovedFromInventory(playerid, itemid, slot);
 ==============================================================================*/
 
 
-#if defined FILTERSCRIPT
-hook OnFilterScriptInit()
-#else
-hook OnGameModeInit()
-#endif
+hook OnScriptInit()
 {
 	for(new i; i < MAX_PLAYERS; i++)
 	{
