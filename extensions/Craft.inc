@@ -92,7 +92,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Reason:
 				To give functionality to the "Combine" option.
 		}
-		SAMP/hook OnDialogResponse
+		SAMP/OnDialogResponse
 		{
 			Reason:
 				To handle a dialog created by the module for displaying a list of

@@ -1035,6 +1035,7 @@ process_LeaveDynamicArea(playerid, areaid)
 	}
 #endif
 
+
 /*==============================================================================
 
 	Interface Functions
