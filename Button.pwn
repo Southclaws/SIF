@@ -536,8 +536,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#include <SIF/Core.pwn>
 #endif
 
-#if DEBUG_LABELS_BUTTON == true
-	#include <SIF/extensions/DebugLabels.pwn>
+#if defined DEBUG_LABELS_BUTTON
+	#include <SIF/extensions/DebugLabels.inc>
 #endif
 
 #include <YSI\y_iterate>
@@ -606,7 +606,7 @@ Float:		btn_distance
 new
 			btn_Data[BTN_MAX][E_BTN_DATA],
 Iterator:	btn_Index<BTN_MAX>
-	#if DEBUG_LABELS_BUTTON
+	#if defined DEBUG_LABELS_BUTTON
 		,
 			btn_DebugLabelType,
 			btn_DebugLabelID[BTN_MAX]
@@ -646,7 +646,7 @@ hook OnGameModeInit()
 		btn_CurrentlyPressing[i] = INVALID_BUTTON_ID;
 	}
 
-	#if DEBUG_LABELS_BUTTON == true
+	#if defined DEBUG_LABELS_BUTTON
 		btn_DebugLabelType = DefineDebugLabelType("BUTTON", 0xFF0000FF);
 	#endif
 }
@@ -703,7 +703,7 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 
 	Iter_Add(btn_Index, id);
 
-	#if DEBUG_LABELS_BUTTON == true
+	#if defined DEBUG_LABELS_BUTTON
 		btn_DebugLabelID[id] = CreateDebugLabel(btn_DebugLabelType, id, x, y, z);
 		UpdateButtonDebugLabel(id);
 	#endif
@@ -716,17 +716,21 @@ stock DestroyButton(buttonid)
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
+	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[DestroyButton] process_LeaveDynamicArea calls");
 	foreach(new i : Player)
 	{
 		if(IsPlayerInDynamicArea(i, btn_Data[buttonid][btn_area]))
 			process_LeaveDynamicArea(i, btn_Data[buttonid][btn_area]);
 	}
 
+	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[DestroyButton] Destroying dynamic area");
 	DestroyDynamicArea(btn_Data[buttonid][btn_area]);
 
+	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[DestroyButton] Destroying 3D text label");
 	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
 		DestroyDynamic3DTextLabel(btn_Data[buttonid][btn_label]);
 
+	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[DestroyButton] Clearing array data");
 	btn_Data[buttonid][btn_area]		= -1;
 	btn_Data[buttonid][btn_label]		= Text3D:INVALID_3DTEXT_ID;
 
@@ -739,12 +743,15 @@ stock DestroyButton(buttonid)
 	btn_Data[buttonid][btn_link]		= INVALID_BUTTON_ID;
 	btn_Data[buttonid][btn_text][0]		= EOS;
 
+	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[DestroyButton] Removing from button index");
 	Iter_Remove(btn_Index, buttonid);
 
-	#if DEBUG_LABELS_BUTTON == true
+	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[DestroyButton] Destroying debug label");
+	#if defined DEBUG_LABELS_BUTTON
 		DestroyDebugLabel(btn_DebugLabelID[buttonid]);
 	#endif
 
+	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[DestroyButton] End of function");
 	return 1;
 }
 
@@ -757,7 +764,7 @@ stock LinkTP(buttonid1, buttonid2)
 	btn_Data[buttonid1][btn_link] = buttonid2;
 	btn_Data[buttonid2][btn_link] = buttonid1;
 
-	#if DEBUG_LABELS_BUTTON == true
+	#if defined DEBUG_LABELS_BUTTON
 		UpdateButtonDebugLabel(buttonid1);
 		UpdateButtonDebugLabel(buttonid2);
 	#endif
@@ -780,7 +787,7 @@ stock UnLinkTP(buttonid1, buttonid2)
 	btn_Data[buttonid1][btn_link] = INVALID_BUTTON_ID;
 	btn_Data[buttonid2][btn_link] = INVALID_BUTTON_ID;
 
-	#if DEBUG_LABELS_BUTTON == true
+	#if defined DEBUG_LABELS_BUTTON
 		UpdateButtonDebugLabel(buttonid1);
 		UpdateButtonDebugLabel(buttonid2);
 	#endif
@@ -1015,7 +1022,7 @@ process_LeaveDynamicArea(playerid, areaid)
 	}
 }
 
-#if DEBUG_LABELS_BUTTON == true
+#if defined DEBUG_LABELS_BUTTON
 	UpdateButtonDebugLabel(buttonid)
 	{
 		new string[64];
@@ -1156,7 +1163,7 @@ stock SetButtonSize(buttonid, Float:size)
 	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_SIZE, size);
 	btn_Data[buttonid][btn_size]y = size;
 
-	#if DEBUG_LABELS_BUTTON == true
+	#if defined DEBUG_LABELS_BUTTON
 		UpdateButtonDebugLabel(buttonid);
 	#endif
 
@@ -1271,7 +1278,7 @@ stock SetButtonExtraData(itemid, data)
 
 	btn_Data[itemid][btn_exData] = data;
 
-	#if DEBUG_LABELS_BUTTON == true
+	#if defined DEBUG_LABELS_BUTTON
 		UpdateButtonDebugLabel(buttonid);
 	#endif
 
