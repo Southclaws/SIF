@@ -451,7 +451,7 @@ stock SetItemArrayData(itemid, data[], length)
 
 	if(length > itm_arr_ItemTypeArrayMax[GetItemType(itemid)])
 	{
-		print("ERROR: [SetItemArrayData] data length exceeds item type data size.");
+		printf("ERROR: [SetItemArrayData] data length %d exceeds item type data size of %d.", length, itm_arr_ItemTypeArrayMax[GetItemType(itemid)]);
 		return -1;
 	}
 
@@ -508,9 +508,11 @@ stock GetItemArrayDataAtCell(itemid, cell)
 		return 0;
 	}
 
-	if(cell > itm_arr_ItemTypeArrayMax[GetItemType(itemid)])
+	new ItemType:itemtype = GetItemType(itemid);
+
+	if(cell > itm_arr_ItemTypeArrayMax[itemtype])
 	{
-		print("[GetItemArrayDataAtCell] ERROR: Cell exceeds item type max");
+		printf("[GetItemArrayDataAtCell] ERROR: Cell %d exceeds item type (%d) max of %d.", cell, _:itemtype, itm_arr_ItemTypeArrayMax[itemtype]);
 		return -1;
 	}
 
@@ -518,7 +520,7 @@ stock GetItemArrayDataAtCell(itemid, cell)
 
 		if(cell > itm_arr_Length[itemid])
 		{
-			print("[GetItemArrayDataAtCell] ERROR: Cell exceeds item length");
+			printf("[GetItemArrayDataAtCell] ERROR: Cell %d exceeds item (%d) length of %d.", cell, itemid, itm_arr_Length[itemid]);
 			return -2;
 		}
 
