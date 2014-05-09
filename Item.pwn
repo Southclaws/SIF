@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.6.0
+	Version: 1.7.1
 
 
 	SIF/Overview
@@ -1251,6 +1251,9 @@ forward OnItemRemovedFromPlayer(playerid, itemid);
 forward OnItemNameRender(itemid);
 
 
+static ITEM_DEBUG;
+
+
 /*==============================================================================
 
 	Zeroing
@@ -1260,7 +1263,9 @@ forward OnItemNameRender(itemid);
 
 hook OnScriptInit()
 {
-	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnScriptInit]");
+	ITEM_DEBUG = sif_debug_register_handler("SIF/Item");
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnScriptInit]");
+
 	for(new i; i < MAX_PLAYERS; i++)
 	{
 		itm_Holding[i] = INVALID_ITEM_ID;
@@ -1286,7 +1291,7 @@ hook OnScriptInit()
 
 hook OnPlayerConnect(playerid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerConnect]");
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerConnect]");
 	itm_Holding[playerid]		= INVALID_ITEM_ID;
 	itm_Interacting[playerid]	= INVALID_ITEM_ID;
 }
@@ -1301,7 +1306,7 @@ hook OnPlayerConnect(playerid)
 
 stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[CreateItem]");
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem]");
 	new id = Iter_Free(itm_Index);
 
 	if(id == -1)
@@ -1339,7 +1344,7 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 
 stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[DestroyItem]");
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DestroyItem]");
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
@@ -1395,7 +1400,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 
 stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, colour = -1, boneid = 6)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[DefineItemType]");
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType]");
 	new ItemType:id;
 
 	while(id < ITM_MAX_TYPES && itm_TypeData[id][itm_used])
@@ -1435,7 +1440,7 @@ stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty 
 
 stock ShiftItemTypeIndex(ItemType:start, amount)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[ShiftItemTypeIndex]");
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[ShiftItemTypeIndex]");
 	if(!(start <= (start + ItemType:amount) < ITM_MAX_TYPES))
 		return 0;
 
@@ -1495,8 +1500,11 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 
 stock PlayerPickUpItem(playerid, itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[PlayerPickUpItem]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[PlayerPickUpItem]")<playerid>;
 	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 		return 0;
 
 	new
@@ -1539,7 +1547,7 @@ stock PlayerPickUpItem(playerid, itemid)
 
 stock PlayerDropItem(playerid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[PlayerDropItem]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[PlayerDropItem]")<playerid>;
 	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
 		return 0;
 
@@ -1559,7 +1567,7 @@ stock PlayerDropItem(playerid)
 
 stock PlayerGiveItem(playerid, targetid, call = true)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[PlayerGiveItem]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[PlayerGiveItem]")<playerid>;
 	if(!(0 <= playerid < MAX_PLAYERS))
 		return 0;
 
@@ -1578,7 +1586,7 @@ stock PlayerGiveItem(playerid, targetid, call = true)
 		return 0;
 
 	if(Iter_Contains(itm_Index, itm_Holding[targetid]))
-		return -1;
+		return 0;
 
 	new
 		Float:x1,
@@ -1618,13 +1626,13 @@ stock PlayerGiveItem(playerid, targetid, call = true)
 
 stock PlayerUseItem(playerid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[PlayerUseItem]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[PlayerUseItem]")<playerid>;
 	return internal_OnPlayerUseItem(playerid, itm_Holding[playerid]);
 }
 
 stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[GiveWorldItemToPlayer]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[GiveWorldItemToPlayer]")<playerid>;
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
@@ -1648,11 +1656,11 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 
 	if(Iter_Contains(itm_WorldIndex, itemid))
 	{
-		sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[GiveWorldItemToPlayer] Item in world, destroying object", playerid);
+		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Item in world, destroying object")<playerid>;
 		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
-		sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[GiveWorldItemToPlayer] Destroying button", playerid);
+		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Destroying button")<playerid>;
 		DestroyButton(itm_Data[itemid][itm_button]);
-		sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[GiveWorldItemToPlayer] Resetting array data", playerid);
+		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Resetting array data")<playerid>;
 		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
 
 		itm_Data[itemid][itm_objId] = -1;
@@ -1668,30 +1676,30 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 	if(itm_TypeData[type][itm_size] == ITEM_SIZE_CARRY)
 		SetPlayerSpecialAction(playerid, SPECIAL_ACTION_CARRY);
 
-	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[GiveWorldItemToPlayer] Removing item from world index", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Removing item from world index")<playerid>;
 	Iter_Remove(itm_WorldIndex, itemid);
 
 	if(call)
 	{
-		sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[GiveWorldItemToPlayer] Calling OnPlayerGetItem", playerid);
+		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Calling OnPlayerGetItem")<playerid>;
 		if(CallLocalFunction("OnPlayerGetItem", "dd", playerid, itemid))
 			return 0;
 
-		sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[GiveWorldItemToPlayer] Checking if item still exists", playerid);
+		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Checking if item still exists")<playerid>;
 		if(!Iter_Contains(itm_Index, itemid))
 		{
-			sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[GiveWorldItemToPlayer] Item does not exist, end of function", playerid);
+			sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Item does not exist, end of function")<playerid>;
 			return 0;
 		}
 	}
 
-	sif_debug(SIF_DEBUG_LEVEL_CORE_DEEP, "[GiveWorldItemToPlayer] End of function", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] End of function")<playerid>;
 	return 1;
 }
 
 stock RemoveCurrentItem(playerid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CORE, "[RemoveCurrentItem]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[RemoveCurrentItem]")<playerid>;
 	if(!(0 <= playerid < MAX_PLAYERS))
 		return INVALID_ITEM_ID;
 
@@ -1740,7 +1748,7 @@ CreateItemInWorld(itemid,
 	Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0,
 	Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERNAL, "[CreateItemInWorld]");
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItemInWorld]");
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
@@ -1818,7 +1826,7 @@ CreateItemInWorld(itemid,
 
 stock RemoveItemFromWorld(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERNAL, "[RemoveItemFromWorld]");
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[RemoveItemFromWorld]");
 	if(!Iter_Contains(itm_Index, _:itemid))return 0;
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
@@ -1849,59 +1857,76 @@ stock RemoveItemFromWorld(itemid)
 
 hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerKeyStateChange]");
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerKeyStateChange]");
 	if(IsPlayerInAnyVehicle(playerid) || GetPlayerState(playerid) == PLAYER_STATE_SPECTATING)
 		return 1;
 
 	if(newkeys & KEY_NO)
 	{
-		new animidx = GetPlayerAnimationIndex(playerid);
-
-		if( (animidx == 1164 || animidx == 1189) && itm_Interacting[playerid] == INVALID_ITEM_ID && Iter_Contains(itm_Index, itm_Holding[playerid]))
-		{
-			foreach(new i : Player)
-			{
-				if(i == playerid)
-					continue;
-
-				if(itm_Holding[i] != INVALID_ITEM_ID)
-					continue;
-
-				if(itm_Interacting[i] != INVALID_ITEM_ID)
-					continue;
-
-				if(IsPlayerInAnyVehicle(i))
-					continue;
-
-				if(GetPlayerWeapon(i) != 0)
-					continue;
-
-				if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]))
-				{
-					PlayerGiveItem(playerid, i, 1);
-					return 1;
-				}
-			}
-
-			PlayerDropItem(playerid);
-		}
+		_PlayerKeyHandle_Drop(playerid);
 	}
 	if(newkeys & 16)
 	{
-		new animidx = GetPlayerAnimationIndex(playerid);
-
-		if( (animidx == 1164 || animidx == 1189) && itm_Interacting[playerid] == INVALID_ITEM_ID && Iter_Contains(itm_Index, itm_Holding[playerid]))
-		{
-			PlayerUseItem(playerid);
-		}
+		_PlayerKeyHandle_Use(playerid);
 	}
 	return 1;
+}
+
+_PlayerKeyHandle_Drop(playerid)
+{
+	new animidx = GetPlayerAnimationIndex(playerid);
+
+	if(!sif_IsIdleAnim(animidx))
+		return 0;
+
+	if(itm_Interacting[playerid] != INVALID_ITEM_ID)
+		return -1;
+
+	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+		return -2;
+
+	// TODO: Replace this bit with some more abstracted code
+	// And improve near-player checks to use button style "near"-indexing.
+	foreach(new i : Player)
+	{
+		if(i == playerid)
+			continue;
+
+		if(itm_Holding[i] != INVALID_ITEM_ID)
+			continue;
+
+		if(itm_Interacting[i] != INVALID_ITEM_ID)
+			continue;
+
+		if(IsPlayerInAnyVehicle(i))
+			continue;
+
+		if(IsPlayerInDynamicArea(playerid, gPlayerArea[i]))
+		{
+			if(PlayerGiveItem(playerid, i, 1))
+				return 1;
+		}
+	}
+
+	PlayerDropItem(playerid);
+
+	return 1;
+}
+
+_PlayerKeyHandle_Use(playerid)
+{
+	new animidx = GetPlayerAnimationIndex(playerid);
+
+	if(sif_IsIdleAnim(animidx) && itm_Interacting[playerid] == INVALID_ITEM_ID && Iter_Contains(itm_Index, itm_Holding[playerid]))
+	{
+		PlayerUseItem(playerid);
+	}
 }
 
 
 public OnPlayerEnterPlayerArea(playerid, targetid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerEnterPlayerArea]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerEnterPlayerArea]")<playerid>;
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 	{
 		ShowActionText(playerid, "Press N to give item");
@@ -1909,6 +1934,8 @@ public OnPlayerEnterPlayerArea(playerid, targetid)
 
 	#if defined itm_OnPlayerEnterPlayerArea
 		return itm_OnPlayerEnterPlayerArea(playerid, targetid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerEnterPlayerArea
@@ -1923,7 +1950,7 @@ public OnPlayerEnterPlayerArea(playerid, targetid)
 
 public OnPlayerLeavePlayerArea(playerid, targetid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerLeavePlayerArea]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerLeavePlayerArea]")<playerid>;
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 	{
 		HideActionText(playerid);
@@ -1931,6 +1958,8 @@ public OnPlayerLeavePlayerArea(playerid, targetid)
 
 	#if defined itm_OnPlayerLeavePlayerArea
 		return itm_OnPlayerLeavePlayerArea(playerid, targetid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerLeavePlayerArea
@@ -1945,7 +1974,7 @@ public OnPlayerLeavePlayerArea(playerid, targetid)
 
 internal_OnPlayerUseItem(playerid, itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERNAL, "[internal_OnPlayerUseItem]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[internal_OnPlayerUseItem]")<playerid>;
 	new buttonid = GetPlayerButtonID(playerid);
 
 	if(buttonid != -1)
@@ -1957,35 +1986,15 @@ internal_OnPlayerUseItem(playerid, itemid)
 
 public OnButtonPress(playerid, buttonid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnButtonPress]", playerid);
-	if(itm_Interacting[playerid] == INVALID_ITEM_ID)
-	{
-		if(itm_ButtonIndex[buttonid] != INVALID_ITEM_ID)
-		{
-			if(Iter_Contains(itm_Index, itm_ButtonIndex[buttonid]))
-			{
-				new itemid = itm_ButtonIndex[buttonid];
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnButtonPress]")<playerid>;
 
-				if(itm_Holder[itemid] == INVALID_PLAYER_ID && itm_Interactor[itemid] == INVALID_PLAYER_ID)
-				{
-					if(Iter_Contains(itm_Index, itm_Holding[playerid]))
-						return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid);
-
-					if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, itemid))
-						return 1;
-
-					PlayerPickUpItem(playerid, itemid);
-
-					return 1;
-				}
-			}
-		}
-	}
+	if(_OnButtonPressHandler(playerid, buttonid))
+		return 1;
 
 	#if defined itm_OnButtonPress
 		return itm_OnButtonPress(playerid, buttonid);
 	#else
-		return 1;
+		return 0;
 	#endif
 }
 #if defined _ALS_OnButtonPress
@@ -1998,9 +2007,42 @@ public OnButtonPress(playerid, buttonid)
 	forward itm_OnButtonPress(playerid, buttonid);
 #endif
 
+_OnButtonPressHandler(playerid, buttonid)
+{
+	if(itm_Interacting[playerid] != INVALID_ITEM_ID)
+		return 0;
+
+	if(itm_ButtonIndex[buttonid] == INVALID_ITEM_ID)
+		return 0;
+
+	if(!Iter_Contains(itm_Index, itm_ButtonIndex[buttonid]))
+		return 0;
+
+	new itemid = itm_ButtonIndex[buttonid];
+
+	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
+		return 0;
+
+	if(itm_Interactor[itemid] != INVALID_PLAYER_ID)
+		return 0;
+
+	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
+	{
+		if(CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid))
+			return 0;
+	}
+
+	if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, itemid))
+		return 1;
+
+	PlayerPickUpItem(playerid, itemid);
+
+	return 1;
+}
+
 timer PickUpItemDelay[400](playerid, id, animtype)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERNAL, "[PickUpItemDelay]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[PickUpItemDelay]")<playerid>;
 	if(animtype == 0)
 		ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
 
@@ -2018,7 +2060,7 @@ timer PickUpItemDelay[400](playerid, id, animtype)
 
 timer DropItemDelay[400](playerid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERNAL, "[DropItemDelay]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[DropItemDelay]")<playerid>;
 	new
 		itemid = itm_Holding[playerid],
 		Float:x,
@@ -2059,7 +2101,7 @@ timer DropItemDelay[400](playerid)
 
 timer GiveItemDelay[500](playerid, targetid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERNAL, "[GiveItemDelay]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[GiveItemDelay]")<playerid>;
 	if(Iter_Contains(itm_Index, itm_Holding[targetid]))
 		return;
 
@@ -2103,7 +2145,7 @@ timer GiveItemDelay[500](playerid, targetid)
 
 public OnPlayerDeath(playerid, killerid, reason)
 {
-	sif_debug(SIF_DEBUG_LEVEL_CALLBACKS, "[OnPlayerDeath]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerDeath]")<playerid>;
 	new itemid = itm_Holding[playerid];
 	if(Iter_Contains(itm_Index, itemid))
 	{
@@ -2129,6 +2171,8 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 	#if defined itm_OnPlayerDeath
 		return itm_OnPlayerDeath(playerid, killerid, reason);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerDeath
@@ -2164,7 +2208,7 @@ public OnPlayerDeath(playerid, killerid, reason)
 
 stock IsValidItem(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[IsValidItem]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsValidItem]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2175,7 +2219,7 @@ stock IsValidItem(itemid)
 // itm_objId
 stock GetItemObjectID(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemObjectID]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemObjectID]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2189,7 +2233,7 @@ stock GetItemObjectID(itemid)
 // itm_button
 stock GetItemButtonID(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemButtonID]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemButtonID]");
 
 	if(!Iter_Contains(itm_Index, itemid))return INVALID_BUTTON_ID;
 	if(!Iter_Contains(itm_WorldIndex, itemid))return INVALID_BUTTON_ID;
@@ -2197,7 +2241,7 @@ stock GetItemButtonID(itemid)
 }
 stock SetItemLabel(itemid, text[], colour = 0xFFFF00FF, Float:range = 10.0)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetItemLabel]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemLabel]");
 
 	if(!Iter_Contains(itm_Index, itemid))return 0;
 	SetButtonLabel(itm_Data[itemid][itm_button], text, colour, range);
@@ -2207,7 +2251,7 @@ stock SetItemLabel(itemid, text[], colour = 0xFFFF00FF, Float:range = 10.0)
 // itm_type
 stock ItemType:GetItemType(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemType]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemType]");
 
 	if(!Iter_Contains(itm_Index, itemid))return INVALID_ITEM_TYPE;
 	return itm_Data[itemid][itm_type];
@@ -2218,7 +2262,7 @@ stock ItemType:GetItemType(itemid)
 // itm_posZ
 stock GetItemPos(itemid, &Float:x, &Float:y, &Float:z)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemPos]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemPos]");
 
 	if(!Iter_Contains(itm_Index, itemid))return 0;
 
@@ -2230,7 +2274,7 @@ stock GetItemPos(itemid, &Float:x, &Float:y, &Float:z)
 }
 stock SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetItemPos]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemPos]");
 
 	if(!Iter_Contains(itm_Index, itemid))return 0;
 
@@ -2245,7 +2289,7 @@ stock SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0)
 }
 stock GetItemRot(itemid, &Float:rx, &Float:ry, &Float:rz)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemRot]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemRot]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2258,7 +2302,7 @@ stock GetItemRot(itemid, &Float:rx, &Float:ry, &Float:rz)
 }
 stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults = false)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetItemRot]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemRot]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2292,7 +2336,7 @@ stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults =
 // itm_world
 stock SetItemWorld(itemid, world)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetItemWorld]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemWorld]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return -1;
@@ -2307,7 +2351,7 @@ stock SetItemWorld(itemid, world)
 }
 stock GetItemWorld(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemWorld]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemWorld]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return -1;
@@ -2321,7 +2365,7 @@ stock GetItemWorld(itemid)
 // itm_interior
 stock SetItemInterior(itemid, interior)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetItemInterior]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemInterior]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return -1;
@@ -2336,7 +2380,7 @@ stock SetItemInterior(itemid, interior)
 }
 stock GetItemInterior(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemInterior]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemInterior]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return -1;
@@ -2350,7 +2394,7 @@ stock GetItemInterior(itemid)
 // itm_exData
 stock SetItemExtraData(itemid, data)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetItemExtraData]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemExtraData]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2361,7 +2405,7 @@ stock SetItemExtraData(itemid, data)
 }
 stock GetItemExtraData(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemExtraData]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemExtraData]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2372,7 +2416,7 @@ stock GetItemExtraData(itemid)
 // itm_nameEx
 stock SetItemNameExtra(itemid, string[])
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[SetItemNameExtra]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemNameExtra]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2385,7 +2429,7 @@ stock SetItemNameExtra(itemid, string[])
 
 stock GetItemNameExtra(itemid, string[])
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemNameExtra]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemNameExtra]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2399,7 +2443,7 @@ stock GetItemNameExtra(itemid, string[])
 // itm_used
 stock IsValidItemType(ItemType:itemtype)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[IsValidItemType]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsValidItemType]");
 
 	if(ItemType:0 <= itemtype < ITM_MAX_TYPES)
 		return itm_TypeData[itemtype][itm_used];
@@ -2410,7 +2454,7 @@ stock IsValidItemType(ItemType:itemtype)
 // itm_name
 stock GetItemTypeName(ItemType:itemtype, string[])
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemTypeName]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeName]");
 
 	if(!IsValidItemType(itemtype))
 		return 0;
@@ -2424,7 +2468,7 @@ stock GetItemTypeName(ItemType:itemtype, string[])
 // itm_model
 stock GetItemTypeModel(ItemType:itemtype)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemTypeModel]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeModel]");
 
 	if(!IsValidItemType(itemtype))
 		return 0;
@@ -2435,7 +2479,7 @@ stock GetItemTypeModel(ItemType:itemtype)
 // itm_size
 stock GetItemTypeSize(ItemType:itemtype)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemTypeSize]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeSize]");
 
 	if(!IsValidItemType(itemtype))
 		return INVALID_ITEM_SIZE;
@@ -2446,7 +2490,7 @@ stock GetItemTypeSize(ItemType:itemtype)
 // itm_colour
 stock GetItemTypeColour(ItemType:itemtype)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemTypeColour]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeColour]");
 
 	if(!IsValidItemType(itemtype))
 		return INVALID_ITEM_SIZE;
@@ -2457,7 +2501,7 @@ stock GetItemTypeColour(ItemType:itemtype)
 // itm_attachBone
 stock GetItemTypeBone(ItemType:itemtype)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemTypeBone]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeBone]");
 
 	if(!IsValidItemType(itemtype))
 		return INVALID_ITEM_SIZE;
@@ -2468,7 +2512,7 @@ stock GetItemTypeBone(ItemType:itemtype)
 // itm_Holder
 stock GetItemHolder(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemHolder]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemHolder]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return INVALID_PLAYER_ID;
@@ -2479,7 +2523,7 @@ stock GetItemHolder(itemid)
 // itm_Holding
 stock GetPlayerItem(playerid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetPlayerItem]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetPlayerItem]")<playerid>;
 
 	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
 		return INVALID_ITEM_ID;
@@ -2492,7 +2536,7 @@ stock GetPlayerItem(playerid)
 
 stock IsItemInWorld(itemid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[IsItemInWorld]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsItemInWorld]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return -1;
@@ -2505,7 +2549,7 @@ stock IsItemInWorld(itemid)
 
 stock GetItemName(itemid, string[])
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetItemName]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemName]");
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2527,7 +2571,7 @@ stock GetItemName(itemid, string[])
 
 stock GetPlayerInteractingItem(playerid)
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetPlayerInteractingItem]", playerid);
+	sif_dp:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetPlayerInteractingItem]")<playerid>;
 
 	if(!IsPlayerConnected(playerid))
 		return INVALID_ITEM_ID;
@@ -2537,7 +2581,7 @@ stock GetPlayerInteractingItem(playerid)
 
 stock GetNextItemID()
 {
-	sif_debug(SIF_DEBUG_LEVEL_INTERFACE, "[GetNextItemID]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetNextItemID]");
 
 	return Iter_Free(itm_Index);
 }

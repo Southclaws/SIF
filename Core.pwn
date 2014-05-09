@@ -399,3 +399,17 @@ stock Float:sif_GetAngleToPoint(Float:fPointX, Float:fPointY, Float:fDestX, Floa
 stock Float:sif_Distance(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2)
 	return floatsqroot((((x1-x2)*(x1-x2))+((y1-y2)*(y1-y2))+((z1-z2)*(z1-z2))));
 
+
+/*
+	Checks if an animation index is an idle stance.
+*/
+stock sif_IsIdleAnim(animidx)
+{
+	switch(animidx)
+	{
+		case 320, 1164, 1183, 1188, 1189:
+			return 1;
+	}
+
+	return 0;
+}
