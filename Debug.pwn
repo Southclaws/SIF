@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.0
+	Version: 2.0.1
 
 
 	SIF/Overview
@@ -122,6 +122,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 
 #include <YSI\y_hooks>
+#include <YSI\y_va>
 
 #define _SIF_DEBUG_INCLUDED
 
@@ -131,6 +132,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	Setup
 
 ==============================================================================*/
+
+
+#if !defined MAX_DEBUG_HANDLER
+	#define MAX_DEBUG_HANDLER			(128)
+#endif
+
+#if !defined MAX_DEBUG_HANDLER_NAME
+	#define MAX_DEBUG_HANDLER_NAME		(32)
+#endif
+
+#define SIF_IS_VALID_HANDLER(%0)		(0 <= %0 < dbg_Total)
+#define sif_dp:%0:%1(%2)<%3>			sif_debug_printf(%1,%0,%3,%2)
+#define sif_d:%0:%1(%2)					sif_debug_printf(%1,%0,INVALID_PLAYER_ID,%2)
 
 
 enum
@@ -147,9 +161,14 @@ enum
 	SIF_DEBUG_LEVEL_LOOPS
 }
 
+static const DEBUG_PREFIX[32] = "$ ";
+
+
 static
-	dbg_Level,
-	dbg_PlayerLevel[MAX_PLAYERS];
+		dbg_Name[MAX_DEBUG_HANDLER][MAX_DEBUG_HANDLER_NAME],
+		dbg_Level[MAX_DEBUG_HANDLER] = {255, 0, 0, ...}, // set handler 0 to 255
+		dbg_PlayerLevel[MAX_DEBUG_HANDLER][MAX_PLAYERS],
+		dbg_Total = 1; // handler 0 is global
 
 
 /*==============================================================================
@@ -161,7 +180,8 @@ static
 
 hook OnPlayerConnect(playerid)
 {
-	dbg_PlayerLevel[playerid] = 0;
+	for(new i; i < dbg_Total; i++)
+		dbg_PlayerLevel[playerid][i] = 0;
 }
 
 
@@ -172,63 +192,114 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock sif_debug_level(level)
+stock sif_debug_register_handler(name[], initstate = 0)
 {
-	dbg_Level = level;
+	strcat(dbg_Name[dbg_Total], name);
+	dbg_Level[dbg_Total] = initstate;
+
+	return dbg_Total++;
+}
+
+stock sif_debug_level(handler, level)
+{
+	dbg_Level[handler] = level;
 
 	return 1;
 }
 
-stock sif_debug_plevel(playerid, level)
+stock sif_debug_plevel(playerid, handler, level)
 {
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
-	dbg_PlayerLevel[playerid] = level;
+	dbg_PlayerLevel[playerid][handler] = level;
 
 	return 1;
 }
 
-stock sif_debug(level, msg[], playerid = INVALID_PLAYER_ID)
+stock sif_debug_print(handler, level, playerid, msg[])
 {
+	if(!SIF_IS_VALID_HANDLER(handler))
+		return 0;
+
 	if(playerid != INVALID_PLAYER_ID)
 	{
-		if(!IsPlayerConnected(playerid))
-			return 0;
-
-		if(level <= dbg_PlayerLevel[playerid] && dbg_PlayerLevel[playerid] != 0)
+		if(level <= dbg_PlayerLevel[playerid][handler])
 		{
 			new name[MAX_PLAYER_NAME];
 
 			GetPlayerName(playerid, name, MAX_PLAYER_NAME);
 
 			SendClientMessage(playerid, -1, msg);
-			printf("[DEBUG:SIF%d] %s (%d: %s)", level, msg, playerid, name);
 		}
 	}
-	else
+
+	if(level <= dbg_Level[handler])
 	{
-		if(level <= dbg_Level && dbg_Level != 0)
-		{
-			printf("[DEBUG:SIF%d] %s", level, msg);
-		}
+		printf("%s[%s:%d]: %s", DEBUG_PREFIX, dbg_Name[handler], level, msg);
 	}
 
 	return 1;
 }
 
+stock sif_debug_printf(handler, level, playerid, string[], va_args<>)
+{
+	if(!SIF_IS_VALID_HANDLER(handler))
+		return 0;
 
-/*==============================================================================
+	if(dbg_Level[handler] < level)
+		return 0;
 
-	Internal Functions and Hooks
+	if(playerid != INVALID_PLAYER_ID && dbg_PlayerLevel[playerid][handler] < level)
+		return 0;
 
-==============================================================================*/
+	new str[256];
+	va_format(str, sizeof(str), string, va_start<4>);
+	sif_debug_print(handler, level, playerid, str);
 
+	return 1;
+}
 
-/*==============================================================================
+stock sif_debug_handler_search(name[], thresh = 3)
+{
+	new
+		bestmatch = -1,
+		longest,
+		len,
+		j;
 
-	Interface
+	for(new i; i < dbg_Total; i++)
+	{
+		len = strlen(dbg_Name[i]);
 
-==============================================================================*/
+		while(j < len)
+		{
+			if(name[j] != dbg_Name[i][j])
+			{
+				if(j > longest)
+				{
+					longest = j;
 
+					if(j > thresh)
+						bestmatch = i;
+				}
+				break;
+			}
 
+			j++;
+		}
+	}
+
+	return bestmatch;
+}
+
+stock sif_debug_get_handler_name(handler, output[])
+{
+	if(!SIF_IS_VALID_HANDLER(handler))
+		return 0;
+
+	output[0] = EOS;
+	strcat(output, dbg_Name[handler], MAX_DEBUG_HANDLER_NAME);
+
+	return 1;
+}
