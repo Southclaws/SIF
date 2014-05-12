@@ -244,7 +244,7 @@ stock CreateDebugLabel(type, entityid, Float:x, Float:y, Float:z, string[] = "",
 
 	dbl_Data[id][dbl_labelID] = CreateDynamic3DTextLabelEx(
 		dbl_Data[id][dbl_string], dbl_TypeData[type][dbl_colour], x, y, z, 10000.0,
-		.testlos = false, .streamdistance = 10000.0, .worlds = worlds, .interiors = interiors, .players = players, .maxplayers = maxplayers);
+		.testlos = false, .streamdistance = 10.0, .worlds = worlds, .interiors = interiors, .players = players, .maxplayers = maxplayers);
 
 	Iter_Add(dbl_Index, id);
 
