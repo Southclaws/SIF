@@ -260,33 +260,17 @@ stock sif_debug_printf(handler, level, playerid, string[], va_args<>)
 	return 1;
 }
 
-stock sif_debug_handler_search(name[], thresh = 3)
+stock sif_debug_handler_search(name[])
 {
-	new
-		bestmatch = -1,
-		longest,
-		len,
-		j;
+	new bestmatch = -1;
 
+	// Needs a better search algorithm...
 	for(new i; i < dbg_Total; i++)
 	{
-		len = strlen(dbg_Name[i]);
-
-		while(j < len)
+		if(strfind(dbg_Name[i], name, true) != -1)
 		{
-			if(name[j] != dbg_Name[i][j])
-			{
-				if(j > longest)
-				{
-					longest = j;
-
-					if(j > thresh)
-						bestmatch = i;
-				}
-				break;
-			}
-
-			j++;
+			bestmatch = i;
+			break;
 		}
 	}
 
