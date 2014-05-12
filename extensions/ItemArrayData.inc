@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.1.0
+	Version: 1.2.0
 
 
 	SIF/Overview
@@ -345,6 +345,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#include <SIF/Core.pwn>
 #endif
 
+#include <YSI\y_hooks>
+
 #define _SIF_ITEMARRAYDATA_INCLUDED
 
 
@@ -372,7 +374,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	with single-cell array equivalents.
 */
 #if ITM_ARR_REPLACE_ITEM_EXTRADATA == 1
-	#define SetItemExtraData(%0,%1) SetItemArrayDataAtCell(%0,%1,0),SetItemArrayDataSize(%0,1)
+	#define SetItemExtraData(%0,%1) SetItemArrayDataAtCell(%0,%1,0,1)
 	#define GetItemExtraData(%0) GetItemArrayDataAtCell(%0,0)
 #endif
 
@@ -383,6 +385,9 @@ static
 	itm_arr_Data[ITM_MAX][ITM_ARR_MAX_ARRAY_DATA],
 	itm_arr_Length[ITM_MAX];
 
+static
+	ITEM_ARRAY_DATA;
+
 
 /*==============================================================================
 
@@ -390,6 +395,11 @@ static
 
 ==============================================================================*/
 
+
+hook OnGameModeInit()
+{
+	ITEM_ARRAY_DATA = sif_debug_register_handler("SIF/ItemArrayData");
+}
 
 public OnItemCreate(itemid)
 {
@@ -425,6 +435,7 @@ public OnItemCreate(itemid)
 
 stock SetItemTypeMaxArrayData(ItemType:itemtype, size)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemTypeMaxArrayData] %d %d", _:itemtype, size);
 	if(!IsValidItemType(itemtype))
 		return 0;
 
@@ -438,6 +449,7 @@ stock SetItemTypeMaxArrayData(ItemType:itemtype, size)
 
 stock GetItemTypeArrayDataSize(ItemType:itemtype)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemTypeArrayDataSize] %d", _:itemtype);
 	if(!IsValidItemType(itemtype))
 		return -1;
 
@@ -446,6 +458,7 @@ stock GetItemTypeArrayDataSize(ItemType:itemtype)
 
 stock SetItemArrayData(itemid, data[], length)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayData] %d %d", itemid, length);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -465,6 +478,7 @@ stock SetItemArrayData(itemid, data[], length)
 
 stock GetItemArrayData(itemid, data[])
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayData] %d", itemid);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -474,8 +488,9 @@ stock GetItemArrayData(itemid, data[])
 	return 1;
 }
 
-stock SetItemArrayDataAtCell(itemid, data, cell)
+stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] %d %d", itemid, cell);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -484,15 +499,18 @@ stock SetItemArrayDataAtCell(itemid, data, cell)
 
 	if(cell > itm_arr_Length[itemid])
 	{
-		#if ITM_ARR_ARRAY_SIZE_PROTECT == false
-
-			itm_arr_Length[itemid] = cell;
-
-		#else
-
-			return -2;
-
-		#endif
+		if(autoadjustsize)
+		{
+			itm_arr_Length[itemid] = cell;			
+		}
+		else
+		{
+			#if ITM_ARR_ARRAY_SIZE_PROTECT == false
+				itm_arr_Length[itemid] = cell;
+			#else
+				return -2;
+			#endif	
+		}
 	}
 
 	itm_arr_Data[itemid][cell] = data;
@@ -502,6 +520,7 @@ stock SetItemArrayDataAtCell(itemid, data, cell)
 
 stock GetItemArrayDataAtCell(itemid, cell)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayDataAtCell] %d %d", itemid, cell);
 	if(!IsValidItem(itemid))
 	{
 		print("[GetItemArrayDataAtCell] ERROR: Invalid item ID");
@@ -531,6 +550,7 @@ stock GetItemArrayDataAtCell(itemid, cell)
 
 stock SetItemArrayDataSize(itemid, size)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataSize] %d %d", itemid, size);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -541,6 +561,7 @@ stock SetItemArrayDataSize(itemid, size)
 
 stock GetItemArrayDataSize(itemid)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayDataSize] %d", itemid);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -549,6 +570,7 @@ stock GetItemArrayDataSize(itemid)
 
 stock GetItemTypeArrayDataMax(ItemType:itemtype)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemTypeArrayDataMax] %d", _:itemtype);
 	if(!IsValidItemType(itemtype))
 		return 0;
 
@@ -557,6 +579,7 @@ stock GetItemTypeArrayDataMax(ItemType:itemtype)
 
 stock AppendItemArray(itemid, data[], length)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[AppendItemArray] %d %d", itemid, length);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -571,6 +594,7 @@ stock AppendItemArray(itemid, data[], length)
 
 stock AppendItemArrayCell(itemid, data)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[AppendItemArrayCell] %d %d", itemid, data);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -584,6 +608,7 @@ stock AppendItemArrayCell(itemid, data)
 
 stock SetItemArrayDataLength(itemid, length)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataLength] %d %d", itemid, length);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -594,6 +619,7 @@ stock SetItemArrayDataLength(itemid, length)
 
 stock RemoveItemArrayData(itemid)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[RemoveItemArrayData] %d", itemid);
 	if(!IsValidItem(itemid))
 		return 0;
 
