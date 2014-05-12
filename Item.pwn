@@ -1632,7 +1632,7 @@ stock PlayerUseItem(playerid)
 
 stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 {
-	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[GiveWorldItemToPlayer]")<playerid>;
+	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[GiveWorldItemToPlayer] playerid: %d itemid: %d call: %d", playerid, itemid, call)<playerid>;
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
@@ -2028,8 +2028,8 @@ _OnButtonPressHandler(playerid, buttonid)
 
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 	{
-		if(CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid))
-			return 0;
+		CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid);
+		return 0;
 	}
 
 	if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, itemid))
