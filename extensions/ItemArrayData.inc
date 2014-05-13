@@ -523,7 +523,7 @@ stock GetItemArrayDataAtCell(itemid, cell)
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayDataAtCell] %d %d", itemid, cell);
 	if(!IsValidItem(itemid))
 	{
-		print("[GetItemArrayDataAtCell] ERROR: Invalid item ID");
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[GetItemArrayDataAtCell] ERROR: Invalid item ID");
 		return 0;
 	}
 
