@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.7.1
+	Version: 1.7.2
 
 
 	SIF/Overview
@@ -2027,10 +2027,7 @@ _OnButtonPressHandler(playerid, buttonid)
 		return 0;
 
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
-	{
-		CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid);
-		return 0;
-	}
+		return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid);
 
 	if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, itemid))
 		return 1;
