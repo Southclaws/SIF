@@ -470,8 +470,12 @@ stock SetItemArrayData(itemid, data[], length)
 
 	itm_arr_Length[itemid] = 0;
 
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayData] Setting item array data");
 	for(new i; i < length; i++)
+	{
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:ITEM_ARRAY_DATA("[SetItemArrayData] Data at %04d: %d", i, data[i]);
 		itm_arr_Data[itemid][itm_arr_Length[itemid]++] = data[i];
+	}
 
 	return 1;
 }
@@ -482,8 +486,12 @@ stock GetItemArrayData(itemid, data[])
 	if(!IsValidItem(itemid))
 		return 0;
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[GetItemArrayData] Data length to return: %d", itm_arr_Length[itemid]);
 	for(new i; i < itm_arr_Length[itemid]; i++)
+	{
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:ITEM_ARRAY_DATA("[GetItemArrayData] Data at %04d: %d", i, itm_arr_Data[itemid][i]);
 		data[i] = itm_arr_Data[itemid][i];
+	}
 
 	return 1;
 }
@@ -494,25 +502,31 @@ stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0)
 	if(!IsValidItem(itemid))
 		return 0;
 
-	if(cell > itm_arr_ItemTypeArrayMax[GetItemType(itemid)])
+	if(cell >= itm_arr_ItemTypeArrayMax[GetItemType(itemid)])
 		return -1;
 
-	if(cell > itm_arr_Length[itemid])
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] Item and cell valid. Checking cell %d >= length %d", cell, itm_arr_Length[itemid]);
+	if(cell >= itm_arr_Length[itemid])
 	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] cell > itm_arr_Length");
 		if(autoadjustsize)
 		{
-			itm_arr_Length[itemid] = cell;			
+			sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] Auto adjusting size to %d", cell +1);
+			itm_arr_Length[itemid] = cell + 1;			
 		}
 		else
 		{
 			#if ITM_ARR_ARRAY_SIZE_PROTECT == false
-				itm_arr_Length[itemid] = cell;
+				sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] (Un-protect) adjusting size to %d", cell +1);
+				itm_arr_Length[itemid] = cell + 1;
 			#else
+				sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] cell out of item bounds, return -2.");
 				return -2;
 			#endif	
 		}
 	}
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] Setting cell %d data to %d", cell, data);
 	itm_arr_Data[itemid][cell] = data;
 
 	return 1;
@@ -529,7 +543,7 @@ stock GetItemArrayDataAtCell(itemid, cell)
 
 	new ItemType:itemtype = GetItemType(itemid);
 
-	if(cell > itm_arr_ItemTypeArrayMax[itemtype])
+	if(cell >= itm_arr_ItemTypeArrayMax[itemtype])
 	{
 		printf("[GetItemArrayDataAtCell] ERROR: Cell %d exceeds item type (%d) max of %d.", cell, _:itemtype, itm_arr_ItemTypeArrayMax[itemtype]);
 		return -1;
@@ -537,7 +551,7 @@ stock GetItemArrayDataAtCell(itemid, cell)
 
 	#if ITM_ARR_ARRAY_SIZE_PROTECT == true
 
-		if(cell > itm_arr_Length[itemid])
+		if(cell >= itm_arr_Length[itemid])
 		{
 			printf("[GetItemArrayDataAtCell] ERROR: Cell %d exceeds item (%d) length of %d.", cell, itemid, itm_arr_Length[itemid]);
 			return -2;
@@ -545,6 +559,7 @@ stock GetItemArrayDataAtCell(itemid, cell)
 
 	#endif
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[GetItemArrayDataAtCell] Returning %d", itm_arr_Data[itemid][cell]);
 	return itm_arr_Data[itemid][cell];
 }
 
