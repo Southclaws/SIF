@@ -52,10 +52,24 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/ContainerDialog/Core
 		native -
 
-		native DisplayContainerInventory(playerid, containerid, showoptions = 0)
+		native DisplayContainerInventory(playerid, containerid)
 		{
 			Description:
+				Displays the contents of a container with a SA:MP dialog.
+
+			Parameters:
 				-
+
+			Returns:
+				-
+		}
+
+		native ClosePlayerContainer(playerid)
+		{
+			Description:
+				Closes a container dialog for a player. It's important that this
+				function is used rather than just a dialog close function as
+				this clears the current dialog ID from the player.
 
 			Parameters:
 				-
@@ -76,31 +90,33 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native OnPlayerOpenContainer(playerid, containerid);
 		{
 			Called:
-				-
+				When a container dialog is displayed for a player.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				1
+					To cancel the dialog being shown.
 		}
 
 		native OnPlayerCloseContainer(playerid, containerid);
 		{
 			Called:
-				-
+				When a container dialog menu is closed for a player.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				1
+					To cancel and keep the dialog open.
 		}
 
 		native OnPlayerViewContainerOpt(playerid, containerid);
 		{
 			Called:
-				-
+				When a player opens the options for an item in a container.
 
 			Parameters:
 				-
@@ -112,7 +128,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native OnPlayerSelectContainerOpt(playerid, containerid, option);
 		{
 			Called:
-				-
+				When a player selects an option for an item in a container.
 
 			Parameters:
 				-
@@ -124,7 +140,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native OnMoveItemToContainer(playerid, itemid, containerid);
 		{
 			Called:
-				-
+				When a player moves an item from their inventory to a container
+				using the inventory options dialog.
 
 			Parameters:
 				-
@@ -136,7 +153,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native OnMoveItemToInventory(playerid, itemid, containerid);
 		{
 			Called:
-				-
+				When a player moves an item from a container to their inventory
+				using the container options dialog.
 
 			Parameters:
 				-
@@ -158,27 +176,40 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native GetPlayerCurrentContainer(playerid)
 		{
 			Description:
-				-
+				Returns the container that <playerid> is currently viewing.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				(int, containerid)
 		}
 
 		native GetPlayerContainerSlot(playerid)
 		{
 			Description:
-				-
+				Returns the slot that a player selected in the container dialog.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				-1
+					If the specified player is invalid.
 		}
 
+		native AddContainerOption(playerid, option[])
+		{
+			Description:
+				Adds an option to a player's container dialog option list.
+
+			Parameters:
+				-
+
+			Returns:
+				0
+					If the input string won't fit in the options string.
+		}
 	}
 
 	SIF/ContainerDialog/Internal Functions
@@ -220,6 +251,15 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if !defined DIALOG_CONTAINER_LIST
+	#define DIALOG_CONTAINER_LIST		(9002)
+#endif
+
+#if !defined DIALOG_CONTAINER_OPTIONS
+	#define DIALOG_CONTAINER_OPTIONS	(9003)
+#endif
+
+
 static
 			cnt_CurrentContainer		[MAX_PLAYERS],
 			cnt_SelectedSlot			[MAX_PLAYERS],
@@ -259,7 +299,7 @@ hook OnPlayerConnect(playerid)
 
 stock DisplayContainerInventory(playerid, containerid)
 {
-	if(!Iter_Contains(cnt_Index, containerid))
+	if(!IsValidContainer(containerid))
 		return 0;
 
 	new
@@ -293,9 +333,17 @@ stock DisplayContainerInventory(playerid, containerid)
 
 stock ClosePlayerContainer(playerid)
 {
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	if(cnt_CurrentContainer[playerid] == INVALID_CONTAINER_ID)
+		return 0;
+
 	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
 	CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]);
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
+
+	return 1;
 }
 
 
@@ -328,13 +376,11 @@ DisplayContainerOptions(playerid, slotid)
 
 public OnButtonPress(playerid, buttonid)
 {
-	foreach(new i : cnt_Index)
+	new containerid = GetButtonContainer(buttonid);
+
+	if(IsValidContainer(containerid))
 	{
-		if(buttonid == cnt_Data[i][cnt_button])
-		{
-			DisplayContainerInventory(playerid, i);
-			break;
-		}
+		DisplayContainerInventory(playerid, containerid);
 	}
 
 	#if defined cnt_OnButtonPress
@@ -359,7 +405,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	{
 		if(response)
 		{
-			if(!Iter_Contains(cnt_Index, cnt_CurrentContainer[playerid]))
+			if(!IsValidContainer(cnt_CurrentContainer[playerid]))
 				return 0;
 
 			if(listitem == cnt_Data[cnt_CurrentContainer[playerid]][cnt_size])
@@ -381,9 +427,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 		else
 		{
-			CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]);
-			CancelSelectTextDraw(playerid);
-			cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
+			ClosePlayerContainer(playerid);
 		}
 	}
 
@@ -456,7 +500,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 {
 	if(clickedid == Text:65535)
 	{
-		if(Iter_Contains(cnt_Index, cnt_CurrentContainer[playerid]))
+		if(IsValidContainer(cnt_CurrentContainer[playerid]))
 		{
 			ClosePlayerContainer(playerid);
 		}
@@ -537,7 +581,7 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 
 public OnPlayerOpenInventory(playerid)
 {
-	if(Iter_Contains(cnt_Index, cnt_CurrentContainer[playerid]))
+	if(IsValidContainer(cnt_CurrentContainer[playerid]))
 	{
 		new str[CNT_MAX_NAME + 2];
 		strcat(str, cnt_Data[cnt_CurrentContainer[playerid]][cnt_name]);
@@ -561,7 +605,7 @@ public OnPlayerOpenInventory(playerid)
 
 public OnPlayerSelectExtraItem(playerid, item)
 {
-	if(Iter_Contains(cnt_Index, cnt_CurrentContainer[playerid]))
+	if(IsValidContainer(cnt_CurrentContainer[playerid]))
 	{
 		if(item == cnt_InventoryContainerItem[playerid])
 		{
@@ -593,7 +637,7 @@ public OnPlayerSelectExtraItem(playerid, item)
 
 stock GetPlayerCurrentContainer(playerid)
 {
-	if(!(0 <= playerid < MAX_PLAYERS))
+	if(!IsPlayerConnected(playerid))
 		return INVALID_CONTAINER_ID;
 
 	return cnt_CurrentContainer[playerid];
@@ -601,7 +645,7 @@ stock GetPlayerCurrentContainer(playerid)
 
 stock GetPlayerContainerSlot(playerid)
 {
-	if(!(0 <= playerid < MAX_PLAYERS))
+	if(!IsPlayerConnected(playerid))
 		return -1;
 
 	return cnt_SelectedSlot[playerid];

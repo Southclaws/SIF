@@ -288,6 +288,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If the target player was already holding an item.
 		}
 
+		native PlayerUseItem(playerid)
+		{
+			Description:
+				Forces a player to use his current item, resulting in a call to
+				OnPlayerUseItem.
+
+			Parameters:
+				-
+
+			Returns:
+				Whatever OnPlayerUseItem returns.
+		}
+
 		native GiveWorldItemToPlayer(playerid, itemid, call = 1)
 		{
 			Description:
@@ -322,6 +335,27 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				INVALID_ITEM_ID
 					If the player ID is invalid or the player isn't holding an
 					item.
+		}
+
+		native RemoveItemFromWorld(itemid)
+		{	
+			Description:
+				Removes an item from the world. Deletes all physical elements
+				but keeps the item in memory with a valid ID  and removes the
+				ID from the world index. Effectively makes the item a "virtual"
+				item, as in it still exists in the server memory but it doesn't
+				exist physically in the game world.
+
+			Parameters:
+				<itemid> (int)
+					The ID handle of the item to remove.
+
+			Returns:
+				1
+					On success
+
+				0
+					If the item is invalid or not in the world.
 		}
 	}
 
@@ -429,6 +463,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				(nothing)
 		}
+
 		native OnPlayerUseItemWithItem(playerid, itemid, withitemid)
 		{
 			Called:
@@ -447,6 +482,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				(nothing)
 		}
+
 		native OnPlayerUseItemWithButton(playerid, buttonid, itemid)
 		{
 			Called:
@@ -466,6 +502,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				(nothing)
 		}
+
 		native OnPlayerPickUpItem(playerid, itemid)
 		{
 			Called:
@@ -482,6 +519,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				1
 					To cancel the pickup request, no animation will play.
 		}
+
 		native OnPlayerPickedUpItem(playerid, itemid)
 		{
 			Called:
@@ -498,6 +536,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				1
 					To cancel giving the item ID to the player.
 		}
+
 		native OnPlayerGetItem(playerid, itemid)
 		{
 			Called:
@@ -513,6 +552,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				(nothing)
 		}
+
 		native OnPlayerDropItem(playerid, itemid)
 		{
 			Called:
@@ -530,6 +570,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					To cancel the drop, no animation will play and the player
 					will keep his item.
 		}
+
 		native OnPlayerDroppedItem(playerid, itemid)
 		{
 			Called:
@@ -546,6 +587,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				1
 					To cancel removing the item from the player.
 		}
+
 		native OnPlayerGiveItem(playerid, targetid, itemid)
 		{
 			Called:
@@ -566,6 +608,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				1
 					To cancel the give request, no animations will play.
 		}
+
 		native OnPlayerGivenItem(playerid, targetid, itemid)
 		{
 			Called:
@@ -587,6 +630,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					To cancel removing the item from the giver and the target
 					receiving the item.
 		}
+
 		native OnItemRemovedFromPlayer(playerid, itemid)
 		{
 			Called:
@@ -603,6 +647,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				(none)
 		}
+
 		native OnItemNameRender(itemid)
 		{
 			Called:
@@ -644,6 +689,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the item Id is invalid.
 		}
+
 		native GetItemObjectID(itemid)
 		{
 			Description:
@@ -662,6 +708,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the item is invalid or not a world item.
 		}
+
 		native GetItemButtonID(itemid)
 		{
 			Description:
@@ -680,6 +727,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the item is invalid or not a world item.
 		}
+
 		native SetItemLabel(itemid, text[], colour = 0xFFFF00FF, Float:range = 10.0)
 		{
 			Description:
@@ -708,6 +756,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the ID handle of the item is invalid.
 		}
+
 		native GetItemType(itemid)
 		{
 			Description:
@@ -724,6 +773,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+
 		native GetItemPos(itemid, &Float:x, &Float:y, &Float:z)
 		{
 			Description:
@@ -742,6 +792,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+
 		native SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0)
 		{
 
@@ -764,6 +815,24 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+
+		native GetItemRot(itemid, &Float:rx, &Float:ry, &Float:rz)
+		{
+			Description:
+				Returns the rotation of a world item.
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID handle of the item to get the rotation of.
+
+				<x>, <y>, <z> (float)
+					The rotation variables passed by reference.
+
+			Returns:
+				0
+					If the entered item ID handle is invalid.
+		}
+
 		native SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults)
 		{
 			Description:
@@ -785,6 +854,55 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+
+		native SetItemWorld(itemid, world)
+		{
+			Description:
+				Sets an item's virtual world.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetItemWorld(itemid)
+		{
+			Description:
+				Returns an item's virtual world.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native SetItemInterior(itemid, interior)
+		{
+			Description:
+				Sets an item's interior ID.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetItemInterior(itemid)
+		{
+			Description:
+				Returns an item's interior ID.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
 		native SetItemExtraData(itemid, data)
 		{
 			Description:
@@ -804,6 +922,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+
 		native GetItemExtraData(itemid)
 		{
 			Description:
@@ -821,6 +940,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+
 		native SetItemNameExtra(itemid, string[])
 		{
 			Description:
@@ -837,6 +957,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+
 		native GetItemNameExtra(itemid, string[])
 		{
 			Description:
@@ -853,6 +974,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered item ID handle is invalid.
 		}
+
 		native IsValidItemType(ItemType:itemtype)
 		{
 			Description:
@@ -868,6 +990,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the entered value is not in the item type index.
 		}
+
 		native GetItemTypeName(ItemType:itemtype, string[])
 		{
 			Description:
@@ -884,6 +1007,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If itemtype is an invalid item type.
 		}
+
 		native GetItemTypeModel(ItemType:itemtype)
 		{
 			Description:
@@ -897,6 +1021,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the item type is not in the item type index.
 		}
+
 		native GetItemTypeSize(ItemType:itemtype)
 		{
 			Description:
@@ -910,6 +1035,33 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the item type is not in the item type index.	
 		}
+
+		native GetItemTypeColour(ItemType:itemtype)
+		{
+			Description:
+				Returns the default colour of an item type.
+
+			Parameters:
+				<itemtype> (int, ItemType)
+
+			Returns:
+				(int)
+					Item type colour in ARGB order.
+		}
+
+		native GetItemTypeBone(itemid)
+		{
+			Description:
+				Returns the bone that an item type will attach the mesh to.
+
+			Parameters:
+				-
+
+			Returns:
+				(int)
+					A bone ID.
+		}
+
 		native GetItemHolder(itemid)
 		{
 			Description:
@@ -923,6 +1075,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the item ID handle is invalid.
 		}
+
 		native GetPlayerItem(playerid)
 		{
 			Description:
@@ -936,6 +1089,24 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If the player isn't holding something or is an invalid
 					player ID. There is no IsPlayerConnected check here.
 		}
+
+		native IsItemInWorld(itemid)
+		{
+			Description:
+				Checks if an item is in the game world.
+
+			Parameters:
+				<itemid> (int)
+					The ID handle of the item to check.
+					
+			Returns:
+				1
+					If the item is in the world.
+
+				0
+					If the item is not in the world.
+		}
+
 		native GetItemName(itemid, string[])
 		{
 			Description:
@@ -953,6 +1124,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				0
 					If the item ID handle is invalid.
 		}
+
 		native GetPlayerInteractingItem(playerid)
 		{
 			Description:
@@ -967,6 +1139,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				(int)
 					ID handle of the item that <playerid> is interacting with.
 		}
+
 		native GetNextItemID()
 		{
 			Description:
@@ -994,15 +1167,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				Creates an item that is already added to the item index in the
 				world. This means it is given an object and a button. This
 				function is called by CreateItem.
-		}
-
-		RemoveItemFromWorld(itemid)
-		{
-			Description:
-				Removes an item object and button and removes the ID from the
-				world index. Effectively makes the item a "virtual" item, as in
-				it still exists in the server memory but it doesn't exist
-				physically in the game world.
 		}
 
 		internal_OnPlayerUseItem
@@ -1735,6 +1899,39 @@ stock RemoveCurrentItem(playerid)
 
 }
 
+stock RemoveItemFromWorld(itemid)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[RemoveItemFromWorld]");
+	if(!Iter_Contains(itm_Index, _:itemid))
+		return 0;
+
+	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
+	{
+		CallLocalFunction("OnItemRemovedFromPlayer", "dd", itm_Holder[itemid], itemid);
+		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
+		itm_Holding[itm_Holder[itemid]] = INVALID_ITEM_ID;
+		itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
+		itm_Holder[itemid] = INVALID_PLAYER_ID;
+		itm_Interactor[itemid] = INVALID_PLAYER_ID;
+	}
+	else
+	{
+		if(!Iter_Contains(itm_WorldIndex, _:itemid))
+			return 0;
+
+		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
+		DestroyButton(itm_Data[itemid][itm_button]);
+		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
+
+		itm_Data[itemid][itm_objId] = -1;
+		itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
+	}
+
+	Iter_Remove(itm_WorldIndex, itemid);
+
+	return 1;
+}
+
 
 /*==============================================================================
 
@@ -1820,37 +2017,6 @@ CreateItemInWorld(itemid,
 	Iter_Add(itm_WorldIndex, itemid);
 
 	CallLocalFunction("OnItemCreateInWorld", "d", itemid);
-
-	return 1;
-}
-
-stock RemoveItemFromWorld(itemid)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[RemoveItemFromWorld]");
-	if(!Iter_Contains(itm_Index, _:itemid))return 0;
-
-	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
-	{
-		CallLocalFunction("OnItemRemovedFromPlayer", "dd", itm_Holder[itemid], itemid);
-		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
-		itm_Holding[itm_Holder[itemid]] = INVALID_ITEM_ID;
-		itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
-		itm_Holder[itemid] = INVALID_PLAYER_ID;
-		itm_Interactor[itemid] = INVALID_PLAYER_ID;
-	}
-	else
-	{
-		if(!Iter_Contains(itm_WorldIndex, _:itemid))return 0;
-
-		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
-		DestroyButton(itm_Data[itemid][itm_button]);
-		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
-
-		itm_Data[itemid][itm_objId] = -1;
-		itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
-	}
-
-	Iter_Remove(itm_WorldIndex, itemid);
 
 	return 1;
 }
@@ -2232,16 +2398,23 @@ stock GetItemButtonID(itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemButtonID]");
 
-	if(!Iter_Contains(itm_Index, itemid))return INVALID_BUTTON_ID;
-	if(!Iter_Contains(itm_WorldIndex, itemid))return INVALID_BUTTON_ID;
+	if(!Iter_Contains(itm_Index, itemid))
+		return INVALID_BUTTON_ID;
+
+	if(!Iter_Contains(itm_WorldIndex, itemid))
+		return INVALID_BUTTON_ID;
+
 	return itm_Data[itemid][itm_button];
 }
 stock SetItemLabel(itemid, text[], colour = 0xFFFF00FF, Float:range = 10.0)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemLabel]");
 
-	if(!Iter_Contains(itm_Index, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
 	SetButtonLabel(itm_Data[itemid][itm_button], text, colour, range);
+
 	return 1;
 }
 
@@ -2250,7 +2423,9 @@ stock ItemType:GetItemType(itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemType]");
 
-	if(!Iter_Contains(itm_Index, itemid))return INVALID_ITEM_TYPE;
+	if(!Iter_Contains(itm_Index, itemid))
+		return INVALID_ITEM_TYPE;
+
 	return itm_Data[itemid][itm_type];
 }
 
@@ -2261,7 +2436,8 @@ stock GetItemPos(itemid, &Float:x, &Float:y, &Float:z)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemPos]");
 
-	if(!Iter_Contains(itm_Index, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
 
 	x = itm_Data[itemid][itm_posX];
 	y = itm_Data[itemid][itm_posY];
@@ -2273,7 +2449,8 @@ stock SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemPos]");
 
-	if(!Iter_Contains(itm_Index, itemid))return 0;
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
 
 	itm_Data[itemid][itm_posX] = x;
 	itm_Data[itemid][itm_posY] = y;

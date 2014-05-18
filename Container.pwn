@@ -70,12 +70,12 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Description:
 				Creates a container to store items in, can be specified as
 				virtual to not create a button or label so the container is only
-				accessible via showing the dialog in a script.
+				accessible via the script.
 
 			Parameters:
 				<name> (string)
-					The title displayed in the contents dialog and the button
-					label if there is one.
+					The name given to the container. Also applied to the button
+					label if created in the world.
 
 				<size> (int)
 					The maximum capacity of items the container can store.
@@ -122,37 +122,69 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native DestroyContainer(containerid)
 		{
 			Description:
-				-
+				Removes a container from memory and frees the ID.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				0
+					If the containerid is invalid.
 		}
 
 		native AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 		{
 			Description:
-				-
+				Adds an item to a container list, calls OnItemAddToContainer.
 
 			Parameters:
-				-
+				<containerid> (int, containerid)
+					The container to add the item to.
+
+				<itemid> (int)
+					The item to add (must be valid, may be virtual)
+
+				<playerid> (int)
+					Can tell other scripts that the item was added by a player
+					and not automatically.
 
 			Returns:
-				-
+				1
+					On success.
+
+				0
+					If the item or container are invalid.
+
+				-1
+					If the item won't fit.
 		}
 
 		native RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
 		{
 			Description:
-				-
+				Removes an item from a container slot.
 
 			Parameters:
-				-
+				<containerid> (int)
+					The container to remove from.
+
+				<slotid> (int)
+					The slot in the container to remove an item from. NOT an
+					itemid!
+
+				<playerid> (int)
+					Can tell other scripts that a player caused the item
+					removal rather than the script.
 
 			Returns:
-				-
+				1
+					On success.
+
+				0
+					If the specified slot was out of bounds.
+
+				-1
+					If the specified slot contained an invalid item ID.
 		}
 	}
 
@@ -167,49 +199,84 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native OnItemAddToContainer(containerid, itemid, playerid);
 		{
 			Called:
-				-
+				When an item is added to a container. Note that the item won't
+				actually be in the container list when this is called.
 
 			Parameters:
-				-
+				<containerid> (int)
+					The container the item will be added to.
+
+				<itemid> (int)
+					The item that will be added.
+
+				<playerid> (int)
+					The player who is adding it (specified in
+					AddItemToContainer)
 
 			Returns:
-				-
+				1
+					To cancel the item being added.
 		}
 
 		native OnItemAddedToContainer(containerid, itemid, playerid);
 		{
 			Called:
-				-
+				After an item has been added to a container.
 
 			Parameters:
-				-
+				<containerid> (int)
+					The container the item was added to.
+
+				<itemid> (int)
+					The item that was added.
+
+				<playerid> (int)
+					The player who added it (specified in AddItemToContainer)
 
 			Returns:
-				-
+				(nothing)
 		}
 
 		native OnItemRemoveFromContainer(containerid, slotid, playerid);
 		{
 			Called:
-				-
+				As an item is removed from a container. Note that the item will
+				still be in the container list when this is called.
 
 			Parameters:
-				-
+				<containerid> (int)
+					The container the item will be removed from.
+
+				<itemid> (int)
+					The item that will be removed.
+
+				<playerid> (int)
+					The player who is removing it (specified in
+					RemoveItemFromContainer)
 
 			Returns:
-				-
+				1
+					To cancel the item being removed.
 		}
 
 		native OnItemRemovedFromContainer(containerid, slotid, playerid);
 		{
 			Called:
-				-
+				After an item has been removed from a container.
 
 			Parameters:
-				-
+				<containerid> (int)
+					The container the item was removed from.
+
+				<itemid> (int)
+					The item that was removed.
+
+				<playerid> (int)
+					The player who removed it (specified in
+					RemoveItemFromContainer)
 
 			Returns:
-				-
+				(nothing)
 		}
 	}
 
@@ -225,7 +292,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native IsValidContainer(containerid)
 		{
 			Description:
-				-
+				Checks if a container ID is valid.
 
 			Parameters:
 				-
@@ -237,43 +304,45 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native GetContainerButton(containerid)
 		{
 			Description:
-				-
+				Returns the button ID used by a container (if not virtual).
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				(int, buttonid)
 		}
 
 		native GetContainerName(containerid, name[])
 		{
 			Description:
-				-
+				Returns a container's name.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				(bool)
+					Success state.
 		}
 
 		native GetContainerPos(containerid, &Float:x, &Float:y, &Float:z)
 		{
 			Description:
-				-
+				Returns a container's button position.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				(bool)
+					Success state.
 		}
 
 		native SetContainerPos(containerid, Float:x, Float:y, Float:z)
 		{
 			Description:
-				-
+				Updates a container's button position in the world.
 
 			Parameters:
 				-
@@ -285,7 +354,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native GetContainerSize(containerid)
 		{
 			Description:
-				-
+				Returns a container's item capacity.
 
 			Parameters:
 				-
@@ -297,7 +366,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native SetContainerSize(containerid, size)
 		{
 			Description:
-				-
+				Sets a container's item capacity.
 
 			Parameters:
 				-
@@ -309,7 +378,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native GetContainerWorld(containerid)
 		{
 			Description:
-				-
+				Returns the virtual world a container's button exists in.
 
 			Parameters:
 				-
@@ -321,7 +390,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native SetContainerWorld(containerid, world)
 		{
 			Description:
-				-
+				Sets the virtual world that a container's button will exist in.
 
 			Parameters:
 				-
@@ -333,7 +402,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native GetContainerInterior(containerid)
 		{
 			Description:
-				-
+				Returns the interior world a container's button exists in.
 
 			Parameters:
 				-
@@ -345,19 +414,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native SetContainerInterior(containerid, interior)
 		{
 			Description:
-				-
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetPlayerContainerButtonArea(playerid)
-		{
-			Description:
-				-
+				Sets the interior world that a container's button will exist in.
 
 			Parameters:
 				-
@@ -369,19 +426,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native GetContainerSlotItem(containerid, slot)
 		{
 			Description:
-				-
+				Returns the item stored in the specified slot.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				(int, itemid)
 		}
 
 		native IsContainerSlotUsed(containerid, slotid)
 		{
 			Description:
-				-
+				Checks if a slot in a container is occupied by an item.
 
 			Parameters:
 				-
@@ -393,7 +450,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native IsContainerFull(containerid)
 		{
 			Description:
+				Checks if a container is full.
+
+			Parameters:
 				-
+
+			Returns:
+				-
+		}
+
+		native IsContainerEmpty(containerid)
+		{
+			Description:
+				Checks if a container is empty.
 
 			Parameters:
 				-
@@ -405,7 +474,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native WillItemTypeFitInContainer(containerid, ItemType:itemtype)
 		{
 			Description:
-				-
+				Checks if an item type will fit into a container.
 
 			Parameters:
 				-
@@ -417,7 +486,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native GetContainerFreeSlots(containerid)
 		{
 			Description:
-				-
+				Returns the number of free item slots in a container.
 
 			Parameters:
 				-
@@ -429,13 +498,25 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native GetItemContainer(itemid)
 		{
 			Description:
-				Returns the ID of a container if <itemid> is stored inside it.
+				Returns the ID of the container that <itemid> is stored in.
 
 			Parameters:
 				-
 
 			Returns:
+				(int, containerid)
+		}
+
+		native GetButtonContainer(buttonid)
+		{
+			Description:
+				Returns the ID of the container that <buttonid> is created for.
+
+			Parameters:
 				-
+
+			Returns:
+				(int, containerid)
 		}
 	}
 
@@ -452,22 +533,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Hooked functions or callbacks, either SA:MP natives or from other
 		scripts or plugins.
 
-		SAMP/OnPlayerConnect
-		{
-			Reason:
-				-
-		}
-
 		YSI/OnScriptInit
 		{
 			Reason:
 				Zero initialised array cells.
-		}
-
-		SIF/Button/OnButtonPress
-		{
-			Reason:
-				-
 		}
 	}
 
@@ -513,14 +582,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#define CNT_MAX_SLOTS				(24)
 #endif
 
-#if !defined DIALOG_CONTAINER_LIST
-	#define DIALOG_CONTAINER_LIST		(9002)
-#endif
-
-#if !defined DIALOG_CONTAINER_OPTIONS
-	#define DIALOG_CONTAINER_OPTIONS	(9003)
-#endif
-
 
 #define INVALID_CONTAINER_ID		(-1)
 
@@ -543,7 +604,8 @@ new
 			cnt_Data					[CNT_MAX][E_CONTAINER_DATA],
 			cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
 Iterator:	cnt_Index<CNT_MAX>,
-			cnt_ItemContainer			[ITM_MAX];
+			cnt_ItemContainer			[ITM_MAX],
+			cnt_ButtonContainer			[BTN_MAX];
 
 
 forward OnItemAddToContainer(containerid, itemid, playerid);
@@ -586,10 +648,14 @@ stock CreateContainer(name[], size,
 	}
 
 	if(!virtual)
+	{
 		cnt_Data[id][cnt_button] = CreateButton(x, y, z, "Press F to open", world, interior, 1.0, label, name);
-
+		cnt_ButtonContainer[cnt_Data[id][cnt_button]] = id;
+	}
 	else
+	{
 		cnt_Data[id][cnt_button] = INVALID_BUTTON_ID;
+	}
 
 	strcpy(cnt_Data[id][cnt_name], name, CNT_MAX_NAME);
 	cnt_Data[id][cnt_posX]			= x;
@@ -616,6 +682,7 @@ stock DestroyContainer(containerid)
 		return 0;
 
 	DestroyButton(cnt_Data[containerid][cnt_button]);
+	cnt_ButtonContainer[cnt_Data[containerid][cnt_button]] = INVALID_CONTAINER_ID;
 	cnt_Data[containerid][cnt_button] = INVALID_BUTTON_ID;
 
 	for(new i; i < cnt_Data[containerid][cnt_size]; i++)
@@ -692,7 +759,7 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 	}
 
 	if(i == cnt_Data[containerid][cnt_size])
-		return -2;
+		return -1;
 
 	cnt_Items[containerid][i] = itemid;
 	cnt_ItemContainer[itemid] = containerid;
@@ -711,7 +778,7 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 
 	if(!IsValidItem(cnt_Items[containerid][slotid]))
 	{
-		if(cnt_Data[containerid][cnt_size] == INVALID_ITEM_ID)
+		if(cnt_Data[containerid][cnt_size] != INVALID_ITEM_ID)
 		{
 			cnt_Data[containerid][cnt_size] = INVALID_ITEM_ID;
 
@@ -899,16 +966,6 @@ stock SetContainerInterior(containerid, interior)
 	return 1;
 }
 
-stock GetPlayerContainerButtonArea(playerid)
-{
-	new button = GetPlayerButtonID(playerid);
-
-	foreach(new i : cnt_Index)
-		if(button == cnt_Data[i][cnt_button]) return i;
-
-	return INVALID_CONTAINER_ID;
-}
-
 // cnt_Items
 stock GetContainerSlotItem(containerid, slotid)
 {
@@ -1045,4 +1102,12 @@ stock GetItemContainer(itemid)
 		return INVALID_CONTAINER_ID;
 
 	return cnt_ItemContainer[itemid];
+}
+
+stock GetButtonContainer(buttonid)
+{
+	if(!IsValidButton(buttonid))
+		return INVALID_CONTAINER_ID;
+
+	return cnt_ButtonContainer[buttonid];
 }
