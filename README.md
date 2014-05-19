@@ -3,11 +3,15 @@ SIF is a collection of high-level include scripts to make the development of
 interactive features easy for the developer while maintaining quality front-end
 gameplay for players.
 
+
 # The Libraries
 
 SIF Comes with 5 main libraries (and one core library utilised by the other 5),
 each of which can be individually included and their dependencies will be
 managed automatically.
+
+There is also a debug library with some basic runtime debugging functions that
+are used in all SIF libraries.
 
 
 ## Button
@@ -75,11 +79,61 @@ to make swapping items or looting quick and easy.
 A fundamental library with features used by multiple SIF scripts.
 
 
+# Extensions
+
+Extension scripts are smaller modules not essential to the core functionality
+but offer some useful additions to the existing SIF libraries.
+
+## ContainerDialog
+Offers functions that represent the contents of containers with dialogs. Also
+includes dynamic menu options for each item in the container.
+
+## Craft
+Basic two-item combination crafting script. Offers a function for binding two
+items then the rest is done through container menu options.
+
+## DebugLabels
+Entity labelling library used throughout SIF. Debug labels can be enabled and
+disabled in runtime and display various pieces of useful information.
+
+## Dispenser
+A basic item dispenser. Constructor function takes an item type and a price,
+players can interact with a dispenser to buy items.
+
+## InventoryDialog
+Offers a method of viewing player inventory contents with dialogs. Also contains
+dynamic menu options for each item in the inventory.
+
+## InventoryKeys
+Basically just assigns a key to opening inventory and adding items to it.
+
+## ItemArrayData
+Extends the amount of data available to store with items. Includes functions for
+setting, getting and appending the data.
+
+## ItemList
+Data library for compacting a list of items into a long string of item's types
+and array data as well as other pieces of information. Used mainly for storage.
+
+## Notebook
+Basic example of how to use the dynamic menu options. Uses inventory options
+feature to add a notebook to the inventory dialog.
+
+
 # Installation
-Simply create a folder titled 'SIF' inside 'Pawno/includes/'
-Then dump all the files from the repository into that folder.
+Then dump all the files from the repository into ```/pawno/includes/SIF/'''.
+The path to SIF.inc should be: ```/pawno/includes/SIF/SIF.inc'''
 Use this line in scripts to start using SIF:
+
 	#include <SIF/SIF>
+
+Or you can include individual scripts:
+
+	#include <SIF/Button.pwn>
+	#include <SIF/Item.pwn>
+	#include <SIF/extensions/Dispenser.pwn>
+
+Note that the <SIF/SIF> include line will not include any extensions.
 
 
 You are welcome to fork, submit issues and improve the code any way you like!
