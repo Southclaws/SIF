@@ -1530,3 +1530,15 @@ stock Float:GetButtonAngleToPlayer(playerid, buttonid)
 
 	return sif_GetAngleToPoint(btn_Data[buttonid][btn_posX], btn_Data[buttonid][btn_posY], x, y);
 }
+
+
+/*==============================================================================
+
+	Testing
+
+==============================================================================*/
+
+
+#if defined RUN_TESTS
+	#include <SIF/testing/Button.pwn>
+#endif
