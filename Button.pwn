@@ -285,6 +285,79 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If the button ID handle <buttonid> is invalid.
 		}
 
+		native GetButtonArea(buttonid)
+		{
+			Description:
+				Returns the streamer area ID used by a button.
+
+			Parameters:
+				-
+
+			Returns:
+				(int, areaid)
+		}
+
+		native SetButtonArea(buttonid, areaid)
+		{
+			Description:
+				Updates a button's streamer area ID. Note that this does not
+				remove the existing area from memory so that should be got with
+				GetButtonArea and deleted beforehand.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
+		{
+			Description:
+				Creates a 3D Text Label at the specified button ID handle, if
+				a label already exists it updates the text, colour and range.
+
+			Parameters:
+				<buttonid> (int, buttonid)
+					The button ID handle to set the label of.
+
+				<text> (string)
+					The text to display in the label.
+
+				<colour> (int)
+					The colour of the label.
+
+				<range> (float)
+					The stream range of the label.
+
+			Returns:
+				0
+					If the button ID handle is invalid
+
+				1
+					If the label was created successfully.
+
+				2
+					If the label already existed and was updated successfully.
+		}
+
+		native DestroyButtonLabel(buttonid)
+		{
+			Description:
+				Removes the label from a button.
+
+			Parameters:
+				<buttonid>
+					The button ID handle to remove the label from.
+
+			Returns:
+				0
+					If the button ID handle is invalid
+
+				-1
+					If the button does not have a label to remove.
+		}
+
 		native GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z)
 		{
 			Description:
@@ -355,22 +428,54 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If <buttonid> is an invalid button ID handle.
 		}
 
-		native GetPlayerButtonArea(playerid)
+		native GetButtonWorld(buttonid)
 		{
 			Description:
-				Returns the ID of the button which <playerid> is within the area
-				of if any.
+				Returns the virtual world that a button exists in.
 
 			Parameters:
-				<playerid> (int)
-					The player you want to retreive the button area of.
+				-
 
 			Returns:
-				(int)
-					Button ID handle of the button area that the player is in.
+				-
+		}
 
-				INVALID_BUTTON_ID
-					If the player isn't in a button's area.
+		native SetButtonWorld(buttonid, world)
+		{
+			Description:
+				Updates a button's virtual world. Moves all streamer entities
+				to the world too.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetButtonInterior(buttonid)
+		{
+			Description:
+				Returns the interior that a button exists in.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native SetButtonInterior(buttonid, interior)
+		{
+			Description:
+				Updates a button's interior. Moves all streamer entities
+				to the interior too.
+
+			Parameters:
+				-
+
+			Returns:
+				-
 		}
 
 		native GetButtonLinkedID(buttonid)
@@ -390,94 +495,121 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If the button isn't linked to another button.
 		}
 
-		native SetButtonMessage(buttonid, msg[])
+		native GetButtonText(buttonid, text[])
 		{
 			Description:
-				Sets the button's on-screen message text for when a player
-				enters the button's area.
+				Returns the text assigned to a button that appears on-screen
+				when a player walks near it.
 
 			Parameters:
-				<buttonid> (int, buttonid)
-					The button ID handle to set the message text of.
+				-
 
-				<msg> (string)
-					The text to set the message to.
+			Returns:
+				-
+		}
+
+		native SetButtonText(buttonid, text[])
+		{
+			Description:
+				Updates the text that appears on-screen when a player walks near
+				the button.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native SetButtonExtraData(buttonid, data)
+		{
+			Description:
+				Sets the button's extra data field, this is one cell of blank
+				space allocated for each button.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetButtonExtraData(buttonid)
+		{
+			Description:
+				Retrieves the integer assigned to the button set with
+				SetButtonExtraData.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetPlayerPressingButton(playerid)
+		{
+			Description:
+				Returns the ID of the button that the player is currently
+				pressing. This will only return a value while <playerid> is
+				holding down the interact key at a button.
+
+			Parameters:
+				-
+
+			Returns:
+				(int, buttonid)
+		}
+
+		native GetPlayerButtonID(playerid)
+		{
+			Description:
+				Returns the ID of the closest button that a player is standing
+				within the area of.
+
+			Parameters:
+				-
+
+			Returns:
+				(int, buttonid)
+		}
+
+		native GetPlayerButtonList(playerid, list[], &size)
+		{
+			Description:
+				Returns a list of buttons that a player is standing in the areas
+				of.
+
+			Parameters:
+				-
 
 			Returns:
 				1
-					If the message text was set successfully.
-
-				0
-					If <buttonid> is an invalid button ID handle.
+					On success
 		}
 
-		native SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
+		native GetPlayerAngleToButton(playerid, buttonid)
 		{
 			Description:
-				Creates a 3D Text Label at the specified button ID handle, if
-				a label already exists it updates the text, colour and range.
-
-			Parameters:
-				<buttonid> (int, buttonid)
-					The button ID handle to set the label of.
-
-				<text> (string)
-					The text to display in the label.
-
-				<colour> (int)
-					The colour of the label.
-
-				<range> (float)
-					The stream range of the label.
-
-			Returns:
-				0
-					If the button ID handle is invalid
-
-				1
-					If the label was created successfully.
-
-				2
-					If the label already existed and was updated successfully.
-		}
-
-		native DestroyButtonLabel(buttonid)
-		{
-			Description:
-				Removes the label from a button.
-
-			Parameters:
-				<buttonid>
-					The button ID handle to remove the label from.
-
-			Returns:
-				0
-					If the button ID handle is invalid
-
-				-1
-					If the button does not have a label to remove.
-		}
-		stock GetPlayerAngleToButton(playerid, buttonid)
-		{
-			Description:
-				-
+				Returns the angle in degrees from a player to a button.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				(float, angle, degrees)
 		}
-		stock GetButtonAngleToPlayer(playerid, buttonid)
+
+		native GetButtonAngleToPlayer(playerid, buttonid)
 		{
 			Description:
-				-
+				Returns the angle in degrees from a button to a player.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				(float, angle, degrees)
 		}
 
 	}
@@ -527,9 +659,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				OnPlayerLeaveButtonArea.
 		}
 	}
-
-
-
 
 ==============================================================================*/
 
@@ -1109,7 +1238,7 @@ stock DestroyButtonLabel(buttonid)
 		return -1;
 
 	DestroyDynamic3DTextLabel(btn_Data[buttonid][btn_label]);
-	btn_Data[buttonid][btn_label] = INVALID_3DTEXT_ID;
+	btn_Data[buttonid][btn_label] = Text3D:INVALID_3DTEXT_ID;
 
 	return 1;
 }
@@ -1119,7 +1248,7 @@ stock DestroyButtonLabel(buttonid)
 // btn_posZ
 stock GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonPos]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonPos] %d", buttonid);
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1131,7 +1260,7 @@ stock GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z)
 }
 stock SetButtonPos(buttonid, Float:x, Float:y, Float:z)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonPos]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonPos] %d, %f, %f, %f", buttonid, x, y, z);
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
@@ -1141,14 +1270,17 @@ stock SetButtonPos(buttonid, Float:x, Float:y, Float:z)
 
 	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
 	{
+		sif_d:SIF_DEBUG_LEVEL_INTERFACE_DEEP:BUTTON_DEBUG("[SetButtonPos] Updating button label");
 		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_X, x);
 		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_Y, y);
 		Streamer_SetFloatData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_Z, z);
 	}
 
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE_DEEP:BUTTON_DEBUG("[SetButtonPos] Updating variables");
 	btn_Data[buttonid][btn_posX] = x;
 	btn_Data[buttonid][btn_posY] = y;
 	btn_Data[buttonid][btn_posZ] = z;
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE_DEEP:BUTTON_DEBUG("[SetButtonPos] Updated to: %f, %f, %f", btn_Data[buttonid][btn_posX], btn_Data[buttonid][btn_posY], btn_Data[buttonid][btn_posZ]);
 
 	return 1;
 }
@@ -1156,7 +1288,7 @@ stock SetButtonPos(buttonid, Float:x, Float:y, Float:z)
 // btn_size
 stock Float:GetButtonSize(buttonid)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonSize]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonSize] %d", buttonid);
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0.0;
 
@@ -1164,12 +1296,12 @@ stock Float:GetButtonSize(buttonid)
 }
 stock SetButtonSize(buttonid, Float:size)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonSize]");
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonSize] %d, %f", buttonid, size);
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
 	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_SIZE, size);
-	btn_Data[buttonid][btn_size]y = size;
+	btn_Data[buttonid][btn_size] = size;
 
 	#if defined DEBUG_LABELS_BUTTON
 		UpdateButtonDebugLabel(buttonid);
@@ -1226,7 +1358,7 @@ stock SetButtonInterior(buttonid, interior)
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
-	if(btn_Data[buttonid][btn_world] != interior)
+	if(btn_Data[buttonid][btn_interior] != interior)
 	{
 		new tmp[1];
 		tmp[0] = interior;
@@ -1238,7 +1370,7 @@ stock SetButtonInterior(buttonid, interior)
 			Streamer_SetArrayData(STREAMER_TYPE_3D_TEXT_LABEL, btn_Data[buttonid][btn_label], E_STREAMER_INTERIOR_ID, tmp);
 		}
 
-		btn_Data[buttonid][btn_world] = interior;
+		btn_Data[buttonid][btn_interior] = interior;
 	}
 
 	return 1;
@@ -1279,12 +1411,12 @@ stock SetButtonText(buttonid, text[])
 }
 
 // btn_exData
-stock SetButtonExtraData(itemid, data)
+stock SetButtonExtraData(buttonid, data)
 {
-	if(!Iter_Contains(btn_Index, itemid))
+	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
-	btn_Data[itemid][btn_exData] = data;
+	btn_Data[buttonid][btn_exData] = data;
 
 	#if defined DEBUG_LABELS_BUTTON
 		UpdateButtonDebugLabel(buttonid);
@@ -1292,12 +1424,12 @@ stock SetButtonExtraData(itemid, data)
 
 	return 1;
 }
-stock GetButtonExtraData(itemid)
+stock GetButtonExtraData(buttonid)
 {
-	if(!Iter_Contains(btn_Index, itemid))
+	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
-	return btn_Data[itemid][btn_exData];
+	return btn_Data[buttonid][btn_exData];
 }
 
 // btn_CurrentlyPressing
@@ -1357,22 +1489,6 @@ stock GetPlayerButtonList(playerid, list[], &size)
 
 	foreach(new i : btn_CurrentlyNearIndex[playerid])
 		list[size++] = btn_CurrentlyNear[playerid][i];
-
-	return 1;
-}
-
-stock SetButtonMessage(buttonid, msg[])
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonMessage]");
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	btn_Data[buttonid][btn_text][0] = EOS;
-	strcpy(btn_Data[buttonid][btn_text], msg);
-
-	foreach(new i : Player)
-		if(IsPlayerViewingMsgBox(i))
-			ShowActionText(i, btn_Data[i][btn_text]);
 
 	return 1;
 }
