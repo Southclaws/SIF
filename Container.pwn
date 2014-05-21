@@ -604,8 +604,8 @@ new
 			cnt_Data					[CNT_MAX][E_CONTAINER_DATA],
 			cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
 Iterator:	cnt_Index<CNT_MAX>,
-			cnt_ItemContainer			[ITM_MAX],
-			cnt_ButtonContainer			[BTN_MAX];
+			cnt_ItemContainer			[ITM_MAX] = {INVALID_CONTAINER_ID, ...},
+			cnt_ButtonContainer			[BTN_MAX] = {INVALID_CONTAINER_ID, ...};
 
 
 forward OnItemAddToContainer(containerid, itemid, playerid);
@@ -625,6 +625,9 @@ hook OnScriptInit()
 {
 	for(new i; i < ITM_MAX; i++)
 		cnt_ItemContainer[i] = INVALID_CONTAINER_ID;
+
+	for(new i; i < BTN_MAX; i++)
+		cnt_ButtonContainer[i] = INVALID_CONTAINER_ID;
 }
 
 
@@ -681,8 +684,12 @@ stock DestroyContainer(containerid)
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
-	DestroyButton(cnt_Data[containerid][cnt_button]);
-	cnt_ButtonContainer[cnt_Data[containerid][cnt_button]] = INVALID_CONTAINER_ID;
+	if(IsValidButton(cnt_Data[containerid][cnt_button]))
+	{
+		DestroyButton(cnt_Data[containerid][cnt_button]);
+		cnt_ButtonContainer[cnt_Data[containerid][cnt_button]] = INVALID_CONTAINER_ID;
+	}
+
 	cnt_Data[containerid][cnt_button] = INVALID_BUTTON_ID;
 
 	for(new i; i < cnt_Data[containerid][cnt_size]; i++)
