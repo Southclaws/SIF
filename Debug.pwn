@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 2.0.1
+	Version: 2.1.1
 
 
 	SIF/Overview
@@ -20,6 +20,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	SIF/Debug/Dependencies
 	{
 		YSI\y_hooks
+		YSI\y_va
 	}
 
 	SIF/Debug/Credits
@@ -30,6 +31,17 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Y_Less							- YSI framework
 	}
 
+	SIF/Debug/Constants
+	{
+		These can be altered by defining their values before the include line.
+
+		MAX_DEBUG_HANDLER
+			Maximum debug handlers that can be registered.
+
+		MAX_DEBUG_HANDLER_NAME
+			Debug handler name length limit.
+	}
+
 	SIF/Debug/Core Functions
 	{
 		The functions that control the core features of this script.
@@ -38,10 +50,54 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Debug/Core
 		native -
 
-		native Func(params)
+		native sif_debug_register_handler(name[], initstate = 0)
 		{
 			Description:
-				-
+				Registers a new debug handler. A debug handler is an identifier
+				for a collection of debug messages. A handler can be activated
+				and deactivated during runtime allowing for instant debugging of
+				problems found while using a script.
+
+			Parameters:
+				<name> (string)
+					The name given to the handler. This can also be used to
+					search for handlers so developers don't need to remember
+					numerical identifiers.
+
+				<initstate> (int)
+					Initial debug level of the handler. Default value of zero
+					and is generally left this way unless debugging something
+					that happens on script initiation.
+
+			Returns:
+				(int)
+					A debug handler identifier.
+
+				-1
+					If the debug handler limit was reached.
+		}
+
+		native sif_debug_level(handler, level)
+		{
+			Description:
+				Sets the debug level for a specific debug handler.
+
+			Parameters:
+				<handler> (int)
+					Debug handler ID to set the level of.
+
+				<level> (int)
+					Debug level to set. Higher values generally mean more
+					information from debug prints.
+
+			Returns:
+				(none)
+		}
+
+		native sif_debug_plevel(playerid, handler, level)
+		{
+			Description:
+				(scheduled for depreciation)
 
 			Parameters:
 				-
@@ -49,60 +105,87 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
-	}
 
-	SIF/Debug/Events
-	{
-		Events called by player actions done by using features from this script.
-
-		native -
-		native - SIF/Debug/Callbacks
-		native -
-
-		native Func(params)
+		native sif_debug_print(handler, level, playerid, msg[])
 		{
-			Called:
+			Description:
+				Prints a debug message on the specified handler for the
+				specified level. If the level is higher than the active level
+				for the handler, nothing will happen.
+
+			Parameters:
+				<handler> (int)
+					Handler ID.
+
+				<level> (int)
+					Debug level to print at.
+
+				<playerid> (int, playerid)
+					Player to send a client message to
+					(scheduled for depreciation).
+
+				<msg> (string)
+					Message to send.
+
+			Returns:
 				-
+		}
+
+		native sif_debug_printf(handler, level, playerid, string[], va_args<>)
+		{
+			Description:
+				Prints a formatted debug message on the specified handler for
+				the	specified level. If the level is higher than the active
+				level for the handler, nothing will happen.
+
+			Parameters:
+				<handler> (int)
+					Handler ID.
+
+				<level> (int)
+					Debug level to print at.
+
+				<playerid> (int, playerid)
+					Player to send a client message to
+					(scheduled for depreciation).
+
+				<msg> (string)
+					Message to send.
+
+				<va_args> (variable arguments)
+					String format parameters.
+
+			Returns:
+				-
+		}
+
+		native sif_debug_handler_search(name[])
+		{
+			Description:
+				Searches for a debug handler name and returns the ID.
 
 			Parameters:
 				-
 
 			Returns:
-				-
+				(int)
+					A valid debug handler ID if found.
+
+				-1
+					If no handler was found from the specified string.
 		}
-	}
 
-	SIF/Debug/Interface Functions
-	{
-		Functions to get or set data values in this script without editing
-		the data directly. These include automatic ID validation checks.
-
-		native -
-		native - SIF/Debug/Interface
-		native -
-
-		native Func(params)
+		native sif_debug_get_handler_name(handler, output[])
 		{
 			Description:
-				-
+				Returns a debug handler name for the specified ID.
 
 			Parameters:
 				-
 
 			Returns:
-				-
-		}
-	}
-
-	SIF/Debug/Internal Functions
-	{
-		Internal events called by player actions done by using features from
-		this script.
-	
-		Func(params)
-		{
-			Description:
-				-
+				0
+					If the ID was invalid.
 		}
 	}
 
@@ -111,10 +194,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Hooked functions or callbacks, either SA:MP natives or from other
 		scripts or plugins.
 
-		SAMP/OnPlayerSomething
+		SAMP/OnPlayerConnect
 		{
 			Reason:
-				-
+				Zeroing some variables and resetting stuff.
 		}
 	}
 

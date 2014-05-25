@@ -6,7 +6,7 @@ gameplay for players.
 
 # The Libraries
 
-SIF Comes with 5 main libraries (and one core library utilised by the other 5),
+SIF Comes with 5 main libraries (and a couple of internally used extras),
 each of which can be individually included and their dependencies will be
 managed automatically.
 
@@ -77,6 +77,9 @@ to make swapping items or looting quick and easy.
 
 ## Core
 A fundamental library with features used by multiple SIF scripts.
+
+## Debug
+Basic debugging library offering runtime debug functions used throughout SIF.
 
 
 # Extensions

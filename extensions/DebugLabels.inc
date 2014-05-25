@@ -128,6 +128,11 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define _SIF_DEBUG_LABELS_INCLUDED
 
 
+#if !defined SIF_USE_DEBUG_LABELS
+	#endinput
+#endif
+
+
 /*==============================================================================
 
 	Setup
