@@ -46,6 +46,21 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 		DR_MAX_BUTTONS_PER
 			Maximum amount of buttons that can be assigned to a door.
+
+		DR_STATE_INVALID
+			Invalid door state.
+
+		DR_STATE_OPEN
+			Door is open.
+
+		DR_STATE_CLOSED
+			Door is closed.
+
+		DR_STATE_OPENING
+			Door is moving from closed to open position.
+
+		DR_STATE_CLOSING
+			Door is moving from open to closed position.
 	}
 
 	SIF/Door/Core Functions
