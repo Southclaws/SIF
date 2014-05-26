@@ -16,7 +16,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF/FILENAME/Dependencies
 	{
-		SIF/Button
 		Streamer Plugin
 		YSI\y_hooks
 		YSI\y_timers
@@ -28,6 +27,13 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		SA:MP Community					- Inspiration and support
 		Incognito						- Very useful streamer plugin
 		Y_Less							- YSI framework
+	}
+
+	SIF/FILENAME/Constants
+	{
+		These can be altered by defining their values before the include line.
+
+		-
 	}
 
 	SIF/FILENAME/Core Functions
@@ -121,11 +127,17 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+//
+
+
 /*==============================================================================
 
 	Setup
 
 ==============================================================================*/
+
+
+//
 
 
 /*==============================================================================
@@ -135,11 +147,17 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+//
+
+
 /*==============================================================================
 
 	Core Functions
 
 ==============================================================================*/
+
+
+//
 
 
 /*==============================================================================
@@ -149,6 +167,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+//
+
+
 /*==============================================================================
 
 	Interface
@@ -156,3 +177,4 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+//

@@ -124,19 +124,21 @@ feature to add a notebook to the inventory dialog.
 
 
 # Installation
-Then dump all the files from the repository into ```/pawno/includes/SIF/```.
-The path to SIF.inc should be: ```/pawno/includes/SIF/SIF.inc```.
+Then dump all the files from the repository into ```/pawno/includes/```.
 Use this line in scripts to start using SIF:
 
-	#include <SIF/SIF>
+	#include <SIF>
 
 Or you can include individual scripts:
 
-	#include <SIF/Button.pwn>
-	#include <SIF/Item.pwn>
-	#include <SIF/extensions/Dispenser.pwn>
+	#include <SIF\Item.pwn>
+	#include <SIF\extensions/Dispenser.pwn>
 
-Note that the <SIF/SIF> include line will not include any extensions.
+Internal dependencies are automatically included. SIF/Item depends on SIF/Button
+so the above example will automatically include SIF/Button if it hasn't already
+been included beforehand.
+
+Note that the <SIF> include line will not include any extensions.
 
 
 You are welcome to fork, submit issues and improve the code any way you like!
