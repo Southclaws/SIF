@@ -132,7 +132,7 @@ Use this line in scripts to start using SIF:
 Or you can include individual scripts:
 
 	#include <SIF\Item.pwn>
-	#include <SIF\extensions/Dispenser.pwn>
+	#include <SIF\extensions\Dispenser.pwn>
 
 Internal dependencies are automatically included. SIF/Item depends on SIF/Button
 so the above example will automatically include SIF/Button if it hasn't already
