@@ -705,7 +705,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				(int)
 					The ID of the streamed object used for the item.
 
-				0
+				INVALID_OBJECT_ID
 					If the item is invalid or not a world item.
 		}
 
@@ -2385,10 +2385,10 @@ stock GetItemObjectID(itemid)
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemObjectID]");
 
 	if(!Iter_Contains(itm_Index, itemid))
-		return 0;
+		return INVALID_OBJECT_ID;
 
 	if(!Iter_Contains(itm_WorldIndex, itemid))
-		return 0;
+		return INVALID_OBJECT_ID;
 
 	return itm_Data[itemid][itm_objId];
 }
