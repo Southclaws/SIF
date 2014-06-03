@@ -1,5 +1,10 @@
+#if defined _SIF_DISPENSER_INCLUDED
+	#endinput
+#endif
+
 #include <YSI\y_hooks>
 
+#define _SIF_DISPENSER_INCLUDED
 
 #define MAX_DISPENSER			(64)
 #define MAX_DISPENSER_TYPE		DispenserType:(8)

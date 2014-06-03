@@ -663,16 +663,20 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if defined _SIF_BUTTON_INCLUDED
+	#endinput
+#endif
+
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF/Debug.pwn>
+	#include <SIF\Debug.pwn>
 #endif
 
 #if !defined _SIF_CORE_INCLUDED
-	#include <SIF/Core.pwn>
+	#include <SIF\Core.pwn>
 #endif
 
 #if defined DEBUG_LABELS_BUTTON
-	#include <SIF/extensions/DebugLabels.inc>
+	#include <SIF\extensions/DebugLabels.inc>
 #endif
 
 #include <YSI\y_iterate>
@@ -1536,5 +1540,5 @@ stock Float:GetButtonAngleToPlayer(playerid, buttonid)
 
 
 #if defined RUN_TESTS
-	#include <SIF/testing/Button.pwn>
+	#include <SIF\testing/Button.pwn>
 #endif

@@ -25,9 +25,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 // SIF
 
-#include "SIF/Core.pwn"
-#include "SIF/Button.pwn"
-#include "SIF/Door.pwn"
-#include "SIF/Item.pwn"
-#include "SIF/Inventory.pwn"
-#include "SIF/Container.pwn"
+#include "SIF\Core.pwn"
+#include "SIF\Button.pwn"
+#include "SIF\Door.pwn"
+#include "SIF\Item.pwn"
+#include "SIF\Inventory.pwn"
+#include "SIF\Container.pwn"

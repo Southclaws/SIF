@@ -104,14 +104,21 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if defined _SIF_CRAFT_INCLUDED
+	#endinput
+#endif
+
+#include <YSI\y_hooks>
+
+#define _SIF_CRAFT_INCLUDED
+
+
 /*==============================================================================
 
 	Setup
 
 ==============================================================================*/
 
-
-#include <YSI\y_hooks>
 
 
 #define CFT_MAX_COMBO (64)

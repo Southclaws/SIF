@@ -1,4 +1,10 @@
+#if defined _SIF_NOTEBOOK_INCLUDED
+	#endinput
+#endif
+
 #include <YSI\y_hooks>
+
+#define _SIF_NOTEBOOK_INCLUDED
 
 
 #if !defined NOTEBOOK_FILE

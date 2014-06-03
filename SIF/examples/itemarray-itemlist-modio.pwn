@@ -1,9 +1,9 @@
 #define FILTERSCRIPT
 
 #include <a_samp>
-#include <SIF/Item.pwn>
-#include <SIF/extensions/ItemArrayData>
-#include <SIF/extensions/ItemList>
+#include <SIF\Item.pwn>
+#include <SIF\extensions/ItemArrayData>
+#include <SIF\extensions/ItemList>
 #include <YSI\y_hooks>
 #include <modio>
 

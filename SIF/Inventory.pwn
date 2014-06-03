@@ -314,12 +314,16 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if defined _SIF_INVENTORY_INCLUDED
+	#endinput
+#endif
+
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF/Debug.pwn>
+	#include <SIF\Debug.pwn>
 #endif
 
 #if !defined _SIF_ITEM_INCLUDED
-	#include <SIF/Item.pwn>
+	#include <SIF\Item.pwn>
 #endif
 
 #include <YSI\y_iterate>

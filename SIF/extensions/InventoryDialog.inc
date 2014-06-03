@@ -398,6 +398,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if defined _SIF_INVENTORY_DIALOG_INCLUDED
+	#endinput
+#endif
+
 #include <YSI\y_hooks>
 
 #define _SIF_INVENTORY_DIALOG_INCLUDED
