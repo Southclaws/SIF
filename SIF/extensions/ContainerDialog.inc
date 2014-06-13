@@ -2,7 +2,8 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.1
+	SIF Version: 1.3.0
+	Module Version: 1.1.1
 
 
 	SIF/Overview
@@ -33,15 +34,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		SA:MP Community					- Inspiration and support
 		Incognito						- Very useful streamer plugin
 		Y_Less							- YSI framework
-	}
-
-	SIF/Container/Constants
-	{
-		DIALOG_CONTAINER_LIST
-			Dialog ID for container inventory list.
-
-		DIALOG_CONTAINER_OPTIONS
-			Dialog ID for container inventory item options menu.
 	}
 
 	SIF/ContainerDialog/Core Functions
@@ -288,9 +280,27 @@ forward OnMoveItemToInventory(playerid, itemid, containerid);
 ==============================================================================*/
 
 
+hook OnScriptInit()
+{
+	for(new i; i < MAX_PLAYERS; i++)
+	{
+		_ContDialog_ResetPlayerVars(i);
+	}
+}
+
 hook OnPlayerConnect(playerid)
 {
+	_ContDialog_ResetPlayerVars(playerid);
+}
+
+_ContDialog_ResetPlayerVars(playerid)
+{
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
+	cnt_SelectedSlot[playerid] = -1;
+	cnt_OptionsList[playerid][0] = EOS;
+	cnt_OptionsCount[playerid] = 0;
+	cnt_InventoryContainerItem[playerid] = INVALID_ITEM_ID;
+	cnt_InventoryOptionID[playerid] = 0;
 }
 
 
@@ -328,7 +338,38 @@ stock DisplayContainerInventory(playerid, containerid)
 	if(CallLocalFunction("OnPlayerOpenContainer", "dd", playerid, containerid))
 		return 0;
 
-	ShowPlayerDialog(playerid, DIALOG_CONTAINER_LIST, DIALOG_STYLE_LIST, cnt_Data[containerid][cnt_name], list, "Options", "Close");
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
+	{
+		#pragma unused pid, dialogid, inputtext
+
+		if(response)
+		{
+			if(!IsValidContainer(cnt_CurrentContainer[playerid]))
+				return 0;
+
+			if(listitem == cnt_Data[cnt_CurrentContainer[playerid]][cnt_size])
+			{
+				DisplayPlayerInventory(playerid);
+			}
+			else
+			{
+				if(!IsValidItem(cnt_Items[cnt_CurrentContainer[playerid]][listitem]))
+				{
+					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
+				}
+				else
+				{
+					cnt_SelectedSlot[playerid] = listitem;
+					DisplayContainerOptions(playerid, listitem);
+				}
+			}
+		}
+		else
+		{
+			ClosePlayerContainer(playerid);
+		}
+	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, cnt_Data[containerid][cnt_name], list, "Options", "Close");
 
 	SelectTextDraw(playerid, 0xFFFF00FF);
 
@@ -343,7 +384,7 @@ stock ClosePlayerContainer(playerid)
 	if(cnt_CurrentContainer[playerid] == INVALID_CONTAINER_ID)
 		return 0;
 
-	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
+	Dialog_Hide(playerid);
 	CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]);
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
 
@@ -375,73 +416,16 @@ DisplayContainerOptions(playerid, slotid)
 
 	CallLocalFunction("OnPlayerViewContainerOpt", "dd", playerid, cnt_CurrentContainer[playerid]);
 
-	ShowPlayerDialog(playerid, DIALOG_CONTAINER_OPTIONS, DIALOG_STYLE_LIST, tmp, cnt_OptionsList[playerid], "Accept", "Back");
-}
-
-public OnButtonPress(playerid, buttonid)
-{
-	new containerid = GetButtonContainer(buttonid);
-
-	if(IsValidContainer(containerid))
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
 	{
-		DisplayContainerInventory(playerid, containerid);
-	}
+		#pragma unused pid, dialogid, inputtext
 
-	#if defined cnt_OnButtonPress
-		return cnt_OnButtonPress(playerid, buttonid);
-	#else
-		return 0;
-	#endif
-}
-#if defined _ALS_OnButtonPress
-	#undef OnButtonPress
-#else
-	#define _ALS_OnButtonPress
-#endif
-#define OnButtonPress cnt_OnButtonPress
-#if defined cnt_OnButtonPress
-	forward cnt_OnButtonPress(playerid, buttonid);
-#endif
-
-hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
-{
-	if(dialogid == DIALOG_CONTAINER_LIST)
-	{
-		if(response)
-		{
-			if(!IsValidContainer(cnt_CurrentContainer[playerid]))
-				return 0;
-
-			if(listitem == cnt_Data[cnt_CurrentContainer[playerid]][cnt_size])
-			{
-				DisplayPlayerInventory(playerid);
-			}
-			else
-			{
-				if(!IsValidItem(cnt_Items[cnt_CurrentContainer[playerid]][listitem]))
-				{
-					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
-				}
-				else
-				{
-					cnt_SelectedSlot[playerid] = listitem;
-					DisplayContainerOptions(playerid, listitem);
-				}
-			}
-		}
-		else
-		{
-			ClosePlayerContainer(playerid);
-		}
-	}
-
-	if(dialogid == DIALOG_CONTAINER_OPTIONS)
-	{
 		if(!response)
 		{
 			DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 			return 1;
 		}
+
 		switch(listitem)
 		{
 			case 0:
@@ -496,8 +480,19 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 		}
 	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, tmp, cnt_OptionsList[playerid], "Accept", "Back");
 
 	return 1;
+}
+
+hook OnButtonPress(playerid, buttonid)
+{
+	new containerid = GetButtonContainer(buttonid);
+
+	if(IsValidContainer(containerid))
+	{
+		DisplayContainerInventory(playerid, containerid);
+	}
 }
 
 hook OnPlayerClickTextDraw(playerid, Text:clickedid)
@@ -513,7 +508,7 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 	return 1;
 }
 
-public OnPlayerViewInventoryOpt(playerid)
+hook OnPlayerViewInvOpt(playerid)
 {
 	if(cnt_CurrentContainer[playerid] != INVALID_CONTAINER_ID)
 	{
@@ -522,22 +517,9 @@ public OnPlayerViewInventoryOpt(playerid)
 		strcat(str, cnt_Data[cnt_CurrentContainer[playerid]][cnt_name]);
 		cnt_InventoryOptionID[playerid] = AddInventoryOption(playerid, str);
 	}
-
-	#if defined cnt_OnPlayerViewInventoryOpt
-		return cnt_OnPlayerViewInventoryOpt(playerid);
-	#endif
 }
-#if defined _ALS_OnPlayerViewInventoryOpt
-	#undef OnPlayerViewInventoryOpt
-#else
-	#define _ALS_OnPlayerViewInventoryOpt
-#endif
-#define OnPlayerViewInventoryOpt cnt_OnPlayerViewInventoryOpt
-#if defined cnt_OnPlayerViewInventoryOpt
-	forward cnt_OnPlayerViewInventoryOpt(playerid);
-#endif
 
-public OnPlayerSelectInventoryOpt(playerid, option)
+hook OnPlayerSelectInvOpt(playerid, option)
 {
 	if(cnt_CurrentContainer[playerid] != INVALID_CONTAINER_ID)
 	{
@@ -567,23 +549,10 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 		}
 	}
 
-	#if defined cnt_OnPlayerSelectInventoryOpt
-		return cnt_OnPlayerSelectInventoryOpt(playerid, option);
-	#else
-		return 1;
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerSelectInventoryOpt
-	#undef OnPlayerSelectInventoryOpt
-#else
-	#define _ALS_OnPlayerSelectInventoryOpt
-#endif
-#define OnPlayerSelectInventoryOpt cnt_OnPlayerSelectInventoryOpt
-#if defined cnt_OnPlayerSelectInventoryOpt
-	forward cnt_OnPlayerSelectInventoryOpt(playerid, option);
-#endif
 
-public OnPlayerOpenInventory(playerid)
+hook OnPlayerOpenInventory(playerid)
 {
 	if(IsValidContainer(cnt_CurrentContainer[playerid]))
 	{
@@ -592,22 +561,9 @@ public OnPlayerOpenInventory(playerid)
 		strcat(str, " >");
 		cnt_InventoryContainerItem[playerid] = AddInventoryListItem(playerid, str);
 	}
-
-	#if defined cnt_OnPlayerOpenInventory
-		return cnt_OnPlayerOpenInventory(playerid);
-	#endif
 }
-#if defined _ALS_OnPlayerOpenInventory
-	#undef OnPlayerOpenInventory
-#else
-	#define _ALS_OnPlayerOpenInventory
-#endif
-#define OnPlayerOpenInventory cnt_OnPlayerOpenInventory
-#if defined cnt_OnPlayerOpenInventory
-	forward cnt_OnPlayerOpenInventory(playerid);
-#endif
 
-public OnPlayerSelectExtraItem(playerid, item)
+hook OnPlayerSelectExtraItem(playerid, item)
 {
 	if(IsValidContainer(cnt_CurrentContainer[playerid]))
 	{
@@ -616,20 +572,7 @@ public OnPlayerSelectExtraItem(playerid, item)
 			DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 		}
 	}
-
-	#if defined cnt_OnPlayerSelectExtraItem
-		return cnt_OnPlayerSelectExtraItem(playerid, item);
-	#endif
 }
-#if defined _ALS_OnPlayerSelectExtraItem
-	#undef OnPlayerSelectExtraItem
-#else
-	#define _ALS_OnPlayerSelectExtraItem
-#endif
-#define OnPlayerSelectExtraItem cnt_OnPlayerSelectExtraItem
-#if defined cnt_OnPlayerSelectExtraItem
-	forward cnt_OnPlayerSelectExtraItem(playerid, item);
-#endif
 
 
 /*==============================================================================

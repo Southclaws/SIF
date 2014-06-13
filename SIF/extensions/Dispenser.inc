@@ -114,7 +114,7 @@ stock DispenserType:DefineDispenserType(name[], ItemType:type, price)
 	return id;
 }
 
-public OnButtonPress(playerid, buttonid)
+hook OnButtonPress(playerid, buttonid)
 {
 	new dispenserid = dsp_ButtonDispenser[buttonid];
 
@@ -152,23 +152,9 @@ public OnButtonPress(playerid, buttonid)
 
 		return 1;
 	}
-	#if defined dsp_OnButtonPress
-		return dsp_OnButtonPress(playerid, buttonid);
-	#else
-		return 0;
-	#endif
 }
-#if defined _ALS_OnButtonPress
-	#undef OnButtonPress
-#else
-	#define _ALS_OnButtonPress
-#endif
-#define OnButtonPress dsp_OnButtonPress
-#if defined dsp_OnButtonPress
-	forward dsp_OnButtonPress(playerid, buttonid);
-#endif
 
-public OnPlayerPickUpItem(playerid, itemid)
+hook OnPlayerPickUpItem(playerid, itemid)
 {
 	new dispenserid = dsp_ItemDispenser[itemid];
 
@@ -193,17 +179,4 @@ public OnPlayerPickUpItem(playerid, itemid)
 		dsp_ItemDispenser[itemid] = INVALID_DISPENSER_ID;
 		dsp_Data[dispenserid][dsp_itemId] = INVALID_ITEM_ID;
 	}
-	#if defined dsp_OnPlayerPickUpItem
-		return dsp_OnPlayerPickUpItem(playerid, itemid);
-	#endif
 }
-#if defined _ALS_OnPlayerPickUpItem
-	#undef OnPlayerPickUpItem
-#else
-	#define _ALS_OnPlayerPickUpItem
-#endif
-#define OnPlayerPickUpItem dsp_OnPlayerPickUpItem
-#if defined dsp_OnPlayerPickUpItem
-	forward dsp_OnPlayerPickUpItem(playerid, itemid);
-#endif
-

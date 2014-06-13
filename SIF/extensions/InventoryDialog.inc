@@ -2,7 +2,8 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	Version: 1.0.1
+	SIF Version: 1.3.0
+	Module Version: 1.1.1
 
 
 	SIF/Overview
@@ -31,15 +32,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		SA:MP Community					- Inspiration and support
 		Incognito						- Very useful streamer plugin
 		Y_Less							- YSI framework
-	}
-
-	SIF/InventoryDialog/Constants
-	{
-		DIALOG_INVENTORY_LIST
-			-
-
-		DIALOG_INVENTORY_OPTIONS		
-			-
 	}
 
 	SIF/InventoryDialog/Core Functions
@@ -414,15 +406,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
-#if !defined DIALOG_INVENTORY_LIST
-	#define DIALOG_INVENTORY_LIST		(9000)
-#endif
-
-#if !defined DIALOG_INVENTORY_OPTIONS
-	#define DIALOG_INVENTORY_OPTIONS	(9001)
-#endif
-
-
 static
 		inv_SelectedSlot			[MAX_PLAYERS],
 		inv_ViewingInventory		[MAX_PLAYERS],
@@ -454,21 +437,23 @@ hook OnScriptInit()
 {
 	for(new i; i < MAX_PLAYERS; i++)
 	{
-		for(new j; j < INV_MAX_SLOTS; j++)
-		{
-			inv_SelectedSlot[i] = -1;
-		}
+		_InvDialog_ResetPlayerVars(i);
 	}
 }
 
 hook OnPlayerConnect(playerid)
 {
-	for(new j; j < INV_MAX_SLOTS; j++)
-	{
-		inv_SelectedSlot[playerid] = -1;
-	}
+	_InvDialog_ResetPlayerVars(playerid);
+}
 
-	return;
+_InvDialog_ResetPlayerVars(playerid)
+{
+	inv_SelectedSlot[playerid] = -1;
+	inv_ViewingInventory[playerid] = false;
+	inv_ExtraItemList[playerid][0] = EOS;
+	inv_ExtraItemCount[playerid] = 0;
+	inv_OptionsList[playerid][0] = EOS;
+	inv_OptionsCount[playerid] = 0;
 }
 
 
@@ -509,9 +494,42 @@ stock DisplayPlayerInventory(playerid)
 	if(!isnull(inv_ExtraItemList[playerid]))
 		strcat(list, inv_ExtraItemList[playerid]);
 
-	ShowPlayerDialog(playerid, DIALOG_INVENTORY_LIST, DIALOG_STYLE_LIST, "Inventory", list, "Options", "Close");
-	SelectTextDraw(playerid, 0xFFFF00FF);
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
+	{
+		#pragma unused pid, dialogid, inputtext
 
+		if(response)
+		{
+			if(listitem >= INV_MAX_SLOTS)
+			{
+				CallLocalFunction("OnPlayerSelectExtraItem", "dd", playerid, listitem - INV_MAX_SLOTS);
+				inv_ViewingInventory[playerid] = false;
+				return 1;
+			}
+
+			if(!IsValidItem(GetInventorySlotItem(playerid, listitem)))
+			{
+				DisplayPlayerInventory(playerid);
+			}
+			else
+			{
+				inv_SelectedSlot[playerid] = listitem;
+				DisplayPlayerInventoryOptions(playerid, listitem);
+			}
+		}
+		else
+		{
+			if(CallLocalFunction("OnPlayerCloseInventory", "d", playerid))
+				DisplayPlayerInventory(playerid);
+
+			CancelSelectTextDraw(playerid);
+			inv_SelectedSlot[playerid] = -1;
+			inv_ViewingInventory[playerid] = false;
+		}
+	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, "Inventory", list, "Options", "Close");
+
+	SelectTextDraw(playerid, 0xFFFF00FF);
 	inv_ViewingInventory[playerid] = true;
 
 	return 1;
@@ -521,7 +539,7 @@ ClosePlayerInventory(playerid)
 {
 	if(inv_ViewingInventory[playerid])
 	{
-		ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
+		Dialog_Hide(playerid);
 		CallLocalFunction("OnPlayerCloseInventory", "d", playerid);
 		inv_ViewingInventory[playerid] = false;
 
@@ -574,44 +592,10 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 
 	CallLocalFunction("OnPlayerViewInventoryOpt", "d", playerid);
 
-	ShowPlayerDialog(playerid, DIALOG_INVENTORY_OPTIONS, DIALOG_STYLE_LIST, name, inv_OptionsList[playerid], "Accept", "Back");
-}
-
-hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
-{
-	if(dialogid == DIALOG_INVENTORY_LIST)
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
 	{
-		if(response)
-		{
-			if(listitem >= INV_MAX_SLOTS)
-			{
-				CallLocalFunction("OnPlayerSelectExtraItem", "dd", playerid, listitem - INV_MAX_SLOTS);
-				inv_ViewingInventory[playerid] = false;
-				return 1;
-			}
+		#pragma unused pid, dialogid, inputtext
 
-			if(!IsValidItem(GetInventorySlotItem(playerid, listitem)))
-			{
-				DisplayPlayerInventory(playerid);
-			}
-			else
-			{
-				inv_SelectedSlot[playerid] = listitem;
-				DisplayPlayerInventoryOptions(playerid, listitem);
-			}
-		}
-		else
-		{
-			if(CallLocalFunction("OnPlayerCloseInventory", "d", playerid))
-				DisplayPlayerInventory(playerid);
-
-			CancelSelectTextDraw(playerid);
-			inv_SelectedSlot[playerid] = -1;
-			inv_ViewingInventory[playerid] = false;
-		}
-	}
-	if(dialogid == DIALOG_INVENTORY_OPTIONS)
-	{
 		if(!response)
 		{
 			DisplayPlayerInventory(playerid);
@@ -686,6 +670,8 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 		}
 	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, name, inv_OptionsList[playerid], "Accept", "Back");
+
 	return 1;
 }
 
