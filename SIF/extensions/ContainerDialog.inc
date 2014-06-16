@@ -385,6 +385,7 @@ stock ClosePlayerContainer(playerid)
 		return 0;
 
 	Dialog_Hide(playerid);
+	CancelSelectTextDraw(playerid);
 	CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]);
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
 
