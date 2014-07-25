@@ -654,6 +654,8 @@ stock CreateContainer(name[], size,
 		return INVALID_CONTAINER_ID;
 	}
 
+	size = (size > CNT_MAX_SLOTS) ? CNT_MAX_SLOTS : size;
+
 	if(!virtual)
 	{
 		cnt_Data[id][cnt_button] = CreateButton(x, y, z, "Press F to open", world, interior, 1.0, label, name);

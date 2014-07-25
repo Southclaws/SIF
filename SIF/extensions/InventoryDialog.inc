@@ -482,8 +482,8 @@ hook OnPlayerConnect(playerid)
 stock DisplayPlayerInventory(playerid)
 {
 	new
-		list[(INV_MAX_SLOTS * (ITM_MAX_NAME + 1)) + 32],
-		tmp[ITM_MAX_NAME];
+		list[(INV_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)) + 32],
+		tmp[ITM_MAX_NAME + ITM_MAX_TEXT];
 	
 	for(new i; i < INV_MAX_SLOTS; i++)
 	{
@@ -510,14 +510,13 @@ stock DisplayPlayerInventory(playerid)
 		strcat(list, inv_ExtraItemList[playerid]);
 
 	ShowPlayerDialog(playerid, DIALOG_INVENTORY_LIST, DIALOG_STYLE_LIST, "Inventory", list, "Options", "Close");
-	SelectTextDraw(playerid, 0xFFFF00FF);
 
 	inv_ViewingInventory[playerid] = true;
 
 	return 1;
 }
 
-ClosePlayerInventory(playerid)
+stock ClosePlayerInventory(playerid)
 {
 	if(inv_ViewingInventory[playerid])
 	{
@@ -550,23 +549,10 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	return 1;
 }
 
-hook OnPlayerClickTextDraw(playerid, Text:clickedid)
-{
-	if(clickedid == Text:65535)
-	{
-		if(inv_ViewingInventory[playerid])
-		{
-			ClosePlayerInventory(playerid);
-		}
-	}
-
-	return 1;
-}
-
 DisplayPlayerInventoryOptions(playerid, slotid)
 {
 	new
-		name[ITM_MAX_NAME];
+		name[ITM_MAX_NAME + ITM_MAX_TEXT];
 
 	GetItemName(GetInventorySlotItem(playerid, slotid), name);
 	inv_OptionsList[playerid] = "Equip\nUse\nDrop\n";
@@ -605,7 +591,6 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			if(CallLocalFunction("OnPlayerCloseInventory", "d", playerid))
 				DisplayPlayerInventory(playerid);
 
-			CancelSelectTextDraw(playerid);
 			inv_SelectedSlot[playerid] = -1;
 			inv_ViewingInventory[playerid] = false;
 		}
@@ -648,7 +633,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					PlayerUseItem(playerid);
 
 					CallLocalFunction("OnPlayerCloseInventory", "d", playerid);
-					CancelSelectTextDraw(playerid);
+
 					inv_SelectedSlot[playerid] = -1;
 					inv_ViewingInventory[playerid] = false;
 				}
@@ -670,7 +655,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 					PlayerDropItem(playerid);
 
 					CallLocalFunction("OnPlayerCloseInventory", "d", playerid);
-					CancelSelectTextDraw(playerid);
+					
 					inv_SelectedSlot[playerid] = -1;
 					inv_ViewingInventory[playerid] = false;
 				}

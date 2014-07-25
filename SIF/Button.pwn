@@ -574,14 +574,28 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				(int, buttonid)
 		}
 
-		native GetPlayerButtonList(playerid, list[], &size)
+		native GetPlayerButtonList(playerid, list[], &size, bool:validate = false)
 		{
 			Description:
 				Returns a list of buttons that a player is standing in the areas
 				of.
 
 			Parameters:
-				-
+				<playerid> (int, playerid)
+					Player to get a list of buttons from.
+
+				<list> (array)
+					Array to store the buttons in (Must be BTN_MAX_INRANGE size)
+
+				<size> (int, ref)
+					Stores the amount of buttons in the list.
+
+				<validate>
+					If true, the function will check if the player is actually
+					in each button in the list. This is a small workaround for a
+					larger problem that is currently unknown that results in a
+					button not being removed from a player's list when they
+					leave the area for it.
 
 			Returns:
 				1
@@ -1479,7 +1493,7 @@ stock GetPlayerButtonID(playerid)
 	return closestid;
 }
 
-stock GetPlayerButtonList(playerid, list[], &size)
+stock GetPlayerButtonList(playerid, list[], &size, bool:validate = false)
 {
 	if(!IsPlayerConnected(playerid))
 		return 0;
@@ -1487,9 +1501,27 @@ stock GetPlayerButtonList(playerid, list[], &size)
 	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
 		return 0;
 
-	foreach(new i : btn_CurrentlyNearIndex[playerid])
-		list[size++] = btn_CurrentlyNear[playerid][i];
+	// Validate whether or not the player is actually inside the areas.
+	// Caused by a bug that hasn't been found yet, this is the quick workaround.
+	if(validate)
+	{
+		foreach(new i : btn_CurrentlyNearIndex[playerid])
+		{
+			if(!IsPlayerInDynamicArea(playerid, btn_Data[btn_CurrentlyNear[playerid][i]][btn_area]))
+			{
+				printf("ERROR: Player %d incorrectly flagged as inside button %d area, removing.", playerid, btn_CurrentlyNear[playerid][i]);
+				Iter_SafeRemove(btn_CurrentlyNearIndex[playerid], i, i);
+				continue;
+			}
 
+			list[size++] = btn_CurrentlyNear[playerid][i];
+		}
+	}
+	else
+	{
+		foreach(new i : btn_CurrentlyNearIndex[playerid])
+			list[size++] = btn_CurrentlyNear[playerid][i];
+	}
 	return 1;
 }
 

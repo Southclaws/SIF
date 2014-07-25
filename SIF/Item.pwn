@@ -2085,12 +2085,20 @@ _PlayerKeyHandle_Drop(playerid)
 
 _PlayerKeyHandle_Use(playerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[_PlayerKeyHandle_Use]");
+
 	new animidx = GetPlayerAnimationIndex(playerid);
 
-	if(sif_IsIdleAnim(animidx) && itm_Interacting[playerid] == INVALID_ITEM_ID && Iter_Contains(itm_Index, itm_Holding[playerid]))
-	{
-		PlayerUseItem(playerid);
-	}
+	if(!sif_IsIdleAnim(animidx))
+		return 0;
+
+	if(itm_Interacting[playerid] != INVALID_ITEM_ID)
+		return 0;
+
+	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+		return 0;
+
+	return PlayerUseItem(playerid);
 }
 
 
@@ -2238,9 +2246,6 @@ timer DropItemDelay[400](playerid)
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
-	if(CallLocalFunction("OnPlayerDroppedItem", "dd", playerid, itemid))
-		return 0;
-
 	RemovePlayerAttachedObject(playerid, ITM_ATTACH_INDEX);
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_NONE);
 
@@ -2262,6 +2267,8 @@ timer DropItemDelay[400](playerid)
 	ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
 
 	Streamer_Update(playerid);
+
+	CallLocalFunction("OnPlayerDroppedItem", "dd", playerid, itemid);
 
 	return 1;
 }

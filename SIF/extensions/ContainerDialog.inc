@@ -307,12 +307,15 @@ stock DisplayContainerInventory(playerid, containerid)
 		return 0;
 
 	new
-		list[CNT_MAX_SLOTS * (ITM_MAX_NAME + 1)],
-		tmp[ITM_MAX_NAME];
+		list[CNT_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)],
+		tmp[ITM_MAX_NAME + ITM_MAX_TEXT];
 
-	for(new i; i < cnt_Data[containerid][cnt_size]; i++)
+	for(new i; i < cnt_Data[containerid][cnt_size] && i < CNT_MAX_SLOTS; i++)
 	{
-		if(!IsValidItem(cnt_Items[containerid][i])) strcat(list, "<Empty>\n");
+		if(!IsValidItem(cnt_Items[containerid][i]))
+		{
+			strcat(list, "<Empty>\n");
+		}
 		else
 		{
 			GetItemName(cnt_Items[containerid][i], tmp);
@@ -343,7 +346,8 @@ stock ClosePlayerContainer(playerid)
 	if(cnt_CurrentContainer[playerid] == INVALID_CONTAINER_ID)
 		return 0;
 
-	Dialog_Hide(playerid);
+	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
+	CancelSelectTextDraw(playerid);
 	CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]);
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
 
@@ -361,7 +365,7 @@ stock ClosePlayerContainer(playerid)
 DisplayContainerOptions(playerid, slotid)
 {
 	new
-		tmp[ITM_MAX_NAME];
+		tmp[ITM_MAX_NAME + ITM_MAX_TEXT];
 
 	GetItemName(cnt_Items[cnt_CurrentContainer[playerid]][slotid], tmp);
 
