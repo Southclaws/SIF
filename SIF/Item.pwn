@@ -725,7 +725,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				(int)
 					The ID of the button used for the item.
 
-				0
+				INVALID_BUTTON_ID
 					If the item is invalid or not a world item.
 		}
 
@@ -771,7 +771,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				(int, ItemType)
 					Item type of the item.
 
-				0
+				INVALID_ITEM_TYPE
 					If the entered item ID handle is invalid.
 		}
 
