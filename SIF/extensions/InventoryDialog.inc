@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.1.1
+	Module Version: 1.1.2
 
 
 	SIF/Overview
@@ -517,18 +517,24 @@ stock DisplayPlayerInventory(playerid)
 	return 1;
 }
 
-stock ClosePlayerInventory(playerid)
+stock ClosePlayerInventory(playerid, call = false)
 {
-	if(inv_ViewingInventory[playerid])
-	{
-		ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
-		CallLocalFunction("OnPlayerCloseInventory", "d", playerid);
-		inv_ViewingInventory[playerid] = false;
+	if(!inv_ViewingInventory[playerid])
+		return 0;
 
-		return 1;
+	if(call)
+	{
+		if(CallLocalFunction("OnPlayerCloseInventory", "d", playerid))
+		{
+			DisplayPlayerInventory(playerid);
+			return 1;
+		}
 	}
 
-	return 0;
+	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
+	inv_ViewingInventory[playerid] = false;
+
+	return 1;
 }
 
 
@@ -589,11 +595,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 		else
 		{
-			if(CallLocalFunction("OnPlayerCloseInventory", "d", playerid))
-				DisplayPlayerInventory(playerid);
-
-			inv_SelectedSlot[playerid] = -1;
-			inv_ViewingInventory[playerid] = false;
+			ClosePlayerInventory(playerid, true);
 		}
 	}
 	if(dialogid == DIALOG_INVENTORY_OPTIONS)

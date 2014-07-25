@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.1.1
+	Module Version: 1.1.2
 
 
 	SIF/Overview
@@ -339,7 +339,7 @@ stock DisplayContainerInventory(playerid, containerid)
 	return 1;
 }
 
-stock ClosePlayerContainer(playerid)
+stock ClosePlayerContainer(playerid, call = false)
 {
 	if(!IsPlayerConnected(playerid))
 		return 0;
@@ -347,9 +347,16 @@ stock ClosePlayerContainer(playerid)
 	if(cnt_CurrentContainer[playerid] == INVALID_CONTAINER_ID)
 		return 0;
 
+	if(call)
+	{
+		if(CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]))
+		{
+			DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
+			return 1;
+		}
+	}
+
 	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
-	CancelSelectTextDraw(playerid);
-	CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]);
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
 
 	return 1;
@@ -436,7 +443,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		}
 		else
 		{
-			ClosePlayerContainer(playerid);
+			ClosePlayerContainer(playerid, true);
 		}
 	}
 
