@@ -2,8 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	SIF Version: 1.3.0
-	Module Version: 1.8.2
+	Version: 1.7.2
 
 
 	SIF/Overview
@@ -2095,23 +2094,53 @@ _PlayerKeyHandle_Use(playerid)
 }
 
 
-hook OnPlayerEnterPlayerArea(playerid, targetid)
+public OnPlayerEnterPlayerArea(playerid, targetid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerEnterPlayerArea]")<playerid>;
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 	{
 		ShowActionText(playerid, "Press N to give item");
 	}
-}
 
-hook OnPlayerLeavePlayerArea(playerid, targetid)
+	#if defined itm_OnPlayerEnterPlayerArea
+		return itm_OnPlayerEnterPlayerArea(playerid, targetid);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnPlayerEnterPlayerArea
+	#undef OnPlayerEnterPlayerArea
+#else
+	#define _ALS_OnPlayerEnterPlayerArea
+#endif
+#define OnPlayerEnterPlayerArea itm_OnPlayerEnterPlayerArea
+#if defined itm_OnPlayerEnterPlayerArea
+	forward itm_OnPlayerEnterPlayerArea(playerid, targetid);
+#endif
+
+public OnPlayerLeavePlayerArea(playerid, targetid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerLeavePlayerArea]")<playerid>;
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 	{
 		HideActionText(playerid);
 	}
+
+	#if defined itm_OnPlayerLeavePlayerArea
+		return itm_OnPlayerLeavePlayerArea(playerid, targetid);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnPlayerLeavePlayerArea
+	#undef OnPlayerLeavePlayerArea
+#else
+	#define _ALS_OnPlayerLeavePlayerArea
+#endif
+#define OnPlayerLeavePlayerArea itm_OnPlayerLeavePlayerArea
+#if defined itm_OnPlayerLeavePlayerArea
+	forward itm_OnPlayerLeavePlayerArea(playerid, targetid);
+#endif
 
 internal_OnPlayerUseItem(playerid, itemid)
 {
@@ -2125,15 +2154,28 @@ internal_OnPlayerUseItem(playerid, itemid)
 }
 
 
-hook OnButtonPress(playerid, buttonid)
+public OnButtonPress(playerid, buttonid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnButtonPress]")<playerid>;
 
 	if(_OnButtonPressHandler(playerid, buttonid))
 		return 1;
 
-	return 0;
+	#if defined itm_OnButtonPress
+		return itm_OnButtonPress(playerid, buttonid);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnButtonPress
+	#undef OnButtonPress
+#else
+	#define _ALS_OnButtonPress
+#endif
+#define OnButtonPress itm_OnButtonPress
+#if defined itm_OnButtonPress
+	forward itm_OnButtonPress(playerid, buttonid);
+#endif
 
 _OnButtonPressHandler(playerid, buttonid)
 {
@@ -2268,7 +2310,7 @@ timer GiveItemDelay[500](playerid, targetid)
 
 #if defined ITM_DROP_ON_DEATH
 
-hook OnPlayerDeath(playerid, killerid, reason)
+public OnPlayerDeath(playerid, killerid, reason)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerDeath]")<playerid>;
 	new itemid = itm_Holding[playerid];
@@ -2293,7 +2335,22 @@ hook OnPlayerDeath(playerid, killerid, reason)
 
 		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
 	}
+
+	#if defined itm_OnPlayerDeath
+		return itm_OnPlayerDeath(playerid, killerid, reason);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnPlayerDeath
+	#undef OnPlayerDeath
+#else
+	#define _ALS_OnPlayerDeath
+#endif
+#define OnPlayerDeath itm_OnPlayerDeath
+#if defined itm_OnPlayerDeath
+	forward itm_OnPlayerDeath(playerid, killerid, reason);
+#endif
 
 #endif
 

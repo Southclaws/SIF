@@ -204,20 +204,48 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 	}
 }
 
-hook OnPlayerOpenInventory(playerid)
+public OnPlayerOpenInventory(playerid)
 {
 	nbk_InventoryItem[playerid] = AddInventoryListItem(playerid, "Notebook");
 
+	#if defined nbk_OnPlayerOpenInventory
+		return nbk_OnPlayerOpenInventory(playerid);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnPlayerOpenInventory
+	#undef OnPlayerOpenInventory
+#else
+	#define _ALS_OnPlayerOpenInventory
+#endif
+#define OnPlayerOpenInventory nbk_OnPlayerOpenInventory
+#if defined nbk_OnPlayerOpenInventory
+	forward nbk_OnPlayerOpenInventory(playerid);
+#endif
 
-hook OnPlayerSelectExtraItem(playerid, item)
+public OnPlayerSelectExtraItem(playerid, item)
 {
 	if(item == nbk_InventoryItem[playerid])
 	{
 		ShowPlayerNotebook(playerid, 0);
 	}
 
+	#if defined nbk_OnPlayerSelectExtraItem
+		return nbk_OnPlayerSelectExtraItem(playerid, item);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnPlayerSelectExtraItem
+	#undef OnPlayerSelectExtraItem
+#else
+	#define _ALS_OnPlayerSelectExtraItem
+#endif
+#define OnPlayerSelectExtraItem nbk_OnPlayerSelectExtraItem
+#if defined nbk_OnPlayerSelectExtraItem
+	forward nbk_OnPlayerSelectExtraItem(playerid, item);
+#endif
 
 hook OnScriptInit()
 {

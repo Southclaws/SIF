@@ -2,8 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	SIF Version: 1.3.0
-	Module Version: 1.2.1
+	Version: 1.1.1
 
 
 	SIF/Overview
@@ -234,7 +233,7 @@ hook OnPlayerSpawn(playerid)
 ==============================================================================*/
 
 
-hook OnPlayerEnterDynArea(playerid, areaid)
+public OnPlayerEnterDynamicArea(playerid, areaid)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_SPECTATING && !IsPlayerInAnyVehicle(playerid))
 	{
@@ -259,9 +258,22 @@ hook OnPlayerEnterDynArea(playerid, areaid)
 			}
 		}
 	}
-}
 
-hook OnPlayerLeaveDynArea(playerid, areaid)
+	#if defined SIF_OnPlayerEnterDynamicArea
+		return SIF_OnPlayerEnterDynamicArea(playerid, areaid);
+	#endif
+}
+#if defined _ALS_OnPlayerEnterDynamicArea
+	#undef OnPlayerEnterDynamicArea
+#else
+	#define _ALS_OnPlayerEnterDynamicArea
+#endif
+#define OnPlayerEnterDynamicArea SIF_OnPlayerEnterDynamicArea
+#if defined SIF_OnPlayerEnterDynamicArea
+	forward SIF_OnPlayerEnterDynamicArea(playerid, areaid);
+#endif
+
+public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_SPECTATING && !IsPlayerInAnyVehicle(playerid))
 	{
@@ -286,7 +298,20 @@ hook OnPlayerLeaveDynArea(playerid, areaid)
 			}
 		}
 	}
+
+	#if defined SIF_OnPlayerLeaveDynamicArea
+		return SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
+	#endif
 }
+#if defined _ALS_OnPlayerLeaveDynamicArea
+	#undef OnPlayerLeaveDynamicArea
+#else
+	#define _ALS_OnPlayerLeaveDynamicArea
+#endif
+#define OnPlayerLeaveDynamicArea SIF_OnPlayerLeaveDynamicArea
+#if defined SIF_OnPlayerLeaveDynamicArea
+	forward SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
+#endif
 
 stock IsPlayerInPlayerArea(playerid, targetid)
 {

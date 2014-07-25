@@ -2,9 +2,6 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	SIF Version: 1.3.0
-	Module Version: 1.1.0
-
 
 	SIF/Overview
 	{
@@ -179,12 +176,27 @@ stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnite
 ==============================================================================*/
 
 
-hook OnPlayerViewInvOpt(playerid)
+public OnPlayerViewInventoryOpt(playerid)
 {
 	cft_InventoryOptionID[playerid] = AddInventoryOption(playerid, "Combine");
-}
 
-hook OnPlayerSelectInvOpt(playerid, option)
+	#if defined cft_OnPlayerViewInventoryOpt
+		return cft_OnPlayerViewInventoryOpt(playerid);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnPlayerViewInventoryOpt
+	#undef OnPlayerViewInventoryOpt
+#else
+	#define _ALS_OnPlayerViewInventoryOpt
+#endif
+#define OnPlayerViewInventoryOpt cft_OnPlayerViewInventoryOpt
+#if defined cft_OnPlayerViewInventoryOpt
+	forward cft_OnPlayerViewInventoryOpt(playerid);
+#endif
+
+public OnPlayerSelectInventoryOpt(playerid, option)
 {
 	if(option == cft_InventoryOptionID[playerid])
 	{
@@ -192,14 +204,42 @@ hook OnPlayerSelectInvOpt(playerid, option)
 
 		DisplayCombineInventory(playerid, 0);
 	}
-}
 
-hook OnPlayerViewCntOpt(playerid, containerid)
+	#if defined cft_OnPlayerSelectInventoryOpt
+		return cft_OnPlayerSelectInventoryOpt(playerid, option);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnPlayerSelectInventoryOpt
+	#undef OnPlayerSelectInventoryOpt
+#else
+	#define _ALS_OnPlayerSelectInventoryOpt
+#endif
+#define OnPlayerSelectInventoryOpt cft_OnPlayerSelectInventoryOpt
+#if defined cft_OnPlayerSelectInventoryOpt
+	forward cft_OnPlayerSelectInventoryOpt(playerid, option);
+#endif
+
+public OnPlayerViewContainerOpt(playerid, containerid)
 {
 	cft_InventoryOptionID[playerid] = AddContainerOption(playerid, "Combine");
-}
 
-hook OnPlayerSelectCntOpt(playerid, containerid, option)
+	#if defined cft_OnPlayerViewContainerOpt
+		return cft_OnPlayerViewContainerOpt(playerid, containerid);
+	#endif
+}
+#if defined _ALS_OnPlayerViewContainerOpt
+	#undef OnPlayerViewContainerOpt
+#else
+	#define _ALS_OnPlayerViewContainerOpt
+#endif
+#define OnPlayerViewContainerOpt cft_OnPlayerViewContainerOpt
+#if defined cft_OnPlayerViewContainerOpt
+	forward cft_OnPlayerViewContainerOpt(playerid, containerid);
+#endif
+
+public OnPlayerSelectContainerOpt(playerid, containerid, option)
 {
 	if(option == cft_InventoryOptionID[playerid])
 	{
@@ -207,7 +247,20 @@ hook OnPlayerSelectCntOpt(playerid, containerid, option)
 
 		DisplayCombineInventory(playerid, 1);
 	}
+
+	#if defined cft_OnPlayerSelectContainerOpt
+		return cft_OnPlayerSelectContainerOpt(playerid, containerid, option);
+	#endif
 }
+#if defined _ALS_OnPlayerSelectContainerOpt
+	#undef OnPlayerSelectContainerOpt
+#else
+	#define _ALS_OnPlayerSelectContainerOpt
+#endif
+#define OnPlayerSelectContainerOpt cft_OnPlayerSelectContainerOpt
+#if defined cft_OnPlayerSelectContainerOpt
+	forward cft_OnPlayerSelectContainerOpt(playerid, containerid, option);
+#endif
 
 DisplayCombineInventory(playerid, listtype)
 {

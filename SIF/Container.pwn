@@ -2,8 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	SIF Version: 1.3.0
-	Module Version: 1.2.4
+	Version: 1.1.4
 
 
 	SIF/Overview
@@ -837,10 +836,25 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 ==============================================================================*/
 
 
-hook OnItemDestroy(itemid)
+public OnItemDestroy(itemid)
 {
 	cnt_ItemContainer[itemid] = INVALID_CONTAINER_ID;
+
+	#if defined cnt_OnItemDestroy
+		return cnt_OnItemDestroy(itemid);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnItemDestroy
+	#undef OnItemDestroy
+#else
+	#define _ALS_OnItemDestroy
+#endif
+#define OnItemDestroy cnt_OnItemDestroy
+#if defined cnt_OnItemDestroy
+	forward cnt_OnItemDestroy(itemid);
+#endif
 
 
 /*==============================================================================

@@ -2,8 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	SIF Version: 1.3.0
-	Module Version: 1.4.0
+	Version: 1.3.0
 
 
 	SIF/Overview
@@ -646,14 +645,14 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				Zero initialised array cells.
 		}
 
-		Streamer/OnPlayerEnterDynArea
+		Streamer/OnPlayerEnterDynamicArea
 		{
 			Reason:
 				To detect if a player enters a button's area and call
 				OnPlayerEnterButtonArea.
 		}
 
-		Streamer/OnPlayerLeaveDynArea
+		Streamer/OnPlayerLeaveDynamicArea
 		{
 			Reason:
 				To detect if a player leaves a button's area and call
@@ -1050,12 +1049,12 @@ timer btn_Unfreeze[1000](playerid)
 	TogglePlayerControllable(playerid, true);
 }
 
-hook OnPlayerEnterDynArea(playerid, areaid)
+public OnPlayerEnterDynamicArea(playerid, areaid)
 {
-	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerEnterDynArea]")<playerid>;
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerEnterDynamicArea]")<playerid>;
 	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) < BTN_MAX_INRANGE)
 	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynArea] player is valid")<playerid>;
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] player is valid")<playerid>;
 		new data[2];
 
 		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
@@ -1069,10 +1068,10 @@ hook OnPlayerEnterDynArea(playerid, areaid)
 
 		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
 		{
-			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynArea] area is valid")<playerid>;
+			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] area is valid")<playerid>;
 			if(Iter_Contains(btn_Index, data[1]))
 			{
-				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynArea] in index")<playerid>;
+				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] in index")<playerid>;
 				new cell = Iter_Free(btn_CurrentlyNearIndex[playerid]);
 
 				btn_CurrentlyNear[playerid][cell] = data[1];
@@ -1084,20 +1083,51 @@ hook OnPlayerEnterDynArea(playerid, areaid)
 		}
 	}
 
-	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynArea] end")<playerid>;
-}
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] end")<playerid>;
 
-hook OnPlayerLeaveDynArea(playerid, areaid)
+	#if defined btn_OnPlayerEnterDynamicArea
+		return btn_OnPlayerEnterDynamicArea(playerid, areaid);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnPlayerEnterDynamicArea
+	#undef OnPlayerEnterDynamicArea
+#else
+	#define _ALS_OnPlayerEnterDynamicArea
+#endif
+#define OnPlayerEnterDynamicArea btn_OnPlayerEnterDynamicArea
+#if defined btn_OnPlayerEnterDynamicArea
+	forward btn_OnPlayerEnterDynamicArea(playerid, areaid);
+#endif
+
+
+public OnPlayerLeaveDynamicArea(playerid, areaid)
 {
 	process_LeaveDynamicArea(playerid, areaid);
+
+	#if defined btn_OnPlayerLeaveDynamicArea
+		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnPlayerLeaveDynamicArea
+	#undef OnPlayerLeaveDynamicArea
+#else
+	#define _ALS_OnPlayerLeaveDynamicArea
+#endif
+#define OnPlayerLeaveDynamicArea btn_OnPlayerLeaveDynamicArea
+#if defined btn_OnPlayerLeaveDynamicArea
+	forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+#endif
 
 process_LeaveDynamicArea(playerid, areaid)
 {
-	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerLeaveDynArea]")<playerid>;
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea]")<playerid>;
 	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
 	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynArea] player is valid")<playerid>;
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player is valid")<playerid>;
 		new data[2];
 
 		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
@@ -1111,20 +1141,20 @@ process_LeaveDynamicArea(playerid, areaid)
 
 		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
 		{
-			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynArea] area is valid")<playerid>;
+			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] area is valid")<playerid>;
 			if(Iter_Contains(btn_Index, data[1]))
 			{
-				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynArea] in index")<playerid>;
+				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] in index")<playerid>;
 				HideActionText(playerid);
 				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
 
 				foreach(new i : btn_CurrentlyNearIndex[playerid])
 				{
-					sif_dp:SIF_DEBUG_LEVEL_LOOPS:BUTTON_DEBUG("[OnPlayerLeaveDynArea] looping player list")<playerid>;
+					sif_dp:SIF_DEBUG_LEVEL_LOOPS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] looping player list")<playerid>;
 					// ^ Add when debug supports format strings
 					if(btn_CurrentlyNear[playerid][i] == data[1])
 					{
-						sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynArea] removing from player list")<playerid>;
+						sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] removing from player list")<playerid>;
 						Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
 						break;
 					}
@@ -1510,5 +1540,5 @@ stock Float:GetButtonAngleToPlayer(playerid, buttonid)
 
 
 #if defined RUN_TESTS
-	#include <SIF/testing/Button.pwn>
+	#include <SIF\testing/Button.pwn>
 #endif

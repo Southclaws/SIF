@@ -2,8 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	SIF Version: 1.3.0
-	Module Version: 1.3.0
+	Version: 1.2.0
 
 
 	SIF/Overview
@@ -406,13 +405,29 @@ hook OnGameModeInit()
 	ITEM_ARRAY_DATA = sif_debug_register_handler("SIF/ItemArrayData");
 }
 
-hook OnItemCreate(itemid)
+public OnItemCreate(itemid)
 {
 	for(new i; i < itm_arr_ItemTypeArrayMax[GetItemType(itemid)]; i++)
 		itm_arr_Data[itemid][i] = 0;
 
 	itm_arr_Length[itemid] = 0;
+
+	#if defined itmarr_OnItemCreate
+		return itmarr_OnItemCreate(itemid);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnItemCreate
+	#undef OnItemCreate
+#else
+	#define _ALS_OnItemCreate
+#endif
+ 
+#define OnItemCreate itmarr_OnItemCreate
+#if defined itmarr_OnItemCreate
+	forward itmarr_OnItemCreate(itemid);
+#endif
 
 
 /*==============================================================================

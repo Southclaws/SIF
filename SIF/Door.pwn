@@ -2,8 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	SIF Version: 1.3.0
-	Module Version: 1.1.0
+	Version: 1.0.0
 
 
 	SIF/Overview
@@ -693,7 +692,7 @@ stock DestroyDoor(doorid)
 ==============================================================================*/
 
 
-hook OnButtonPress(playerid, buttonid)
+public OnButtonPress(playerid, buttonid)
 {
 	foreach(new i : dr_Index)
 	{
@@ -718,9 +717,20 @@ hook OnButtonPress(playerid, buttonid)
 			}
 		}
 	}
-
-	return 0;
+	#if defined dr_OnButtonPress
+		return dr_OnButtonPress(playerid, buttonid);
+	#endif
 }
+#if defined _ALS_OnButtonPress
+	#undef OnButtonPress
+#else
+	#define _ALS_OnButtonPress
+#endif
+#define OnButtonPress dr_OnButtonPress
+#if defined dr_OnButtonPress
+	forward dr_OnButtonPress(playerid, buttonid);
+#endif
+
 
 OpenDoor(doorid)
 {
@@ -767,7 +777,7 @@ dr_PlaySoundForAll(sound, Float:x, Float:y, Float:z)
 	return 1;
 }
 
-hook OnDynamicObjectMoved(objectid)
+public OnDynamicObjectMoved(objectid)
 {
 	foreach(new i : dr_Index)
 	{
@@ -792,7 +802,19 @@ hook OnDynamicObjectMoved(objectid)
 			CallLocalFunction("OnDoorStateChange", "dd", i, DR_STATE_CLOSED);
 		}
 	}
+	#if defined dr_OnDynamicObjectMoved
+		return dr_OnDynamicObjectMoved(objectid);
+	#endif
 }
+#if defined _ALS_OnDynamicObjectMoved
+	#undef OnDynamicObjectMoved
+#else
+	#define _ALS_OnDynamicObjectMoved
+#endif
+#define OnDynamicObjectMoved dr_OnDynamicObjectMoved
+#if defined dr_OnDynamicObjectMoved
+	forward dr_OnDynamicObjectMoved(objectid);
+#endif
 
 
 /*==============================================================================
