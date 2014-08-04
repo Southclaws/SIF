@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.1.2
+	Module Version: 1.2.0
 
 
 	SIF/Overview
@@ -332,9 +332,38 @@ stock DisplayContainerInventory(playerid, containerid)
 	if(CallLocalFunction("OnPlayerOpenContainer", "dd", playerid, containerid))
 		return 0;
 
-	ShowPlayerDialog(playerid, DIALOG_CONTAINER_LIST, DIALOG_STYLE_LIST, cnt_Data[containerid][cnt_name], list, "Options", "Close");
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
+	{
+		#pragma unused pid, dialogid, inputtext
 
-	SelectTextDraw(playerid, 0xFFFF00FF);
+		if(response)
+		{
+			if(!IsValidContainer(cnt_CurrentContainer[playerid]))
+				return 0;
+
+			if(listitem == cnt_Data[cnt_CurrentContainer[playerid]][cnt_size])
+			{
+				DisplayPlayerInventory(playerid);
+			}
+			else
+			{
+				if(!IsValidItem(cnt_Items[cnt_CurrentContainer[playerid]][listitem]))
+				{
+					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
+				}
+				else
+				{
+					cnt_SelectedSlot[playerid] = listitem;
+					DisplayContainerOptions(playerid, listitem);
+				}
+			}
+		}
+		else
+		{
+			ClosePlayerContainer(playerid, true);
+		}
+	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, cnt_Data[containerid][cnt_name], list, "Options", "Close");
 
 	return 1;
 }
@@ -356,7 +385,7 @@ stock ClosePlayerContainer(playerid, call = false)
 		}
 	}
 
-	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
+	Dialog_Hide(playerid);
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
 
 	return 1;
@@ -387,78 +416,21 @@ DisplayContainerOptions(playerid, slotid)
 
 	CallLocalFunction("OnPlayerViewContainerOpt", "dd", playerid, cnt_CurrentContainer[playerid]);
 
-	ShowPlayerDialog(playerid, DIALOG_CONTAINER_OPTIONS, DIALOG_STYLE_LIST, tmp, cnt_OptionsList[playerid], "Accept", "Back");
-}
-
-public OnButtonPress(playerid, buttonid)
-{
-	new containerid = GetButtonContainer(buttonid);
-
-	if(IsValidContainer(containerid))
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
 	{
-		DisplayContainerInventory(playerid, containerid);
-	}
+		#pragma unused pid, dialogid, inputtext
 
-	#if defined cnt_OnButtonPress
-		return cnt_OnButtonPress(playerid, buttonid);
-	#else
-		return 0;
-	#endif
-}
-#if defined _ALS_OnButtonPress
-	#undef OnButtonPress
-#else
-	#define _ALS_OnButtonPress
-#endif
-#define OnButtonPress cnt_OnButtonPress
-#if defined cnt_OnButtonPress
-	forward cnt_OnButtonPress(playerid, buttonid);
-#endif
-
-hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
-{
-	if(dialogid == DIALOG_CONTAINER_LIST)
-	{
-		if(response)
-		{
-			if(!IsValidContainer(cnt_CurrentContainer[playerid]))
-				return 0;
-
-			if(listitem == cnt_Data[cnt_CurrentContainer[playerid]][cnt_size])
-			{
-				DisplayPlayerInventory(playerid);
-			}
-			else
-			{
-				if(!IsValidItem(cnt_Items[cnt_CurrentContainer[playerid]][listitem]))
-				{
-					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
-				}
-				else
-				{
-					cnt_SelectedSlot[playerid] = listitem;
-					DisplayContainerOptions(playerid, listitem);
-				}
-			}
-		}
-		else
-		{
-			ClosePlayerContainer(playerid, true);
-		}
-	}
-
-	if(dialogid == DIALOG_CONTAINER_OPTIONS)
-	{
 		if(!response)
 		{
 			DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 			return 1;
 		}
+
 		switch(listitem)
 		{
 			case 0:
 			{
-				if(GetPlayerItem(playerid) == INVALID_ITEM_ID && GetPlayerWeapon(playerid) == 0)
+				if(GetPlayerItem(playerid) == INVALID_ITEM_ID)
 				{
 					new id = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
 
@@ -508,22 +480,35 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 		}
 	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, tmp, cnt_OptionsList[playerid], "Accept", "Back");
 
 	return 1;
 }
 
-hook OnPlayerClickTextDraw(playerid, Text:clickedid)
+public OnButtonPress(playerid, buttonid)
 {
-	if(clickedid == Text:65535)
+	new containerid = GetButtonContainer(buttonid);
+
+	if(IsValidContainer(containerid))
 	{
-		if(IsValidContainer(cnt_CurrentContainer[playerid]))
-		{
-			ClosePlayerContainer(playerid);
-		}
+		DisplayContainerInventory(playerid, containerid);
 	}
 
-	return 1;
+	#if defined cnt_OnButtonPress
+		return cnt_OnButtonPress(playerid, buttonid);
+	#else
+		return 0;
+	#endif
 }
+#if defined _ALS_OnButtonPress
+	#undef OnButtonPress
+#else
+	#define _ALS_OnButtonPress
+#endif
+#define OnButtonPress cnt_OnButtonPress
+#if defined cnt_OnButtonPress
+	forward cnt_OnButtonPress(playerid, buttonid);
+#endif
 
 public OnPlayerViewInventoryOpt(playerid)
 {

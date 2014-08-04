@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.1.2
+	Module Version: 1.2.0
 
 
 	SIF/Overview
@@ -510,7 +510,35 @@ stock DisplayPlayerInventory(playerid)
 	if(!isnull(inv_ExtraItemList[playerid]))
 		strcat(list, inv_ExtraItemList[playerid]);
 
-	ShowPlayerDialog(playerid, DIALOG_INVENTORY_LIST, DIALOG_STYLE_LIST, "Inventory", list, "Options", "Close");
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
+	{
+		#pragma unused pid, dialogid, inputtext
+
+		if(response)
+		{
+			if(listitem >= INV_MAX_SLOTS)
+			{
+				CallLocalFunction("OnPlayerSelectExtraItem", "dd", playerid, listitem - INV_MAX_SLOTS);
+				inv_ViewingInventory[playerid] = false;
+				return 1;
+			}
+
+			if(!IsValidItem(GetInventorySlotItem(playerid, listitem)))
+			{
+				DisplayPlayerInventory(playerid);
+			}
+			else
+			{
+				inv_SelectedSlot[playerid] = listitem;
+				DisplayPlayerInventoryOptions(playerid, listitem);
+			}
+		}
+		else
+		{
+			ClosePlayerInventory(playerid, true);
+		}
+	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, "Inventory", list, "Options", "Close");
 
 	inv_ViewingInventory[playerid] = true;
 
@@ -531,7 +559,7 @@ stock ClosePlayerInventory(playerid, call = false)
 		}
 	}
 
-	ShowPlayerDialog(playerid, -1, 0, " ", " ", " ", " ");
+	Dialog_Hide(playerid);
 	inv_ViewingInventory[playerid] = false;
 
 	return 1;
@@ -567,39 +595,10 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 
 	CallLocalFunction("OnPlayerViewInventoryOpt", "d", playerid);
 
-	ShowPlayerDialog(playerid, DIALOG_INVENTORY_OPTIONS, DIALOG_STYLE_LIST, name, inv_OptionsList[playerid], "Accept", "Back");
-}
-
-hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
-{
-	if(dialogid == DIALOG_INVENTORY_LIST)
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
 	{
-		if(response)
-		{
-			if(listitem >= INV_MAX_SLOTS)
-			{
-				CallLocalFunction("OnPlayerSelectExtraItem", "dd", playerid, listitem - INV_MAX_SLOTS);
-				inv_ViewingInventory[playerid] = false;
-				return 1;
-			}
+		#pragma unused pid, dialogid, inputtext
 
-			if(!IsValidItem(GetInventorySlotItem(playerid, listitem)))
-			{
-				DisplayPlayerInventory(playerid);
-			}
-			else
-			{
-				inv_SelectedSlot[playerid] = listitem;
-				DisplayPlayerInventoryOptions(playerid, listitem);
-			}
-		}
-		else
-		{
-			ClosePlayerInventory(playerid, true);
-		}
-	}
-	if(dialogid == DIALOG_INVENTORY_OPTIONS)
-	{
 		if(!response)
 		{
 			DisplayPlayerInventory(playerid);
@@ -610,7 +609,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			case 0:
 			{
-				if(GetPlayerItem(playerid) == INVALID_ITEM_ID && GetPlayerWeapon(playerid) == 0)
+				if(GetPlayerItem(playerid) == INVALID_ITEM_ID)
 				{
 					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
@@ -626,7 +625,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			case 1:
 			{
-				if(GetPlayerItem(playerid) == INVALID_ITEM_ID && GetPlayerWeapon(playerid) == 0)
+				if(GetPlayerItem(playerid) == INVALID_ITEM_ID)
 				{
 					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
@@ -635,10 +634,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 					PlayerUseItem(playerid);
 
-					CallLocalFunction("OnPlayerCloseInventory", "d", playerid);
-
-					inv_SelectedSlot[playerid] = -1;
-					inv_ViewingInventory[playerid] = false;
+					ClosePlayerInventory(playerid, true);
 				}
 				else
 				{
@@ -648,7 +644,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 			case 2:
 			{
-				if(GetPlayerItem(playerid) == INVALID_ITEM_ID && GetPlayerWeapon(playerid) == 0)
+				if(GetPlayerItem(playerid) == INVALID_ITEM_ID)
 				{
 					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
@@ -657,10 +653,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 					PlayerDropItem(playerid);
 
-					CallLocalFunction("OnPlayerCloseInventory", "d", playerid);
-					
-					inv_SelectedSlot[playerid] = -1;
-					inv_ViewingInventory[playerid] = false;
+					ClosePlayerInventory(playerid, true);
 				}
 				else
 				{
@@ -674,6 +667,8 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			}
 		}
 	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, name, inv_OptionsList[playerid], "Accept", "Back");
+
 	return 1;
 }
 
