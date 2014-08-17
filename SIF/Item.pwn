@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.8.2
+	Module Version: 1.9.0
 
 
 	SIF/Overview
@@ -649,7 +649,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				(none)
 		}
 
-		native OnItemNameRender(itemid)
+		native OnItemNameRender(itemid, ItemType:itemtype)
 		{
 			Called:
 				When the function GetItemName is called, so an additional piece
@@ -659,6 +659,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Parameters:
 				<itemid>
 					The ID handle of the item that had it's name requested.
+
+				<itemtype> (int, ItemType)
+					Avoid unnecessary GetItemType calls in this callback.
 
 			Returns:
 				(none)
@@ -1417,7 +1420,7 @@ forward OnPlayerDroppedItem(playerid, itemid);
 forward OnPlayerGiveItem(playerid, targetid, itemid);
 forward OnPlayerGivenItem(playerid, targetid, itemid);
 forward OnItemRemovedFromPlayer(playerid, itemid);
-forward OnItemNameRender(itemid);
+forward OnItemNameRender(itemid, ItemType:itemtype);
 
 
 static ITEM_DEBUG;
@@ -2603,6 +2606,7 @@ stock GetItemExtraData(itemid)
 stock SetItemNameExtra(itemid, string[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemNameExtra]");
+	printf("[SetItemNameExtra] '%s'", string);
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
@@ -2743,7 +2747,7 @@ stock GetItemName(itemid, string[])
 	string[0] = EOS;
 	strcat(string, itm_TypeData[itm_Data[itemid][itm_type]][itm_name], ITM_MAX_NAME);
 
-	CallLocalFunction("OnItemNameRender", "d", itemid);
+	CallLocalFunction("OnItemNameRender", "dd", itemid, _:itm_Data[itemid][itm_type]);
 
 	if(!isnull(itm_Data[itemid][itm_nameEx]))
 	{
