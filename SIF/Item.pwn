@@ -2606,7 +2606,6 @@ stock GetItemExtraData(itemid)
 stock SetItemNameExtra(itemid, string[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemNameExtra]");
-	printf("[SetItemNameExtra] '%s'", string);
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
