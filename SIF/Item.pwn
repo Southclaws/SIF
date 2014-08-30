@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.9.0
+	Module Version: 2.1.0
 
 
 	SIF/Overview
@@ -1355,8 +1355,8 @@ Float:		itm_rotZ,
 
 enum E_ITEM_TYPE_DATA
 {
-bool:		itm_used,
 			itm_name			[ITM_MAX_NAME],
+			itm_uname			[ITM_MAX_NAME],
 			itm_model,
 			itm_size,
 
@@ -1395,7 +1395,8 @@ Iterator:	itm_WorldIndex<ITM_MAX>,
 
 
 static
-			itm_TypeData		[ITM_MAX_TYPES][E_ITEM_TYPE_DATA];
+			itm_TypeData		[ITM_MAX_TYPES][E_ITEM_TYPE_DATA],
+			itm_TypeTotal;
 
 static
 			itm_Holding			[MAX_PLAYERS],
@@ -1423,7 +1424,7 @@ forward OnItemRemovedFromPlayer(playerid, itemid);
 forward OnItemNameRender(itemid, ItemType:itemtype);
 
 
-static ITEM_DEBUG;
+static ITEM_DEBUG = -1;
 
 
 /*==============================================================================
@@ -1570,13 +1571,10 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	return 1;
 }
 
-stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, colour = -1, boneid = 6)
+stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, colour = -1, boneid = 6)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType]");
-	new ItemType:id;
-
-	while(id < ITM_MAX_TYPES && itm_TypeData[id][itm_used])
-		id++;
+	new ItemType:id = ItemType:itm_TypeTotal;
 
 	if(id == ITM_MAX_TYPES)
 	{
@@ -1584,8 +1582,20 @@ stock ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty 
 		return INVALID_ITEM_TYPE;
 	}
 
-	itm_TypeData[id][itm_used]			= true;
+	// Check if any other items have this uname
+	for(new i = _:id - 1; i >= 0; i--)
+	{
+		if(!strcmp(uname, itm_TypeData[ItemType:i][itm_uname], true))
+		{
+			printf("ERROR: Cannot have two item types with the same unique name regardless of case (%d:'%s')", i, uname);
+			return INVALID_ITEM_TYPE;
+		}
+	}
+
+	itm_TypeTotal++;
+
 	format(itm_TypeData[id][itm_name], ITM_MAX_NAME, name);
+	format(itm_TypeData[id][itm_uname], ITM_MAX_NAME, uname);
 	itm_TypeData[id][itm_model]			= model;
 	itm_TypeData[id][itm_size]			= size;
 
@@ -1616,11 +1626,7 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 	if(!(start <= (start + ItemType:amount) < ITM_MAX_TYPES))
 		return 0;
 
-	new ItemType:lastfree;
-	while(lastfree < ITM_MAX_TYPES && itm_TypeData[lastfree][itm_used])
-		lastfree++;
-
-	for(new ItemType:i = lastfree - ItemType:1; i >= start; i--)
+	for(new ItemType:i = ItemType:(itm_TypeTotal - 1); i >= start; i--)
 	{
 		if(!IsValidItemType(i))
 			continue;
@@ -1629,14 +1635,14 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 			continue;
 
 
-		itm_TypeData[i + ItemType:amount][itm_used]			= true;
 		itm_TypeData[i + ItemType:amount][itm_name]			= itm_TypeData[i][itm_name];
-		itm_TypeData[i + ItemType:amount][itm_model]			= itm_TypeData[i][itm_model];
+		itm_TypeData[i + ItemType:amount][itm_uname]			= itm_TypeData[i][itm_uname];
+		itm_TypeData[i + ItemType:amount][itm_model]		= itm_TypeData[i][itm_model];
 		itm_TypeData[i + ItemType:amount][itm_size]			= itm_TypeData[i][itm_size];
 
-		itm_TypeData[i + ItemType:amount][itm_defaultRotX]			= itm_TypeData[i][itm_defaultRotX];
-		itm_TypeData[i + ItemType:amount][itm_defaultRotY]			= itm_TypeData[i][itm_defaultRotY];
-		itm_TypeData[i + ItemType:amount][itm_defaultRotZ]			= itm_TypeData[i][itm_defaultRotZ];
+		itm_TypeData[i + ItemType:amount][itm_defaultRotX]	= itm_TypeData[i][itm_defaultRotX];
+		itm_TypeData[i + ItemType:amount][itm_defaultRotY]	= itm_TypeData[i][itm_defaultRotY];
+		itm_TypeData[i + ItemType:amount][itm_defaultRotZ]	= itm_TypeData[i][itm_defaultRotZ];
 
 		itm_TypeData[i + ItemType:amount][itm_attachBone]	= itm_TypeData[i][itm_attachBone];
 		itm_TypeData[i + ItemType:amount][itm_attachPosX]	= itm_TypeData[i][itm_attachPosX];
@@ -1648,14 +1654,14 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 		itm_TypeData[i + ItemType:amount][itm_attachRotZ]	= itm_TypeData[i][itm_attachRotZ];
 
 
-		itm_TypeData[i][itm_used]							= false;
-		itm_TypeData[i][itm_name][0]							= EOS;
+		itm_TypeData[i][itm_name][0]						= EOS;
+		itm_TypeData[i][itm_uname][0]						= EOS;
 		itm_TypeData[i][itm_model]							= 0;
 		itm_TypeData[i][itm_size]							= 0;
 
-		itm_TypeData[i][itm_defaultRotX]							= 0.0;
-		itm_TypeData[i][itm_defaultRotY]							= 0.0;
-		itm_TypeData[i][itm_defaultRotZ]							= 0.0;
+		itm_TypeData[i][itm_defaultRotX]					= 0.0;
+		itm_TypeData[i][itm_defaultRotY]					= 0.0;
+		itm_TypeData[i][itm_defaultRotZ]					= 0.0;
 
 		itm_TypeData[i][itm_attachBone]						= 0;
 		itm_TypeData[i][itm_attachPosX]						= 0.0;
@@ -2629,13 +2635,12 @@ stock GetItemNameExtra(itemid, string[])
 	return 1;
 }
 
-// itm_used
 stock IsValidItemType(ItemType:itemtype)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsValidItemType]");
 
-	if(ItemType:0 <= itemtype < ITM_MAX_TYPES)
-		return itm_TypeData[itemtype][itm_used];
+	if(ItemType:0 <= itemtype < ItemType:itm_TypeTotal)
+		return 1;
 
 	return false;
 }
@@ -2652,6 +2657,36 @@ stock GetItemTypeName(ItemType:itemtype, string[])
 	strcat(string, itm_TypeData[itemtype][itm_name], ITM_MAX_NAME);
 	
 	return 1;
+}
+
+// itm_uname
+stock GetItemTypeUniqueName(ItemType:itemtype, string[])
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeUniqueName]");
+
+	if(!IsValidItemType(itemtype))
+		return 0;
+	
+	string[0] = EOS;
+	strcat(string, itm_TypeData[itemtype][itm_uname], ITM_MAX_NAME);
+	
+	return 1;
+}
+
+stock ItemType:GetItemTypeFromUniqueName(string[], bool:ignorecase = false)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeFromUniqueName]");
+
+	if(isnull(string))
+		return INVALID_ITEM_TYPE;
+	
+	for(new i; i < itm_TypeTotal; i++)
+	{
+		if(!strcmp(string, itm_TypeData[ItemType:i][itm_uname], ignorecase))
+			return ItemType:i;
+	}
+	
+	return INVALID_ITEM_TYPE;
 }
 
 // itm_model

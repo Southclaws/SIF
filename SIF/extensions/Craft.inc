@@ -95,13 +95,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Reason:
 				To give functionality to the "Combine" option.
 		}
-		SAMP/OnDialogResponse
-		{
-			Reason:
-				To handle a dialog created by the module for displaying a list of
-				a player's items to combine the selected one with.
-		}
-
 	}
 
 ==============================================================================*/
@@ -125,7 +118,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 
 #define CFT_MAX_COMBO (64)
-#define DIALOG_COMBINE_ITEM (9004)
 
 
 enum E_CRAFT_COMBO_DATA
@@ -269,7 +261,7 @@ DisplayCombineInventory(playerid, listtype)
 {
 	new
 		list[INV_MAX_SLOTS * (ITM_MAX_NAME + 1)],
-		tmp[ITM_MAX_NAME];
+		item[ITM_MAX_NAME];
 	
 	cft_ListType[playerid] = listtype;
 
@@ -282,8 +274,8 @@ DisplayCombineInventory(playerid, listtype)
 
 			else
 			{
-				GetItemName(GetInventorySlotItem(playerid, i), tmp);
-				strcat(list, tmp);
+				GetItemName(GetInventorySlotItem(playerid, i), item);
+				strcat(list, item);
 				strcat(list, "\n");
 			}
 		}
@@ -299,28 +291,25 @@ DisplayCombineInventory(playerid, listtype)
 
 			else
 			{
-				GetItemName(GetContainerSlotItem(containerid, i), tmp);
-				strcat(list, tmp);
+				GetItemName(GetContainerSlotItem(containerid, i), item);
+				strcat(list, item);
 				strcat(list, "\n");
 			}
 		}
 	}
 
-	ShowPlayerDialog(playerid, DIALOG_COMBINE_ITEM, DIALOG_STYLE_LIST, "Combine", list, "Combine", "Close");
-}
-
-hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
-{
-	if(dialogid == DIALOG_COMBINE_ITEM)
+	inline Response(pid, dialogid, response, listitem, string:inputtext[])
 	{
-		if(!response)
-		{
-			DisplayPlayerInventory(playerid);
-			return 1;
-		}
+		#pragma unused pid, dialogid, inputtext
 
 		if(cft_ListType[playerid] == 0)
 		{
+			if(!response)
+			{
+				DisplayPlayerInventory(playerid);
+				return 1;
+			}
+
 			// If the player picks the same inventory item as the one he is trying to combine
 			// Or if they pick an empty slot, re-render the dialog.
 			// You can't combine something with itself or nothing, that's like dividing by zero!
@@ -449,6 +438,12 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			new
 				containerid = GetPlayerCurrentContainer(playerid);
 
+			if(!response)
+			{
+				DisplayContainerInventory(playerid, containerid);
+				return 1;
+			}
+
 			if(listitem == GetPlayerContainerSlot(playerid) || !IsContainerSlotUsed(containerid, listitem))
 			{
 				DisplayCombineInventory(playerid, 1);
@@ -560,6 +555,7 @@ hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 			DisplayContainerInventory(playerid, containerid);
 		}
 	}
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, "Combine", list, "Combine", "Close");
 
 	return 1;
 }

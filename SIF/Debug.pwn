@@ -285,6 +285,8 @@ stock sif_debug_register_handler(name[], initstate = 0)
 	strcat(dbg_Name[dbg_Total], name);
 	dbg_Level[dbg_Total] = initstate;
 
+	printf("Registered SIF debug handler %d: '%s' initial state: %d", dbg_Total, dbg_Name[dbg_Total], dbg_Level[dbg_Total]);
+
 	return dbg_Total++;
 }
 
@@ -324,7 +326,7 @@ stock sif_debug_print(handler, level, playerid, msg[])
 
 	if(level <= dbg_Level[handler])
 	{
-		printf("%s[%s:%d]: %s", DEBUG_PREFIX, dbg_Name[handler], level, msg);
+		printf("%s[%s:%d]: %s", DEBUG_PREFIX, handler == 0 ? ("SIF/Global") : dbg_Name[handler], level, msg);
 	}
 
 	return 1;
