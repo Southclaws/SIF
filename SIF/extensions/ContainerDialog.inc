@@ -230,10 +230,28 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Hooked functions or callbacks, either SA:MP natives or from other
 		scripts or plugins.
 
-		SAMP/OnDialogResponse
+		SIF/OnButtonPress
 		{
 			Reason:
-				-
+				Allowing container entities to be interacted with.
+		}
+
+		SIF/OnPlayerViewInventoryOpt
+		{
+			Reason:
+				To add an inventory option for interacting with containers.
+		}
+
+		SIF/OnPlayerOpenInventory
+		{
+			Reason:
+				To add an extra inventory item shortcut to current container.
+		}
+
+		SIF/OnPlayerSelectExtraItem
+		{
+			Reason:
+				For handling the current container shortcut.
 		}
 	}
 
@@ -254,15 +272,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	Setup
 
 ==============================================================================*/
-
-
-#if !defined DIALOG_CONTAINER_LIST
-	#define DIALOG_CONTAINER_LIST		(9002)
-#endif
-
-#if !defined DIALOG_CONTAINER_OPTIONS
-	#define DIALOG_CONTAINER_OPTIONS	(9003)
-#endif
 
 
 static

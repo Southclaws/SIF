@@ -382,13 +382,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Hooked functions or callbacks, either SA:MP natives or from other
 		scripts or plugins.
 
-		SAMP/OnDialogResponse
-		{
-			Reason:
-				To handle the dialogs used in the script for listing inventory
-				items and item options.
-		}
-
 		YSI/OnScriptInit
 		{
 			Reason:
@@ -413,15 +406,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	Setup
 
 ==============================================================================*/
-
-
-#if !defined DIALOG_INVENTORY_LIST
-	#define DIALOG_INVENTORY_LIST		(9000)
-#endif
-
-#if !defined DIALOG_INVENTORY_OPTIONS
-	#define DIALOG_INVENTORY_OPTIONS	(9001)
-#endif
 
 
 static

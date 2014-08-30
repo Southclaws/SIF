@@ -391,7 +391,7 @@ static
 	itm_arr_Length[ITM_MAX];
 
 static
-	ITEM_ARRAY_DATA;
+	ITEM_ARRAY_DATA = -1;
 
 
 /*==============================================================================
@@ -401,7 +401,7 @@ static
 ==============================================================================*/
 
 
-hook OnGameModeInit()
+hook OnScriptInit()
 {
 	ITEM_ARRAY_DATA = sif_debug_register_handler("SIF/ItemArrayData");
 }

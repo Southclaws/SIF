@@ -779,7 +779,7 @@ forward OnPlayerEnterButtonArea(playerid, buttonid);
 forward OnPlayerLeaveButtonArea(playerid, buttonid);
 
 
-static BUTTON_DEBUG;
+static BUTTON_DEBUG = -1;
 
 
 /*==============================================================================
