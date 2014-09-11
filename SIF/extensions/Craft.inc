@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.1.2
+	Module Version: 1.1.3
 
 
 	SIF/Overview
@@ -382,9 +382,9 @@ DisplayCombineInventory(playerid, listtype)
 				}
 			}
 
-			if(GetItemTypeSize(itemtype) != ITEM_SIZE_SMALL)
+			if(WillItemTypeFitInInventory(playerid, itemtype))
 			{
-				ShowActionText(playerid, "Result item is too large", 3000);
+				ShowActionText(playerid, "Not enough free space", 3000);
 				DisplayCombineInventory(playerid, 0);
 				return 0;
 			}

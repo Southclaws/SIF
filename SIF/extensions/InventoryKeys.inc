@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.0.0
+	Module Version: 1.1.0
 
 
 	SIF/Overview
@@ -180,23 +180,16 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 			if(IsValidItem(itemid))
 			{
-				if(GetItemTypeSize(GetItemType(itemid)) != ITEM_SIZE_SMALL)
+				if(WillItemTypeFitInInventory(playerid, GetItemType(itemid)))
 				{
-					ShowActionText(playerid, "Item too big for inventory", 3000, 150);
+					ShowActionText(playerid, "Inventory full", 3000, 100);
 				}
 				else
 				{
-					if(IsPlayerInventoryFull(playerid))
-					{
-						ShowActionText(playerid, "Inventory full", 3000, 100);
-					}
-					else
-					{
-						ShowActionText(playerid, "Item added to inventory", 3000, 150);
-						ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
-						stop inv_PutAwayTimer[playerid];
-						inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
-					}
+					ShowActionText(playerid, "Item added to inventory", 3000, 150);
+					ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
+					stop inv_PutAwayTimer[playerid];
+					inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
 				}
 			}
 		}

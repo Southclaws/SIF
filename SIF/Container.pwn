@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.2.4
+	Module Version: 1.3.4
 
 
 	SIF/Overview
@@ -733,49 +733,22 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 		return 1;
 
 	new
-		i,
-		count;
+		slots,
+		idx;
 
-	while(i < cnt_Data[containerid][cnt_size])
+	while(idx < cnt_Data[containerid][cnt_size])
 	{
-		if(IsValidItem(cnt_Items[containerid][i]))
-		{
-			if(GetItemTypeSize(GetItemType(itemid)) == ITEM_SIZE_MEDIUM && cnt_Data[containerid][cnt_maxOfSize][0] != -1)
-			{
-				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_MEDIUM)
-					count++;
-
-				if(count >= cnt_Data[containerid][cnt_maxOfSize][0])
-					return -1;
-			}
-			else if(GetItemTypeSize(GetItemType(itemid)) == ITEM_SIZE_LARGE && cnt_Data[containerid][cnt_maxOfSize][1] != -1)
-			{
-				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_LARGE)
-					count++;
-
-				if(count >= cnt_Data[containerid][cnt_maxOfSize][1])
-					return -1;
-			}
-			else if(GetItemTypeSize(GetItemType(itemid)) == ITEM_SIZE_CARRY && cnt_Data[containerid][cnt_maxOfSize][2] != -1)
-			{
-				if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_CARRY)
-					count++;
-
-				if(count >= cnt_Data[containerid][cnt_maxOfSize][2])
-					return -1;
-			}
-		}
-		else
-		{
+		if(!IsValidItem(cnt_Items[containerid][idx]))
 			break;
-		}
-		i++;
+
+		slots += GetItemTypeSize(GetItemType(cnt_Items[containerid][idx]));
+		idx++;
 	}
 
-	if(i == cnt_Data[containerid][cnt_size])
-		return -1;
+	if(slots + GetItemTypeSize(GetItemType(itemid)) > cnt_Data[containerid][cnt_size])
+		return -3;
 
-	cnt_Items[containerid][i] = itemid;
+	cnt_Items[containerid][idx] = itemid;
 	cnt_ItemContainer[itemid] = containerid;
 
 	RemoveItemFromWorld(itemid);
@@ -1025,89 +998,43 @@ stock WillItemTypeFitInContainer(containerid, ItemType:itemtype)
 		return 0;
 
 	new
-		i,
-		count,
-		size = GetItemTypeSize(itemtype);
+		slots,
+		idx;
 
-	if(size == ITEM_SIZE_MEDIUM)
+	while(idx < cnt_Data[containerid][cnt_size])
 	{
-		if(cnt_Data[containerid][cnt_maxOfSize][0] == -1)
-			return 1;
+		if(!IsValidItem(cnt_Items[containerid][idx]))
+			break;
 
-		if(cnt_Data[containerid][cnt_maxOfSize][0] == 0)
-			return 0;
-
-		while(i < cnt_Data[containerid][cnt_size])
-		{
-			if(!IsValidItem(cnt_Items[containerid][i]))
-				break;
-
-			if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_MEDIUM)
-				count++;
-
-			if(count >= cnt_Data[containerid][cnt_maxOfSize][0])
-				return 0;
-
-			i++;
-		}
+		slots += GetItemTypeSize(GetItemType(cnt_Items[containerid][idx]));
+		idx++;
 	}
-	if(size == ITEM_SIZE_LARGE)
-	{
-		if(cnt_Data[containerid][cnt_maxOfSize][1] == -1)
-			return 1;
 
-		if(cnt_Data[containerid][cnt_maxOfSize][1] == 0)
-			return 0;
+	if(slots + GetItemTypeSize(itemtype) > cnt_Data[containerid][cnt_size])
+		return 0;
 
-		while(i < cnt_Data[containerid][cnt_size])
-		{
-			if(!IsValidItem(cnt_Items[containerid][i]))
-				break;
-
-			if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_LARGE)
-				count++;
-
-			if(count >= cnt_Data[containerid][cnt_maxOfSize][1])
-				return 0;
-
-			i++;
-		}
-	}
-	if(size == ITEM_SIZE_CARRY)
-	{
-		if(cnt_Data[containerid][cnt_maxOfSize][2] == -1)
-			return 1;
-
-		if(cnt_Data[containerid][cnt_maxOfSize][2] == 0)
-			return 0;
-
-		while(i < cnt_Data[containerid][cnt_size])
-		{
-			if(!IsValidItem(cnt_Items[containerid][i]))
-				break;
-
-			if(GetItemTypeSize(GetItemType(cnt_Items[containerid][i])) == ITEM_SIZE_CARRY)
-				count++;
-
-			if(count >= cnt_Data[containerid][cnt_maxOfSize][2])
-				return 0;
-
-			i++;
-		}
-	}
-	
 	return 1;
 }
 
-
 stock GetContainerFreeSlots(containerid)
 {
-	for(new i, j = cnt_Data[containerid][cnt_size]; i < j; i++)
+	if(!Iter_Contains(cnt_Index, containerid))
+		return 0;
+
+	new
+		slots,
+		idx;
+
+	while(idx < cnt_Data[containerid][cnt_size])
 	{
-		if(!IsValidItem(cnt_Items[containerid][i]))
-			return cnt_Data[containerid][cnt_size] - (i + 1);
+		if(!IsValidItem(cnt_Items[containerid][idx]))
+			break;
+
+		slots += GetItemTypeSize(GetItemType(cnt_Items[containerid][idx]));
+		idx++;
 	}
-	return 0;
+
+	return cnt_Data[containerid][cnt_size] - slots;
 }
 
 stock GetItemContainer(itemid)

@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.2.0
+	Module Version: 1.3.0
 
 
 	SIF/Overview
@@ -409,6 +409,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 
 static
+		inv_ItemListTotal			[MAX_PLAYERS],
 		inv_SelectedSlot			[MAX_PLAYERS],
 		inv_ViewingInventory		[MAX_PLAYERS],
 		inv_ExtraItemList			[MAX_PLAYERS][128],
@@ -466,24 +467,31 @@ hook OnPlayerConnect(playerid)
 
 stock DisplayPlayerInventory(playerid)
 {
-	new
-		list[(INV_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)) + 32],
-		tmp[ITM_MAX_NAME + ITM_MAX_TEXT];
-	
-	for(new i; i < INV_MAX_SLOTS; i++)
-	{
+	if(!IsPlayerConnected(playerid))
+		return 0;
 
-		if(!IsValidItem(GetInventorySlotItem(playerid, i)))
-		{
-			strcat(list, "<Empty>\n");
-		}
-		else
-		{
-			GetItemName(GetInventorySlotItem(playerid, i), tmp);
-			strcat(list, tmp);
-			strcat(list, "\n");
-		}
+	new
+		title[18],
+		list[(INV_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)) + 32],
+		itemid,
+		tmp[5 + ITM_MAX_NAME + ITM_MAX_TEXT + 1];
+
+	inv_ItemListTotal[playerid] = 0;
+
+	for(new i; i < GetPlayerInventorySize(playerid); i++)
+	{
+		itemid = GetInventorySlotItem(playerid, i);
+
+		if(!IsValidItem(itemid))
+			break;
+
+		GetItemName(itemid, tmp);
+
+		format(list, sizeof(list), "%s[%02d]%s\n", list, GetItemTypeSize(GetItemType(itemid)), tmp);
 	}
+
+	for(new i; i < GetInventoryFreeSlots(playerid); i++)
+		strcat(list, "<Empty>\n");
 
 	inv_ExtraItemList[playerid][0] = EOS;
 	inv_ExtraItemCount[playerid] = 0;
@@ -494,15 +502,17 @@ stock DisplayPlayerInventory(playerid)
 	if(!isnull(inv_ExtraItemList[playerid]))
 		strcat(list, inv_ExtraItemList[playerid]);
 
+	format(title, sizeof(title), "Inventory (%d/%d)", GetPlayerInventorySize(playerid) - GetInventoryFreeSlots(playerid), GetPlayerInventorySize(playerid));
+
 	inline Response(pid, dialogid, response, listitem, string:inputtext[])
 	{
 		#pragma unused pid, dialogid, inputtext
 
 		if(response)
 		{
-			if(listitem >= INV_MAX_SLOTS)
+			if(listitem >= GetPlayerInventorySize(playerid))
 			{
-				CallLocalFunction("OnPlayerSelectExtraItem", "dd", playerid, listitem - INV_MAX_SLOTS);
+				CallLocalFunction("OnPlayerSelectExtraItem", "dd", playerid, listitem - inv_ItemListTotal[playerid]);
 				inv_ViewingInventory[playerid] = false;
 				return 1;
 			}
@@ -522,7 +532,7 @@ stock DisplayPlayerInventory(playerid)
 			ClosePlayerInventory(playerid, true);
 		}
 	}
-	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, "Inventory", list, "Options", "Close");
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, title, list, "Options", "Close");
 
 	inv_ViewingInventory[playerid] = true;
 

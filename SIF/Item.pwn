@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 2.1.0
+	Module Version: 3.1.0
 
 
 	SIF/Overview
@@ -144,7 +144,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If <itemid> is an invalid item ID handle.
 		}
 
-		native ItemType:DefineItemType(name[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, colour = -1, boneid = 6)
+		native ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6)
 		{
 			Description:
 				Defines a new item type with the specified name and model. Item
@@ -156,6 +156,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<name> (string)
 					The name of the item, this will be displayed on the label
 					of items created using this type (if one is present)
+
+				<uname> (string)
+					The unique name of the item (cannot match other item types).
+					Used to uniquely identify the item with a string.
 
 				<model> (int, valid GTA:SA model)
 					The GTA:SA model id to use when the item is visible in the
@@ -170,12 +174,16 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<rotx>, <roty>, <rotz> (float)
 					The default rotation the item object will have when dropped.
 
-				<zoffset>
+				<zoffset> (float)
 					Z offset from the item world position to create item model.
 
 				<attx>, <atty>, <attz>, <attrx>, <attry>, <attrz> (float)
 					The attachment coordinates to use when the object is picked
 					up and held by a player.
+
+				<usecarryanim> (bool)
+					When true, the player will use a two-handed carry animation
+					when picking up, holding and dropping items of this type.
 
 				<colour>
 					Item model texture colour.
@@ -1327,12 +1335,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define INVALID_ITEM_ID		(-1)
 #define INVALID_ITEM_TYPE	(ItemType:-1)
 
-#define INVALID_ITEM_SIZE	(-1)
-#define ITEM_SIZE_SMALL		(0)
-#define ITEM_SIZE_MEDIUM	(1)
-#define ITEM_SIZE_LARGE		(2)
-#define ITEM_SIZE_CARRY		(3)
-
 
 enum E_ITEM_DATA
 {
@@ -1372,6 +1374,7 @@ Float:		itm_attachPosZ,
 Float:		itm_attachRotX,
 Float:		itm_attachRotY,
 Float:		itm_attachRotZ,
+			itm_useCarryAnim,
 
 			itm_colour,
 			itm_attachBone
@@ -1525,7 +1528,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
-		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] == ITEM_SIZE_CARRY)
+		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_useCarryAnim])
 			SetPlayerSpecialAction(itm_Holder[itemid], SPECIAL_ACTION_NONE);
 
 		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
@@ -1571,7 +1574,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	return 1;
 }
 
-stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, colour = -1, boneid = 6)
+stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType]");
 	new ItemType:id = ItemType:itm_TypeTotal;
@@ -1611,6 +1614,7 @@ stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Fl
 	itm_TypeData[id][itm_attachRotX]	= attrx;
 	itm_TypeData[id][itm_attachRotY]	= attry;
 	itm_TypeData[id][itm_attachRotZ]	= attrz;
+	itm_TypeData[id][itm_useCarryAnim]	= usecarryanim;
 
 	itm_TypeData[id][itm_colour]		= colour;
 	itm_TypeData[id][itm_attachBone]	= boneid;
@@ -1636,7 +1640,7 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 
 
 		itm_TypeData[i + ItemType:amount][itm_name]			= itm_TypeData[i][itm_name];
-		itm_TypeData[i + ItemType:amount][itm_uname]			= itm_TypeData[i][itm_uname];
+		itm_TypeData[i + ItemType:amount][itm_uname]		= itm_TypeData[i][itm_uname];
 		itm_TypeData[i + ItemType:amount][itm_model]		= itm_TypeData[i][itm_model];
 		itm_TypeData[i + ItemType:amount][itm_size]			= itm_TypeData[i][itm_size];
 
@@ -1671,6 +1675,10 @@ stock ShiftItemTypeIndex(ItemType:start, amount)
 		itm_TypeData[i][itm_attachRotX]						= 0.0;
 		itm_TypeData[i][itm_attachRotY]						= 0.0;
 		itm_TypeData[i][itm_attachRotZ]						= 0.0;
+		itm_TypeData[i][itm_useCarryAnim]					= 0;
+
+		itm_TypeData[i][itm_colour]							= 0;
+		itm_TypeData[i][itm_attachBone]						= 0;
 	}
 	
 	return 1;
@@ -1698,7 +1706,7 @@ stock PlayerPickUpItem(playerid, itemid)
 
 	if((z - itm_Data[itemid][itm_posZ]) < 0.3) // If the height between the player and the item is below 0.5 units
 	{
-		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] == ITEM_SIZE_CARRY)
+		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_useCarryAnim])
 			ApplyAnimation(playerid, "CARRY", "liftup105", 5.0, 0, 0, 0, 0, 400);
 
 		else
@@ -1708,7 +1716,7 @@ stock PlayerPickUpItem(playerid, itemid)
 	}
 	else
 	{
-		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] == ITEM_SIZE_CARRY)
+		if(itm_TypeData[itm_Data[itemid][itm_type]][itm_useCarryAnim])
 			ApplyAnimation(playerid, "CARRY", "liftup", 5.0, 0, 0, 0, 0, 400);
 
 		else
@@ -1732,7 +1740,7 @@ stock PlayerDropItem(playerid)
 	if(CallLocalFunction("OnPlayerDropItem", "dd", playerid, itm_Holding[playerid]))
 		return 0;
 
-	if(itm_TypeData[itm_Data[itm_Holding[playerid]][itm_type]][itm_size] == ITEM_SIZE_CARRY)
+	if(itm_TypeData[itm_Data[itm_Holding[playerid]][itm_type]][itm_useCarryAnim])
 		ApplyAnimation(playerid, "CARRY", "putdwn", 5.0, 0, 0, 0, 0, 0);
 
 	else
@@ -1783,7 +1791,7 @@ stock PlayerGiveItem(playerid, targetid, call = true)
 	SetPlayerFacingAngle(playerid, angle);
 	SetPlayerFacingAngle(targetid, angle+180.0);
 
-	if(itm_TypeData[itm_Data[itemid][itm_type]][itm_size] != ITEM_SIZE_CARRY)
+	if(!itm_TypeData[itm_Data[itemid][itm_type]][itm_useCarryAnim])
 	{
 		ApplyAnimation(playerid, "CASINO", "SLOT_PLYR", 4.0, 0, 0, 0, 0, 450);
 		ApplyAnimation(targetid, "CASINO", "SLOT_PLYR", 4.0, 0, 0, 0, 0, 450);
@@ -1851,7 +1859,7 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 		itm_TypeData[type][itm_attachRotX], itm_TypeData[type][itm_attachRotY], itm_TypeData[type][itm_attachRotZ],
 		.materialcolor1 = itm_TypeData[type][itm_colour], .materialcolor2 = itm_TypeData[type][itm_colour]);
 
-	if(itm_TypeData[type][itm_size] == ITEM_SIZE_CARRY)
+	if(itm_TypeData[type][itm_useCarryAnim])
 		SetPlayerSpecialAction(playerid, SPECIAL_ACTION_CARRY);
 
 	sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Removing item from world index")<playerid>;
@@ -2706,9 +2714,20 @@ stock GetItemTypeSize(ItemType:itemtype)
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeSize]");
 
 	if(!IsValidItemType(itemtype))
-		return INVALID_ITEM_SIZE;
+		return 0;
 
 	return itm_TypeData[itemtype][itm_size];
+}
+
+// itm_useCarryAnim
+stock IsItemTypeCarry(ItemType:itemtype)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsItemTypeCarry]");
+
+	if(!IsValidItemType(itemtype))
+		return 0;
+
+	return itm_TypeData[itemtype][itm_useCarryAnim];
 }
 
 // itm_colour
@@ -2717,7 +2736,7 @@ stock GetItemTypeColour(ItemType:itemtype)
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeColour]");
 
 	if(!IsValidItemType(itemtype))
-		return INVALID_ITEM_SIZE;
+		return 0;
 
 	return itm_TypeData[itemtype][itm_colour];
 }
@@ -2728,7 +2747,7 @@ stock GetItemTypeBone(ItemType:itemtype)
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeBone]");
 
 	if(!IsValidItemType(itemtype))
-		return INVALID_ITEM_SIZE;
+		return 0;
 
 	return itm_TypeData[itemtype][itm_attachBone];
 }

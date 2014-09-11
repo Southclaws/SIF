@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 2.1.3
+	Module Version: 2.2.3
 
 
 	SIF/Overview
@@ -277,6 +277,28 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+		native SetPlayerInventorySize(playerid, slots)
+		{
+			Description:
+				Sets the maximum amount of slots a player's inventory has.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+		native GetPlayerInventorySize(playerid)
+		{
+			Description:
+				Returns the capacity of a player's inventory.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
 	}
 
 	SIF/Inventory/Internal Functions
@@ -343,13 +365,14 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 
 #if !defined INV_MAX_SLOTS
-	#define INV_MAX_SLOTS				(4)
+	#define INV_MAX_SLOTS	(4)
 #endif
 
 
 static
-		inv_Data					[MAX_PLAYERS][INV_MAX_SLOTS],
-		inv_ItemPlayer				[ITM_MAX];
+		inv_Data			[MAX_PLAYERS][INV_MAX_SLOTS],
+		inv_Size			[MAX_PLAYERS] = {INV_MAX_SLOTS, ...},
+		inv_ItemPlayer		[ITM_MAX];
 
 
 forward OnItemAddToInventory(playerid, itemid, slot);
@@ -402,36 +425,44 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 	if(!IsValidItem(itemid))
 		return 0;
 
-	new i;
-	while(i < INV_MAX_SLOTS)
+	new
+		ItemType:itemtype = GetItemType(itemid),
+		itemsize = GetItemTypeSize(itemtype),
+		slots,
+		idx;
+
+	while(idx < inv_Size[playerid])
 	{
-		if(!IsValidItem(inv_Data[playerid][i]))break;
-		i++;
+		if(!IsValidItem(inv_Data[playerid][idx]))
+			break;
+
+		slots += GetItemTypeSize(GetItemType(inv_Data[playerid][idx]));
+		idx++;
 	}
 
-	if(i == INV_MAX_SLOTS)
-		return -2;
-	
+	if(slots + itemsize > inv_Size[playerid])
+		return -3;
+
 	if(call)
 	{
-		if(CallLocalFunction("OnItemAddToInventory", "ddd", playerid, itemid, i))
+		if(CallLocalFunction("OnItemAddToInventory", "ddd", playerid, itemid, idx))
 			return -1;
 	}
 
-	inv_Data[playerid][i] = itemid;
+	inv_Data[playerid][idx] = itemid;
 	inv_ItemPlayer[itemid] = playerid;
 
 	RemoveItemFromWorld(itemid);
 
 	if(call)
-		CallLocalFunction("OnItemAddedToInventory", "ddd", playerid, itemid, i);
+		CallLocalFunction("OnItemAddedToInventory", "ddd", playerid, itemid, idx);
 
 	return 1;
 }
 
 stock RemoveItemFromInventory(playerid, slotid, call = 1)
 {
-	if(!(0 <= slotid < INV_MAX_SLOTS))
+	if(!(0 <= slotid < inv_Size[playerid]))
 		return 0;
 
 	if(!IsValidItem(inv_Data[playerid][slotid]))
@@ -440,12 +471,12 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 		{
 			inv_Data[playerid][slotid] = INVALID_ITEM_ID;
 
-			if(slotid < (INV_MAX_SLOTS - 1))
+			if(slotid < (inv_Size[playerid] - 1))
 			{
-				for(new i = slotid; i < (INV_MAX_SLOTS - 1); i++)
+				for(new i = slotid; i < (inv_Size[playerid] - 1); i++)
 				    inv_Data[playerid][i] = inv_Data[playerid][i+1];
 
-				inv_Data[playerid][(INV_MAX_SLOTS - 1)] = INVALID_ITEM_ID;
+				inv_Data[playerid][(inv_Size[playerid] - 1)] = INVALID_ITEM_ID;
 			}
 		}
 
@@ -463,12 +494,12 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 	inv_ItemPlayer[inv_Data[playerid][slotid]] = INVALID_PLAYER_ID;
 	inv_Data[playerid][slotid] = INVALID_ITEM_ID;
 	
-	if(slotid < (INV_MAX_SLOTS - 1))
+	if(slotid < (inv_Size[playerid] - 1))
 	{
-		for(new i = slotid; i < (INV_MAX_SLOTS - 1); i++)
+		for(new i = slotid; i < (inv_Size[playerid] - 1); i++)
 		    inv_Data[playerid][i] = inv_Data[playerid][i+1];
 
-		inv_Data[playerid][(INV_MAX_SLOTS - 1)] = INVALID_ITEM_ID;
+		inv_Data[playerid][(inv_Size[playerid] - 1)] = INVALID_ITEM_ID;
 	}
 
 	if(call)
@@ -508,12 +539,12 @@ hook OnPlayerDisconnect(playerid)
 	defer DestroyPlayerInventoryItems(playerid);
 }
 
-timer DestroyPlayerInventoryItems[1](id)
+timer DestroyPlayerInventoryItems[1](playerid)
 {
-	for(new i; i < INV_MAX_SLOTS; i++)
+	for(new i; i < inv_Size[playerid]; i++)
 	{
-		DestroyItem(inv_Data[id][0]);
-		RemoveItemFromInventory(id, 0);
+		DestroyItem(inv_Data[playerid][0]);
+		RemoveItemFromInventory(playerid, 0);
 	}	
 }
 
@@ -527,7 +558,7 @@ timer DestroyPlayerInventoryItems[1](id)
 
 stock GetInventorySlotItem(playerid, slotid)
 {
-	if(!(0 <= slotid < INV_MAX_SLOTS))
+	if(!(0 <= slotid < inv_Size[playerid]))
 		return INVALID_ITEM_ID;
 
 	return inv_Data[playerid][slotid];
@@ -535,7 +566,7 @@ stock GetInventorySlotItem(playerid, slotid)
 
 stock IsInventorySlotUsed(playerid, slotid)
 {
-	if(!(0 <= slotid < INV_MAX_SLOTS))
+	if(!(0 <= slotid < inv_Size[playerid]))
 		return -1;
 
 	if(!IsValidItem(inv_Data[playerid][slotid]))
@@ -549,17 +580,52 @@ stock IsPlayerInventoryFull(playerid)
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
-	return IsValidItem(inv_Data[playerid][INV_MAX_SLOTS-1]);
+	return IsValidItem(inv_Data[playerid][inv_Size[playerid]-1]);
+}
+
+stock WillItemTypeFitInInventory(playerid, ItemType:itemtype)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	new
+		slots,
+		idx;
+
+	while(idx < inv_Size[playerid])
+	{
+		if(!IsValidItem(inv_Data[playerid][idx]))
+			break;
+
+		slots += GetItemTypeSize(GetItemType(inv_Data[playerid][idx]));
+		idx++;
+	}
+
+	if(slots + GetItemTypeSize(itemtype) > inv_Size[playerid])
+		return 0;
+
+	return 1;
 }
 
 stock GetInventoryFreeSlots(playerid)
 {
-	for(new i; i < INV_MAX_SLOTS; i++)
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	new
+		slots,
+		idx;
+
+	while(idx < inv_Size[playerid])
 	{
-		if(!IsValidItem(inv_Data[playerid][i]))
-			return INV_MAX_SLOTS - (i + 1);
+		if(!IsValidItem(inv_Data[playerid][idx]))
+			break;
+
+		slots += GetItemTypeSize(GetItemType(inv_Data[playerid][idx]));
+		idx++;
 	}
-	return 0;
+
+	return inv_Size[playerid] - slots;
 }
 
 stock GetItemPlayerInventory(itemid)
@@ -568,4 +634,22 @@ stock GetItemPlayerInventory(itemid)
 		return INVALID_PLAYER_ID;
 
 	return inv_ItemPlayer[itemid];
+}
+
+stock SetPlayerInventorySize(playerid, slots)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	inv_Size[playerid] = slots;
+
+	return 1;	
+}
+
+stock GetPlayerInventorySize(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_Size[playerid];	
 }

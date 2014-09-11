@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.3.0
-	Module Version: 1.2.0
+	Module Version: 1.3.0
 
 
 	SIF/Overview
@@ -317,22 +317,26 @@ stock DisplayContainerInventory(playerid, containerid)
 		return 0;
 
 	new
+		title[CNT_MAX_NAME + 9],
+		containername[CNT_MAX_NAME],
 		list[CNT_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)],
+		itemid,
 		tmp[ITM_MAX_NAME + ITM_MAX_TEXT];
 
-	for(new i; i < cnt_Data[containerid][cnt_size] && i < CNT_MAX_SLOTS; i++)
+	for(new i; i < GetContainerSize(containerid); i++)
 	{
-		if(!IsValidItem(cnt_Items[containerid][i]))
-		{
-			strcat(list, "<Empty>\n");
-		}
-		else
-		{
-			GetItemName(cnt_Items[containerid][i], tmp);
-			strcat(list, tmp);
-			strcat(list, "\n");
-		}
+		itemid = GetContainerSlotItem(containerid, i);
+
+		if(!IsValidItem(itemid))
+			break;
+
+		GetItemName(itemid, tmp);
+
+		format(list, sizeof(list), "%s[%02d]%s\n", list, GetItemTypeSize(GetItemType(itemid)), tmp);
 	}
+
+	for(new i; i < GetContainerFreeSlots(containerid); i++)
+		strcat(list, "<Empty>\n");
 
 	strcat(list, "My Inventory >");
 
@@ -340,6 +344,10 @@ stock DisplayContainerInventory(playerid, containerid)
 
 	if(CallLocalFunction("OnPlayerOpenContainer", "dd", playerid, containerid))
 		return 0;
+
+	GetContainerName(containerid, containername);
+
+	format(title, sizeof(title), "%s (%d/%d)", containername, GetContainerSize(containerid) - GetContainerFreeSlots(containerid), GetContainerSize(containerid));
 
 	inline Response(pid, dialogid, response, listitem, string:inputtext[])
 	{
@@ -372,7 +380,7 @@ stock DisplayContainerInventory(playerid, containerid)
 			ClosePlayerContainer(playerid, true);
 		}
 	}
-	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, cnt_Data[containerid][cnt_name], list, "Options", "Close");
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, title, list, "Options", "Close");
 
 	return 1;
 }
@@ -415,12 +423,7 @@ DisplayContainerOptions(playerid, slotid)
 
 	GetItemName(cnt_Items[cnt_CurrentContainer[playerid]][slotid], tmp);
 
-	if(GetItemTypeSize(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][slotid])) == ITEM_SIZE_SMALL)
-		cnt_OptionsList[playerid] = "Equip\nMove to inventory\n";
-
-	else
-		cnt_OptionsList[playerid] = "Equip\n";
-
+	cnt_OptionsList[playerid] = "Equip\nMove to inventory\n";
 	cnt_OptionsCount[playerid] = 0;
 
 	CallLocalFunction("OnPlayerViewContainerOpt", "dd", playerid, cnt_CurrentContainer[playerid]);
@@ -455,15 +458,15 @@ DisplayContainerOptions(playerid, slotid)
 			}
 			case 1:
 			{
-				if(GetItemTypeSize(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]])) != ITEM_SIZE_SMALL)
-				{
-					CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], 0);
-					return 1;
-				}
-
 				new itemid = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
 
-				if(IsPlayerInventoryFull(playerid) || !IsValidItem(itemid))
+				if(!IsValidItem(itemid))
+				{
+					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
+					return 0;
+				}
+
+				if(!WillItemTypeFitInInventory(playerid, GetItemType(itemid)))
 				{
 					ShowActionText(playerid, "Inventory full", 3000, 100);
 					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
@@ -481,11 +484,7 @@ DisplayContainerOptions(playerid, slotid)
 			}
 			default:
 			{
-				if(GetItemTypeSize(GetItemType(cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]])) == ITEM_SIZE_SMALL)
-					CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
-
-				else
-					CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 1);
+				CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
 			}
 		}
 	}
