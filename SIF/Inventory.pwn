@@ -2,7 +2,7 @@
 
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
-	SIF Version: 1.3.0
+	SIF Version: 1.4.0
 	Module Version: 2.2.3
 
 
@@ -251,6 +251,18 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 				1
 					If it is full.
+		}
+
+		native WillItemTypeFitInInventory(playerid, ItemType:itemtype)
+		{
+			Description:
+				Checks if an item type will fit into a player's inventory.
+
+			Parameters:
+				-
+
+			Returns:
+				-
 		}
 
 		native GetInventoryFreeSlots(playerid)
