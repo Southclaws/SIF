@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.1.0
+	Module Version: 1.1.1
 
 
 	SIF/Overview
@@ -180,7 +180,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 			if(IsValidItem(itemid))
 			{
-				if(WillItemTypeFitInInventory(playerid, GetItemType(itemid)))
+				if(!WillItemTypeFitInInventory(playerid, GetItemType(itemid)))
 				{
 					ShowActionText(playerid, "Inventory full", 3000, 100);
 				}
