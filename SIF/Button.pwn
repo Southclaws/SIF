@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.4.0
+	Module Version: 1.5.0
 
 
 	SIF/Overview
@@ -36,7 +36,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Streamer Plugin
 		YSI\y_hooks
 		YSI\y_timers
-		md-sort
 	}
 
 	SIF/Button/Credits
@@ -45,7 +44,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		SA:MP Community					- Inspiration and support
 		Incognito						- Very useful streamer plugin
 		Y_Less							- YSI framework
-		Slice							- Multidimensional Array Sorting
 	}
 
 	SIF/Button/Constants
@@ -634,6 +632,13 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Internal events called by player actions done by using features from
 		this script.
 	
+		_btn_SortButtons(array[][e_button_range_data], left, right)
+		{
+			Description:
+				Sorts the list of buttons that a player is nearby so they can be
+				triggered in order of distance from the player (closest first).
+		}
+
 		Internal_OnButtonPress(playerid, buttonid)
 		{
 			Description:
@@ -698,7 +703,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #include <YSI\y_timers>
 #include <YSI\y_hooks>
 #include <streamer>
-#include <md-sort>
 
 #define _SIF_BUTTON_INCLUDED
 
@@ -991,24 +995,25 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 				distance = sif_Distance(x, y, z, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
 
-				if(distance < btn_Data[id][btn_size])
-				{
-					list[index][btn_buttonId] = id;
-					list[index][btn_distance] = distance;
+				if(distance > btn_Data[id][btn_size])
+					continue;
 
-					index++;
-				}
+				if(!(btn_Data[id][btn_posZ] - btn_Data[id][btn_size] <= z <= btn_Data[id][btn_posZ] + btn_Data[id][btn_size]))
+					continue;
+
+
+				list[index][btn_buttonId] = id;
+				list[index][btn_distance] = distance;
+
+				index++;
 			}
 
-			SortDeepArray(list, btn_distance);
+			_btn_SortButtons(list, 0, index);
 
-			for(new i = BTN_MAX_INRANGE - index; i < BTN_MAX_INRANGE; i++)
+			for(new i = index - 1; i >= 0; i--)
 			{
-				if(btn_Data[list[i][btn_buttonId]][btn_posZ] - btn_Data[list[i][btn_buttonId]][btn_size] <= z <= btn_Data[list[i][btn_buttonId]][btn_posZ] + btn_Data[list[i][btn_buttonId]][btn_size])
-				{
-					if(Internal_OnButtonPress(playerid, list[i][btn_buttonId]))
-						break;
-				}
+				if(Internal_OnButtonPress(playerid, list[i][btn_buttonId]))
+					break;
 			}
 		}
 
@@ -1022,6 +1027,45 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		}
 	}
 	return 1;
+}
+
+_btn_SortButtons(array[][e_button_range_data], left, right)
+{
+	new
+		tmp_left = left,
+		tmp_right = right,
+		Float:pivot = array[(left + right) / 2][btn_distance],
+		buttonid,
+		Float:distance;
+
+	while(tmp_left <= tmp_right)
+	{
+		while(array[tmp_left][btn_distance] > pivot)
+			tmp_left++;
+
+		while(array[tmp_right][btn_distance] < pivot)
+			tmp_right--;
+
+		if(tmp_left <= tmp_right)
+		{
+			buttonid = array[tmp_left][btn_buttonId];
+			array[tmp_left][btn_buttonId] = array[tmp_right][btn_buttonId];
+			array[tmp_right][btn_buttonId] = buttonid;
+
+			distance = array[tmp_left][btn_distance];
+			array[tmp_left][btn_distance] = array[tmp_right][btn_distance];
+			array[tmp_right][btn_distance] = distance;
+
+			tmp_left++;
+			tmp_right--;
+		}
+	}
+
+	if(left < tmp_right)
+		_btn_SortButtons(array, left, tmp_right);
+
+	if(tmp_left < right)
+		_btn_SortButtons(array, tmp_left, right);
 }
 
 Internal_OnButtonPress(playerid, buttonid)
