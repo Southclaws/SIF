@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.5.0
+	Module Version: 1.5.1
 
 
 	SIF/Overview
@@ -65,6 +65,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 		BTN_STREAMER_AREA_IDENTIFIER
 			A value to identify streamer object EXTRA_ID data array type.
+
+		BTN_TELEPORT_FREEZE_TIME
+			The time in milliseconds to freeze a player upon using a linked
+			teleport button.
 	}
 
 	SIF/Button/Core Functions
@@ -734,6 +738,10 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#define BTN_STREAMER_AREA_IDENTIFIER (100)
 #endif
 
+#if !defined BTN_TELEPORT_FREEZE_TIME
+	#define BTN_TELEPORT_FREEZE_TIME (1000)
+#endif
+
 
 #define INVALID_BUTTON_ID	(-1)
 
@@ -1103,7 +1111,7 @@ Internal_OnButtonPress(playerid, buttonid)
 	return 0;
 }
 
-timer btn_Unfreeze[1000](playerid)
+timer btn_Unfreeze[BTN_TELEPORT_FREEZE_TIME](playerid)
 {
 	TogglePlayerControllable(playerid, true);
 }
