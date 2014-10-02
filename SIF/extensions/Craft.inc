@@ -776,7 +776,7 @@ _cft_CompareListToCraftSet(playerid, craftset)
 
 	for(new i; i < cft_ItemCount[craftset]; i++)
 	{
-		sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CompareListToCraftSet] Item type in %d/%d craftset: %d, player selected: %d", i, cft_ItemCount[craftset], cft_Ingredients[craftset][i][cft_itemType], cft_SelectedItems[playerid][i][cft_selectedItemType]);
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CompareListToCraftSet] Item type in %d/%d craftset: %d, player selected: %d", i, cft_ItemCount[craftset], _:cft_Ingredients[craftset][i][cft_itemType], _:cft_SelectedItems[playerid][i][cft_selectedItemType]);
 
 		if(cft_Ingredients[craftset][i][cft_itemType] != cft_SelectedItems[playerid][i][cft_selectedItemType])
 			return 0;
