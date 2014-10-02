@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 2.2.3
+	Module Version: 2.3.3
 
 
 	SIF/Overview
@@ -289,6 +289,20 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+
+		native GetItemPlayerInventorySlot(itemid)
+		{
+			Description:
+				Returns the inventory slot of an item if it's stored inside a
+				player's inventory.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
 		native SetPlayerInventorySize(playerid, slots)
 		{
 			Description:
@@ -300,6 +314,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+
 		native GetPlayerInventorySize(playerid)
 		{
 			Description:
@@ -384,7 +399,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 static
 		inv_Data			[MAX_PLAYERS][INV_MAX_SLOTS],
 		inv_Size			[MAX_PLAYERS] = {INV_MAX_SLOTS, ...},
-		inv_ItemPlayer		[ITM_MAX];
+		inv_ItemPlayer		[ITM_MAX] = {INVALID_PLAYER_ID, ...},
+		inv_ItemPlayerSlot	[ITM_MAX] = {-1, ...};
 
 
 forward OnItemAddToInventory(playerid, itemid, slot);
@@ -409,9 +425,6 @@ hook OnScriptInit()
 			inv_Data[i][j] = INVALID_ITEM_ID;
 		}
 	}
-
-	for(new i; i < ITM_MAX; i++)
-		inv_ItemPlayer[i] = INVALID_PLAYER_ID;
 }
 
 hook OnPlayerConnect(playerid)
@@ -463,6 +476,7 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 
 	inv_Data[playerid][idx] = itemid;
 	inv_ItemPlayer[itemid] = playerid;
+	inv_ItemPlayerSlot[itemid] = idx;
 
 	RemoveItemFromWorld(itemid);
 
@@ -504,6 +518,7 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 	}
 
 	inv_ItemPlayer[inv_Data[playerid][slotid]] = INVALID_PLAYER_ID;
+	inv_ItemPlayerSlot[inv_Data[playerid][slotid]] = -1;
 	inv_Data[playerid][slotid] = INVALID_ITEM_ID;
 	
 	if(slotid < (inv_Size[playerid] - 1))
@@ -531,6 +546,7 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 public OnItemDestroy(itemid)
 {
 	inv_ItemPlayer[itemid] = INVALID_PLAYER_ID;
+	inv_ItemPlayerSlot[itemid] = -1;
 
 	#if defined inv_OnItemDestroy
 		return inv_OnItemDestroy(itemid);
@@ -646,6 +662,14 @@ stock GetItemPlayerInventory(itemid)
 		return INVALID_PLAYER_ID;
 
 	return inv_ItemPlayer[itemid];
+}
+
+stock GetItemPlayerInventorySlot(itemid)
+{
+	if(!IsValidItem(itemid))
+		return INVALID_PLAYER_ID;
+
+	return inv_ItemPlayerSlot[itemid];
 }
 
 stock SetPlayerInventorySize(playerid, slots)

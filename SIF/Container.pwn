@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.3.4
+	Module Version: 1.4.4
 
 
 	SIF/Overview
@@ -508,6 +508,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				(int, containerid)
 		}
 
+		native GetItemContainerSlot(itemid)
+		{
+			Description:
+				Returns the container slot that the item is stored in if inside
+				a container.
+
+			Parameters:
+				-
+
+			Returns:
+				(int)
+		}
+
 		native GetButtonContainer(buttonid)
 		{
 			Description:
@@ -610,6 +623,7 @@ new
 			cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
 Iterator:	cnt_Index<CNT_MAX>,
 			cnt_ItemContainer			[ITM_MAX] = {INVALID_CONTAINER_ID, ...},
+			cnt_ItemContainerSlot		[ITM_MAX] = {-1, ...},
 			cnt_ButtonContainer			[BTN_MAX] = {INVALID_CONTAINER_ID, ...};
 
 
@@ -617,23 +631,6 @@ forward OnItemAddToContainer(containerid, itemid, playerid);
 forward OnItemAddedToContainer(containerid, itemid, playerid);
 forward OnItemRemoveFromContainer(containerid, slotid, playerid);
 forward OnItemRemovedFromContainer(containerid, slotid, playerid);
-
-
-/*==============================================================================
-
-	Zeroing
-
-==============================================================================*/
-
-
-hook OnScriptInit()
-{
-	for(new i; i < ITM_MAX; i++)
-		cnt_ItemContainer[i] = INVALID_CONTAINER_ID;
-
-	for(new i; i < BTN_MAX; i++)
-		cnt_ButtonContainer[i] = INVALID_CONTAINER_ID;
-}
 
 
 /*==============================================================================
@@ -750,6 +747,7 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 
 	cnt_Items[containerid][idx] = itemid;
 	cnt_ItemContainer[itemid] = containerid;
+	cnt_ItemContainerSlot[itemid] = idx;
 
 	RemoveItemFromWorld(itemid);
 
@@ -788,6 +786,7 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 	}
 
 	cnt_ItemContainer[cnt_Items[containerid][slotid]] = INVALID_CONTAINER_ID;
+	cnt_ItemContainerSlot[cnt_Items[containerid][slotid]] = -1;
 	cnt_Items[containerid][slotid] = INVALID_ITEM_ID;
 
 	if(slotid < (cnt_Data[containerid][cnt_size] - 1))
@@ -815,6 +814,7 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 public OnItemDestroy(itemid)
 {
 	cnt_ItemContainer[itemid] = INVALID_CONTAINER_ID;
+	cnt_ItemContainerSlot[itemid] = -1;
 
 	#if defined cnt_OnItemDestroy
 		return cnt_OnItemDestroy(itemid);
@@ -1043,6 +1043,14 @@ stock GetItemContainer(itemid)
 		return INVALID_CONTAINER_ID;
 
 	return cnt_ItemContainer[itemid];
+}
+
+stock GetItemContainerSlot(itemid)
+{
+	if(!IsValidItem(itemid))
+		return INVALID_CONTAINER_ID;
+
+	return cnt_ItemContainerSlot[itemid];
 }
 
 stock GetButtonContainer(buttonid)
