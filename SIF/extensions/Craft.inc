@@ -392,8 +392,6 @@ forward OnPlayerCrafted(playerid, craftset);
 static CRAFT_DEBUG = -1;
 
 
-
-
 /*==============================================================================
 
 	Zeroing
@@ -403,13 +401,14 @@ static CRAFT_DEBUG = -1;
 
 hook OnScriptInit()
 {
-	CRAFT_DEBUG = sif_debug_register_handler("SIF/extensions/Craft", SIF_DEBUG_LEVEL_INTERNAL);
+	CRAFT_DEBUG = sif_debug_register_handler("SIF/extensions/Craft");
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CRAFT_DEBUG("[OnScriptInit]");
 }
 
 hook OnPlayerConnect(playerid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CRAFT_DEBUG("[OnPlayerConnect]");
+	// TODO: Zero player data
 }
 
 
@@ -531,7 +530,31 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 
 public OnPlayerViewContainerOpt(playerid, containerid)
 {
-	cft_MenuOptionID[playerid] = AddContainerOption(playerid, "Combine");
+	if(cft_SelectedItemCount[playerid] == 0)
+	{
+		cft_MenuOptionID[playerid] = AddContainerOption(playerid, "Combine...");
+	}
+	else
+	{
+		new
+			string[128], // TODO: Improve option length
+			itemname[ITM_MAX_NAME];
+
+		string = "Combine with ";
+
+		for(new i; i < cft_SelectedItemCount[playerid]; i++)
+		{
+			GetItemTypeName(cft_SelectedItems[playerid][i][cft_selectedItemType], itemname);
+
+			if(i == 0)
+				format(string, sizeof(string), "%s%s", string, itemname);
+
+			else
+
+				format(string, sizeof(string), "%s+%s", string, itemname);
+		}
+		cft_MenuOptionID[playerid] = AddContainerOption(playerid, string);
+	}
 
 	#if defined cft_OnPlayerViewContainerOpt
 		return cft_OnPlayerViewContainerOpt(playerid, containerid);
@@ -749,10 +772,12 @@ _cft_CompareSelected(playerid)
 
 _cft_CompareListToCraftSet(playerid, craftset)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CompareListToCraftSet]");
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CompareListToCraftSet] player %d craftset %d", playerid, craftset);
 
 	for(new i; i < cft_ItemCount[craftset]; i++)
 	{
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CompareListToCraftSet] Item type in %d/%d craftset: %d, player selected: %d", i, cft_ItemCount[craftset], cft_Ingredients[craftset][i][cft_itemType], cft_SelectedItems[playerid][i][cft_selectedItemType]);
+
 		if(cft_Ingredients[craftset][i][cft_itemType] != cft_SelectedItems[playerid][i][cft_selectedItemType])
 			return 0;
 	}
