@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 3.1.0
+	Module Version: 3.2.0
 
 
 	SIF/Overview
@@ -2174,7 +2174,10 @@ internal_OnPlayerUseItem(playerid, itemid)
 	new buttonid = GetPlayerButtonID(playerid);
 
 	if(buttonid != -1)
-		return CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, buttonid, itm_Holding[playerid]);
+	{
+		if(CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, buttonid, itm_Holding[playerid]))
+			return 1;
+	}
 
 	return CallLocalFunction("OnPlayerUseItem", "dd", playerid, itemid);
 }
