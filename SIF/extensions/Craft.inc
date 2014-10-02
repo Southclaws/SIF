@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.1.3
+	Module Version: 2.0.0
 
 
 	SIF/Overview
@@ -45,24 +45,80 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Craft/Core
 		native -
 
-		native DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnitem1, returnitem2)
+		native DefineItemCraftSet(ItemType:result, {ItemType, _}:...)
 		{
 			Description:
 				Adds a new combination "recipe" to the index.
 
 			Parameters:
-				<item1> (int, ItemType)
-					One of the two item types required for the combination.
-
-				<item2> (int, ItemType)
-					The other item type.
-
 				<result> (int, ItemType)
-					The type of the resulting item from the combination.
+					The resulting itemtype that will be produced by completing
+					this crafting combination. This can also be set to
+					INVALID_ITEM_TYPE if you want to merely trigger a callback
+					by a player crafting something and execute code.
+
+				<variable arguments>
+
+					<itemtype> (int, ItemType)
+						One ingredient of the crafting recipe.
+
+					<keepitem> (boolean)
+						When true, the item won't be deleted after crafting.
 
 			Returns:
 				-1
 					If the item combination index is full.
+
+				Prints an error if the variable arguments are invalid.
+		}
+	}
+
+	SIF/Inventory/Events
+	{
+		Events called by player actions done by using features from this script.
+
+		native -
+		native - SIF/Inventory/Callbacks
+		native -
+
+		native OnPlayerCraft(playerid, craftset)
+		{
+			Called:
+				When a player completes a crafting combination but before any
+				items are destroyed or created. Can be used to cancel the
+				action. Note: this is never called if the resulting item won't
+				fit into the target location.
+
+			Parameters:
+				<playerid> (int, playerid)
+					The player who completed the crafting combination.
+
+				<craftset> (int, craftset ID)
+					The craftset the player completed. Can be used to get data.
+
+			Returns:
+				1
+					To cancel the action. Prevents ingredients from being used
+					and the result item from being created.
+		}
+
+		native OnPlayerCrafted(playerid, craftset)
+		{
+			Called:
+				After a player completed a crafting combination and all changes
+				to their inventory or container have been committed. Note: this
+				is never called if the resulting item won't fit into the target
+				location.
+
+			Parameters:
+				<playerid> (int, playerid)
+					The player who completed the crafting combination.
+
+				<craftset> (int, craftset ID)
+					The craftset the player completed. Can be used to get data.
+
+			Returns:
+				-
 		}
 	}
 
@@ -71,11 +127,169 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Internal events called by player actions done by using features from
 		this script.
 	
-		GetItemComboResult(ItemType:item1, ItemType:item, &retitem1, &retitem)
+	}
+
+	SIF/Craft/Interface Functions
+	{
+		Functions to get or set data values in this script without editing
+		the data directly. These include automatic ID validation checks.
+
+		native -
+		native - SIF/Craft/Interface
+		native -
+
+		native GetCraftSetIngredients(craftset, ItemType:output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data])
 		{
 			Description:
-				Returns the result of two items combined. Returns
-				INVALID_ITEM_TYPE if there is no combination.
+				Returns a list (of the structure e_craft_item_data) containing
+				itemtypes for the specified crafting set.
+
+			Parameters:
+				-
+
+			Returns:
+				-1
+					If the specified craftset is invalid.
+		}
+
+		native ItemType:GetCraftSetItemType(craftset, index)
+		{
+			Description:
+				Returns an item type for a specific index in a craftset.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetCraftSetItemKeep(craftset, index)
+		{
+			Description:
+				Returns an item keep state for a specific index in a craftset.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetCraftSetItemCount(craftset)
+		{
+			Description:
+				Returns the amount of ingredients in a craftset.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native ItemType:GetCraftSetResult(craftset)
+		{
+			Description:
+				Returns the itemtype the specified craftset produces.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetCraftSetTotal()
+		{
+			Description:
+				Returns the total amount of craftsets.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetPlayerSelectedCraftItems(playerid, output[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data])
+		{
+			Description:
+				Returns a list (of the structure e_selected_item_data)
+				containing the items that a player has selected to combine. This
+				only returns data while the player is still combining and has
+				not produced the result item yet. It works in OnPlayerCraft and
+				OnPlayerCrafted but outside of these callbacks it's not useful.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native ItemType:GetPlayerSelectedCraftItemType(playerid, index)
+		{
+			Description:
+				Returns an item type for a specific index in a player's selected
+				craft items. Like GetPlayerSelectedCraftItems, this is only
+				really useful inside OnPlayerCraft and OnPlayerCrafted.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetPlayerSelectedCraftItemID(playerid, index)
+		{
+			Description:
+				Returns an item ID for a specific index in a player's selected
+				craft items. Like GetPlayerSelectedCraftItems, this is only
+				really useful inside OnPlayerCraft and OnPlayerCrafted.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetPlayerSelectedCraftItemCount(playerid)
+		{
+			Description:
+				Returns the amount of items a player has selected to craft. Like
+				GetPlayerSelectedCraftItems, this is only really useful inside
+				OnPlayerCraft and OnPlayerCrafted.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native GetPlayerCraftEnvironment(playerid)
+		{
+			Description:
+				Returns the environment a player is crafting in. This will
+				either be none, an inventory or a container. Like
+				GetPlayerSelectedCraftItems, this is only really useful inside
+				OnPlayerCraft and OnPlayerCrafted.
+
+			Parameters:
+				-
+
+			Returns:
+				CRAFT_ENVIRONMENT_NONE
+					If the player isn't currently crafting anything.
+
+				CRAFT_ENVIRONMENT_INVENTORY
+					If the player is crafting in their inventory.
+
+				CRAFT_ENVIRONMENT_CONTAINER
+					If the player is crafting inside a container.
 		}
 	}
 
@@ -93,7 +307,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		SIF/Inventory/OnPlayerSelectInventoryOpt
 		{
 			Reason:
-				To give functionality to the "Combine" option.
+				To give functionality to the "Combine" inventory option.
+		}
+
+		SIF/Container/OnPlayerViewInventoryOpt
+		{
+			Reason:
+				To add a "Combine" option to the player's container options.
+		}
+
+		SIF/Container/OnPlayerSelectInventoryOpt
+		{
+			Reason:
+				To give functionality to the "Combine" container option.
 		}
 	}
 
@@ -116,28 +342,75 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 ==============================================================================*/
 
 
+#if !defined CFT_MAX_CRAFT_SET
+	#define CFT_MAX_CRAFT_SET (64)
+#endif
 
-#define CFT_MAX_COMBO (64)
+#if !defined CFT_MAX_CRAFT_SET_ITEMS
+	#define CFT_MAX_CRAFT_SET_ITEMS (8)
+#endif
 
 
-enum E_CRAFT_COMBO_DATA
+enum
 {
-ItemType:	cft_item1,
-ItemType:	cft_item2,
-ItemType:	cft_result,
-			cft_retItem1,
-			cft_retItem2
+	CRAFT_ENVIRONMENT_NONE,
+	CRAFT_ENVIRONMENT_INVENTORY,
+	CRAFT_ENVIRONMENT_CONTAINER
+}
+
+enum e_craft_item_data
+{
+ItemType:	cft_itemType,
+bool:		cft_keepItem
+}
+
+enum e_selected_item_data
+{
+ItemType:	cft_selectedItemType,
+			cft_selectedItemID
 }
 
 
 static 
-			cft_Data[CFT_MAX_COMBO][E_CRAFT_COMBO_DATA],
-Iterator:	cft_Index<CFT_MAX_COMBO>;
+			cft_Ingredients[CFT_MAX_CRAFT_SET][CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data],
+			cft_ItemCount[CFT_MAX_CRAFT_SET],
+ItemType:	cft_Result[CFT_MAX_CRAFT_SET],
+			cft_Total;
 
 static
-			cft_ListType[MAX_PLAYERS],
-			cft_SelectedInvSlot[MAX_PLAYERS],
-			cft_InventoryOptionID[MAX_PLAYERS];
+			cft_SelectedItems[MAX_PLAYERS][CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data],
+			cft_SelectedItemCount[MAX_PLAYERS],
+			cft_SelectedSlot[MAX_PLAYERS],
+			cft_SelectionEnvironment[MAX_PLAYERS],
+			cft_MenuOptionID[MAX_PLAYERS];
+
+
+forward OnPlayerCraft(playerid, craftset);
+forward OnPlayerCrafted(playerid, craftset);
+
+
+static CRAFT_DEBUG = -1;
+
+
+
+
+/*==============================================================================
+
+	Zeroing
+
+==============================================================================*/
+
+
+hook OnScriptInit()
+{
+	CRAFT_DEBUG = sif_debug_register_handler("SIF/extensions/Craft", SIF_DEBUG_LEVEL_INTERNAL);
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CRAFT_DEBUG("[OnScriptInit]");
+}
+
+hook OnPlayerConnect(playerid)
+{
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CRAFT_DEBUG("[OnPlayerConnect]");
+}
 
 
 /*==============================================================================
@@ -147,22 +420,34 @@ static
 ==============================================================================*/
 
 
-stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnitem1 = 0, returnitem2 = 0)
+stock DefineItemCraftSet(ItemType:result, {ItemType, _}:...)
 {
-	new id = Iter_Free(cft_Index);
-	if(id == -1)
+	if(cft_Total >= CFT_MAX_CRAFT_SET)
 		return -1;
 
-	cft_Data[id][cft_item1] = item1;
-	cft_Data[id][cft_item2] = item2;
-	cft_Data[id][cft_result] = result;
-	cft_Data[id][cft_retItem1] = returnitem1;
-	cft_Data[id][cft_retItem2] = returnitem2;
+	new
+		args = numargs();
 
-	Iter_Add(cft_Index, id);
+	if(!(args & 1))
+	{
+		printf("ERROR: DefineItemCraftSet (for result item %d) has invalid parameter structure. Should be: result, (item, keep) * n", _:result);
+		return -1;
+	}
 
-	return id;
+	cft_Result[cft_Total] = result;
+
+	for(new i, j = 1; j < args; i++)
+	{
+		cft_Ingredients[cft_Total][i][cft_itemType] = ItemType:getarg(j++);
+		cft_Ingredients[cft_Total][i][cft_keepItem] = bool:getarg(j++);
+		cft_ItemCount[cft_Total]++;
+	}
+
+	_btn_SortCraftSet(cft_Ingredients[cft_Total], 0, cft_ItemCount[cft_Total]);
+
+	return cft_Total++;
 }
+
 
 /*==============================================================================
 
@@ -173,7 +458,31 @@ stock DefineItemCombo(ItemType:item1, ItemType:item2, ItemType:result, returnite
 
 public OnPlayerViewInventoryOpt(playerid)
 {
-	cft_InventoryOptionID[playerid] = AddInventoryOption(playerid, "Combine");
+	if(cft_SelectedItemCount[playerid] == 0)
+	{
+		cft_MenuOptionID[playerid] = AddInventoryOption(playerid, "Combine...");
+	}
+	else
+	{
+		new
+			string[128], // TODO: Improve option length
+			itemname[ITM_MAX_NAME];
+
+		string = "Combine with ";
+
+		for(new i; i < cft_SelectedItemCount[playerid]; i++)
+		{
+			GetItemTypeName(cft_SelectedItems[playerid][i][cft_selectedItemType], itemname);
+
+			if(i == 0)
+				format(string, sizeof(string), "%s%s", string, itemname);
+
+			else
+
+				format(string, sizeof(string), "%s+%s", string, itemname);
+		}
+		cft_MenuOptionID[playerid] = AddInventoryOption(playerid, string);
+	}
 
 	#if defined cft_OnPlayerViewInventoryOpt
 		return cft_OnPlayerViewInventoryOpt(playerid);
@@ -193,11 +502,15 @@ public OnPlayerViewInventoryOpt(playerid)
 
 public OnPlayerSelectInventoryOpt(playerid, option)
 {
-	if(option == cft_InventoryOptionID[playerid])
+	if(option == cft_MenuOptionID[playerid])
 	{
-		cft_SelectedInvSlot[playerid] = GetPlayerSelectedInventorySlot(playerid);
+		// Get selected item ID, store it.
+		// make the item yellow.
+		// If there are more than 1 items selected, perform craft table check.
+		_cft_AddItemToCraftList(playerid, cft_SelectedSlot[playerid] = GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid)));
+		cft_SelectionEnvironment[playerid] = CRAFT_ENVIRONMENT_INVENTORY;
 
-		DisplayCombineInventory(playerid, 0);
+		DisplayPlayerInventory(playerid);
 	}
 
 	#if defined cft_OnPlayerSelectInventoryOpt
@@ -218,7 +531,7 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 
 public OnPlayerViewContainerOpt(playerid, containerid)
 {
-	cft_InventoryOptionID[playerid] = AddContainerOption(playerid, "Combine");
+	cft_MenuOptionID[playerid] = AddContainerOption(playerid, "Combine");
 
 	#if defined cft_OnPlayerViewContainerOpt
 		return cft_OnPlayerViewContainerOpt(playerid, containerid);
@@ -236,11 +549,15 @@ public OnPlayerViewContainerOpt(playerid, containerid)
 
 public OnPlayerSelectContainerOpt(playerid, containerid, option)
 {
-	if(option == cft_InventoryOptionID[playerid])
+	if(option == cft_MenuOptionID[playerid])
 	{
-		cft_SelectedInvSlot[playerid] = GetPlayerContainerSlot(playerid);
+		// Get selected item ID, store it.
+		// make the item yellow.
+		// If there are more than 1 items selected, perform craft table check.
+		_cft_AddItemToCraftList(playerid, cft_SelectedSlot[playerid] = GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid)));
+		cft_SelectionEnvironment[playerid] = CRAFT_ENVIRONMENT_CONTAINER;
 
-		DisplayCombineInventory(playerid, 1);
+		DisplayContainerInventory(playerid, containerid);
 	}
 
 	#if defined cft_OnPlayerSelectContainerOpt
@@ -257,354 +574,388 @@ public OnPlayerSelectContainerOpt(playerid, containerid, option)
 	forward cft_OnPlayerSelectContainerOpt(playerid, containerid, option);
 #endif
 
-DisplayCombineInventory(playerid, listtype)
+public OnPlayerCloseInventory(playerid)
 {
-	new
-		list[INV_MAX_SLOTS * (ITM_MAX_NAME + 1)],
-		item[ITM_MAX_NAME];
-	
-	cft_ListType[playerid] = listtype;
+	_cft_ClearCraftList(playerid);
 
-	if(listtype == 0)
+	#if defined cft_OnPlayerCloseInventory
+		return cft_OnPlayerCloseInventory(playerid);
+	#else
+		return 1;
+	#endif
+}
+#if defined _ALS_OnPlayerCloseInventory
+	#undef OnPlayerCloseInventory
+#else
+	#define _ALS_OnPlayerCloseInventory
+#endif
+ 
+#define OnPlayerCloseInventory cft_OnPlayerCloseInventory
+#if defined cft_OnPlayerCloseInventory
+	forward cft_OnPlayerCloseInventory(playerid);
+#endif
+
+public OnPlayerCloseContainer(playerid, containerid)
+{
+	_cft_ClearCraftList(playerid);
+
+	#if defined cft_OnPlayerCloseContainer
+		return cft_OnPlayerCloseContainer(playerid, containerid);
+	#else
+		return 1;
+	#endif
+}
+#if defined _ALS_OnPlayerCloseContainer
+	#undef OnPlayerCloseContainer
+#else
+	#define _ALS_OnPlayerCloseContainer
+#endif
+ 
+#define OnPlayerCloseContainer cft_OnPlayerCloseContainer
+#if defined cft_OnPlayerCloseContainer
+	forward cft_OnPlayerCloseContainer(playerid, containerid);
+#endif
+
+_cft_AddItemToCraftList(playerid, itemid)
+{
+	new itemname[ITM_MAX_NAME];
+	GetItemTypeName(GetItemType(itemid), itemname);
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_AddItemToCraftList] %d added %d (type %d, %s)", playerid, itemid, _:GetItemType(itemid), itemname);
+
+	cft_SelectedItems[playerid][cft_SelectedItemCount[playerid]][cft_selectedItemType] = GetItemType(itemid);
+	cft_SelectedItems[playerid][cft_SelectedItemCount[playerid]][cft_selectedItemID] = itemid;
+	cft_SelectedItemCount[playerid]++;
+
+	if(cft_SelectedItemCount[playerid] >= 2)
 	{
-		for(new i; i < INV_MAX_SLOTS; i++)
-		{
-			if(!IsValidItem(GetInventorySlotItem(playerid, i)))
-				strcat(list, "<Empty>\n");
+		new craftset = _cft_CompareSelected(playerid);
 
-			else
+		if(craftset != -1)
+			_cft_CraftSelected(playerid, craftset);
+
+		else
+			SendClientMessage(playerid, -1, "That combination doesn't seem to work... Try adding more items or close the menu to cancel.");
+	}
+
+	return 1;
+}
+
+_cft_ClearCraftList(playerid)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_ClearCraftList] Clearing craft list for %d", playerid);
+
+	cft_SelectionEnvironment[playerid] = CRAFT_ENVIRONMENT_NONE;
+	cft_SelectedItemCount[playerid] = 0;
+}
+
+_cft_CraftSelected(playerid, craftset)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] %d crafting set %d", playerid, craftset);
+
+	new
+		resultslots = GetItemTypeSize(cft_Result[craftset]),
+		totalslots,
+		freeslots;
+
+	for(new i; i < cft_ItemCount[craftset]; i++)
+	{
+		if(!cft_Ingredients[craftset][i][cft_keepItem])
+			resultslots -= GetItemTypeSize(cft_Ingredients[craftset][i][cft_itemType]);
+	}
+
+	if(cft_SelectionEnvironment[playerid] == CRAFT_ENVIRONMENT_INVENTORY)
+	{
+		freeslots = GetInventoryFreeSlots(playerid);
+		totalslots = GetPlayerInventorySize(playerid);
+
+		if(freeslots + resultslots > totalslots)
+			return 0;
+
+		if(CallLocalFunction("OnPlayerCraft", "dd", playerid, craftset))
+			return 0;
+
+		for(new i; i < cft_ItemCount[craftset]; i++)
+		{
+			if(!cft_Ingredients[craftset][i][cft_keepItem])
 			{
-				GetItemName(GetInventorySlotItem(playerid, i), item);
-				strcat(list, item);
-				strcat(list, "\n");
+				RemoveItemFromInventory(playerid, GetItemPlayerInventorySlot(cft_SelectedItems[playerid][i][cft_selectedItemID]), 0);
+				DestroyItem(cft_SelectedItems[playerid][i][cft_selectedItemID]);
 			}
 		}
+
+		new itemid = CreateItem(cft_Result[craftset]);
+		AddItemToInventory(playerid, itemid, false);
+
+		CallLocalFunction("OnPlayerCrafted", "dd", playerid, craftset);
 	}
 	else
 	{
 		new containerid = GetPlayerCurrentContainer(playerid);
 
-		for(new i, j = GetContainerSize(containerid); i < j; i++)
-		{
-			if(!IsValidItem(GetContainerSlotItem(containerid, i)))
-				strcat(list, "<Empty>\n");
+		freeslots = GetContainerFreeSlots(containerid);
+		totalslots = GetContainerSize(containerid);
 
-			else
+		if(freeslots + resultslots > totalslots)
+			return 0;
+
+		if(CallLocalFunction("OnPlayerCraft", "dd", playerid, craftset))
+			return 0;
+
+		for(new i; i < cft_ItemCount[craftset]; i++)
+		{
+			if(!cft_Ingredients[craftset][i][cft_keepItem])
 			{
-				GetItemName(GetContainerSlotItem(containerid, i), item);
-				strcat(list, item);
-				strcat(list, "\n");
+				RemoveItemFromContainer(playerid, GetItemContainerSlot(cft_SelectedItems[playerid][i][cft_selectedItemID]), _, 0);
+				DestroyItem(cft_SelectedItems[playerid][i][cft_selectedItemID]);
 			}
 		}
+
+		new itemid = CreateItem(cft_Result[craftset]);
+		AddItemToContainer(containerid, itemid);
+
+		CallLocalFunction("OnPlayerCrafted", "dd", playerid, craftset);
 	}
 
-	inline Response(pid, dialogid, response, listitem, string:inputtext[])
-	{
-		#pragma unused pid, dialogid, inputtext
+	new
+		str[8 + ITM_MAX_NAME],
+		itemname[ITM_MAX_NAME];
 
-		if(cft_ListType[playerid] == 0)
-		{
-			if(!response)
-			{
-				DisplayPlayerInventory(playerid);
-				return 1;
-			}
+	GetItemTypeName(cft_Result[craftset], itemname);
+	format(str, sizeof(str), "Crafted %s", itemname);
+	ShowActionText(playerid, str, 3000);
 
-			// If the player picks the same inventory item as the one he is trying to combine
-			// Or if they pick an empty slot, re-render the dialog.
-			// You can't combine something with itself or nothing, that's like dividing by zero!
-
-			if(listitem == GetPlayerSelectedInventorySlot(playerid) || !IsInventorySlotUsed(playerid, listitem))
-			{
-				DisplayCombineInventory(playerid, 0);
-				return 1;
-			}
-
-			// Get the item combination result, AKA the item that the two items will create.
-
-			new
-				retitem1,
-				retitem2,
-				result,
-				ItemType:itemtype,
-				itemslot1,
-				itemslot2;
-
-			result = GetItemComboResult(
-				GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))),
-				GetItemType(GetInventorySlotItem(playerid, listitem)));
-
-			if(result == -1)
-			{
-				DisplayCombineInventory(playerid, 0);
-				return 0;
-			}
-
-			if(cft_Data[result][cft_result] == GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))))
-			{
-				new
-					itemid1,
-					itemid2,
-					exdata1,
-					exdata2;
-
-				itemid1 = GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid)),
-				itemid2 = GetInventorySlotItem(playerid, listitem);
-				exdata1 = GetItemExtraData(itemid1),
-				exdata2 = GetItemExtraData(itemid2);
-
-				SetItemExtraData(itemid1, exdata1 + exdata2);
-
-				DestroyItem(itemid2);
-				RemoveItemFromInventory(playerid, listitem);
-				DisplayPlayerInventory(playerid);
-
-				return 1;
-			}
-
-			itemtype = cft_Data[result][cft_result];
-			retitem1 = cft_Data[result][cft_retItem1];
-			retitem2 = cft_Data[result][cft_retItem2];
-
-			if(!IsValidItemType(itemtype))
-			{
-				DisplayCombineInventory(playerid, 0);
-				return 0;
-			}
-
-			if(retitem1 && retitem2)
-			{
-				if(GetInventoryFreeSlots(playerid) < 1)
-				{
-					ShowActionText(playerid, "Not enough free space", 3000);
-					DisplayCombineInventory(playerid, 0);
-					return 0;
-				}
-			}
-
-			if(WillItemTypeFitInInventory(playerid, itemtype))
-			{
-				ShowActionText(playerid, "Not enough free space", 3000);
-				DisplayCombineInventory(playerid, 0);
-				return 0;
-			}
-
-			if(GetItemType(GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid))) != cft_Data[result][cft_item1])
-			{
-				itemslot1 = GetPlayerSelectedInventorySlot(playerid);
-				itemslot2 = listitem;
-			}
-			else
-			{
-				itemslot1 = listitem;
-				itemslot2 = GetPlayerSelectedInventorySlot(playerid);
-			}
-
-			if(itemslot1 > itemslot2)
-			{
-				if(!retitem1)
-				{
-					DestroyItem(GetInventorySlotItem(playerid, itemslot1));
-					RemoveItemFromInventory(playerid, itemslot1);
-				}
-
-				if(!retitem2)
-				{
-					DestroyItem(GetInventorySlotItem(playerid, itemslot2));
-					RemoveItemFromInventory(playerid, itemslot2);
-				}
-			}
-			else
-			{
-				if(!retitem2)
-				{
-					DestroyItem(GetInventorySlotItem(playerid, itemslot2));
-					RemoveItemFromInventory(playerid, itemslot2);
-				}
-
-				if(!retitem1)
-				{
-					DestroyItem(GetInventorySlotItem(playerid, itemslot1));
-					RemoveItemFromInventory(playerid, itemslot1);
-				}
-			}
-
-			AddItemToInventory(playerid, CreateItem(itemtype, 0.0, 0.0, 0.0));
-
-			DisplayPlayerInventory(playerid);
-		}
-		else
-		{
-			new
-				containerid = GetPlayerCurrentContainer(playerid);
-
-			if(!response)
-			{
-				DisplayContainerInventory(playerid, containerid);
-				return 1;
-			}
-
-			if(listitem == GetPlayerContainerSlot(playerid) || !IsContainerSlotUsed(containerid, listitem))
-			{
-				DisplayCombineInventory(playerid, 1);
-				return 1;
-			}
-
-			new
-				retitem1,
-				retitem2,
-				result,
-				ItemType:itemtype,
-				itemslot1,
-				itemslot2;
-
-			result = GetItemComboResult(
-				GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))),
-				GetItemType(GetContainerSlotItem(containerid, listitem)));
-
-			if(result == -1)
-			{
-				DisplayCombineInventory(playerid, 1);
-				return 0;
-			}
-
-			if(cft_Data[result][cft_result] == GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))))
-			{
-				SetItemExtraData(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid)),
-					GetItemExtraData(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))) + 
-					GetItemExtraData(GetContainerSlotItem(containerid, listitem)));
-
-				DestroyItem(GetContainerSlotItem(containerid, listitem));
-				RemoveItemFromContainer(containerid, listitem);
-
-				return 1;
-			}
-
-			itemtype = cft_Data[result][cft_result];
-			retitem1 = cft_Data[result][cft_retItem1];
-			retitem2 = cft_Data[result][cft_retItem2];
-
-			if(!IsValidItemType(itemtype))
-			{
-				DisplayCombineInventory(playerid, 1);
-				return 0;
-			}
-
-			if(retitem1 && retitem2)
-			{
-				if(GetContainerFreeSlots(playerid) < 1)
-				{
-					ShowActionText(playerid, "Not enough free space", 3000);
-					DisplayCombineInventory(playerid, 1);
-					return 0;
-				}
-			}
-
-			if(!WillItemTypeFitInContainer(containerid, itemtype))
-			{
-				ShowActionText(playerid, "Result item won't fit", 3000);
-				DisplayCombineInventory(playerid, 1);
-				return 0;
-			}
-
-			if(GetItemType(GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid))) != cft_Data[result][cft_item1])
-			{
-				itemslot1 = GetPlayerContainerSlot(playerid);
-				itemslot2 = listitem;
-			}
-			else
-			{
-				itemslot1 = listitem;
-				itemslot2 = GetPlayerContainerSlot(playerid);
-			}
-
-			if(itemslot1 > itemslot2)
-			{
-				if(!retitem1)
-				{
-					new tmp = GetContainerSlotItem(containerid, itemslot1);
-					RemoveItemFromContainer(containerid, itemslot1);
-					DestroyItem(tmp);
-				}
-
-				if(!retitem2)
-				{
-					new tmp = GetContainerSlotItem(containerid, itemslot2);
-					RemoveItemFromContainer(containerid, itemslot2);
-					DestroyItem(tmp);
-				}
-			}
-			else
-			{
-				if(!retitem2)
-				{
-					new tmp = GetContainerSlotItem(containerid, itemslot2);
-					RemoveItemFromContainer(containerid, itemslot2);
-					DestroyItem(tmp);
-				}
-				if(!retitem1)
-				{
-					new tmp = GetContainerSlotItem(containerid, itemslot1);
-					RemoveItemFromContainer(containerid, itemslot1);
-					DestroyItem(tmp);
-				}
-			}
-
-			AddItemToContainer(containerid, CreateItem(itemtype, 0.0, 0.0, 0.0));
-
-			DisplayContainerInventory(playerid, containerid);
-		}
-	}
-	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, "Combine", list, "Combine", "Close");
+	_cft_ClearCraftList(playerid);
 
 	return 1;
 }
 
-GetItemComboResult(ItemType:item1, ItemType:item2)
+_cft_CompareSelected(playerid)
 {
-	// Loop through all "recipe" item combinations
-	// If a match is found, return that combo result.
-	foreach(new i : cft_Index)
-	{
-		if(cft_Data[i][cft_item1] == item1 && cft_Data[i][cft_item2] == item2)
-		{
-			return i;
-		}
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CompareSelected]");
 
-		if(cft_Data[i][cft_item2] == item1 && cft_Data[i][cft_item1] == item2)
-		{
+	_btn_SortSelectedItems(cft_SelectedItems[playerid], 0, cft_SelectedItemCount[playerid]);
+
+	for(new i; i < cft_Total; i++)
+	{
+		if(cft_ItemCount[i] != cft_SelectedItemCount[playerid])
+			continue;
+
+		if(_cft_CompareListToCraftSet(playerid, i))
 			return i;
-		}
 	}
 
 	return -1;
 }
 
-stock WriteAllCombosToFile()
+_cft_CompareListToCraftSet(playerid, craftset)
 {
-	new
-		File:file = fopen("itemcombos.txt", io_write),
-		item1[32],
-		item2[32],
-		result[32],
-		str[512];
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CompareListToCraftSet]");
 
-	fwrite(file, "{| border=\"1\" cellpadding=\"1\" cellspacing=\"1\" class=\"article-table\" style=\"width: 500px;\"\n\
-			|-\n\
-			! scope=\"col\"|Item 1\n\
-			! scope=\"col\"|Item 2\n\
-			! scope=\"col\"|Result\n\
-			|-\n");
-
-	foreach(new i : cft_Index)
+	for(new i; i < cft_ItemCount[craftset]; i++)
 	{
-		GetItemTypeName(cft_Data[i][cft_item1], item1);
-		GetItemTypeName(cft_Data[i][cft_item2], item2);
-		GetItemTypeName(cft_Data[i][cft_result], result);
-
-		format(str, 512, "|[[%s]]\n|[[%s]]\n|[[%s]]\n|-\n", item1, item2, result);
-		fwrite(file, str);
+		if(cft_Ingredients[craftset][i][cft_itemType] != cft_SelectedItems[playerid][i][cft_selectedItemType])
+			return 0;
 	}
 
-	fclose(file);
+	return 1;
+}
+
+_btn_SortCraftSet(array[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data], left, right)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_btn_SortCraftSet]");
+
+	new
+		tmp_left = left,
+		tmp_right = right,
+		ItemType:pivot = array[(left + right) / 2][cft_itemType],
+		ItemType:itemtype,
+		bool:keepitem;
+
+	while(tmp_left <= tmp_right)
+	{
+		while(array[tmp_left][cft_itemType] > pivot)
+			tmp_left++;
+
+		while(array[tmp_right][cft_itemType] < pivot)
+			tmp_right--;
+
+		if(tmp_left <= tmp_right)
+		{
+			itemtype = array[tmp_left][cft_itemType];
+			array[tmp_left][cft_itemType] = array[tmp_right][cft_itemType];
+			array[tmp_right][cft_itemType] = itemtype;
+
+			keepitem = array[tmp_left][cft_keepItem];
+			array[tmp_left][cft_keepItem] = array[tmp_right][cft_keepItem];
+			array[tmp_right][cft_keepItem] = keepitem;
+
+			tmp_left++;
+			tmp_right--;
+		}
+	}
+
+	if(left < tmp_right)
+		_btn_SortCraftSet(array, left, tmp_right);
+
+	if(tmp_left < right)
+		_btn_SortCraftSet(array, tmp_left, right);
+}
+
+_btn_SortSelectedItems(array[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data], left, right)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_btn_SortSelectedItems]");
+
+	new
+		tmp_left = left,
+		tmp_right = right,
+		ItemType:pivot = array[(left + right) / 2][cft_selectedItemType],
+		ItemType:itemtype,
+		itemid;
+
+	while(tmp_left <= tmp_right)
+	{
+		while(array[tmp_left][cft_selectedItemType] > pivot)
+			tmp_left++;
+
+		while(array[tmp_right][cft_selectedItemType] < pivot)
+			tmp_right--;
+
+		if(tmp_left <= tmp_right)
+		{
+			itemtype = array[tmp_left][cft_selectedItemType];
+			array[tmp_left][cft_selectedItemType] = array[tmp_right][cft_selectedItemType];
+			array[tmp_right][cft_selectedItemType] = itemtype;
+
+			itemid = array[tmp_left][cft_selectedItemID];
+			array[tmp_left][cft_selectedItemID] = array[tmp_right][cft_selectedItemID];
+			array[tmp_right][cft_selectedItemID] = itemid;
+
+			tmp_left++;
+			tmp_right--;
+		}
+	}
+
+	if(left < tmp_right)
+		_btn_SortSelectedItems(array, left, tmp_right);
+
+	if(tmp_left < right)
+		_btn_SortSelectedItems(array, tmp_left, right);
+}
+
+
+/*==============================================================================
+
+	Interface
+
+==============================================================================*/
+
+
+// cft_Ingredients
+stock GetCraftSetIngredients(craftset, ItemType:output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data])
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	output = cft_Ingredients[craftset];
+
+	return 1;
+}
+
+// cft_Ingredients/cft_itemType
+stock ItemType:GetCraftSetItemType(craftset, index)
+{
+	if(!(0 <= craftset < cft_Total))
+		return INVALID_ITEM_TYPE;
+
+	if(!(0 <= index < cft_ItemCount[craftset]))
+		return INVALID_ITEM_TYPE;
+
+	return cft_Ingredients[craftset][index][cft_itemType];
+}
+
+// cft_Ingredients/cft_keepItem
+stock GetCraftSetItemKeep(craftset, index)
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	if(!(0 <= index < cft_ItemCount[craftset]))
+		return 0;
+
+	return cft_Ingredients[craftset][index][cft_keepItem];
+}
+
+// cft_ItemCount
+stock GetCraftSetItemCount(craftset)
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	return cft_ItemCount[craftset];
+}
+
+// cft_Result
+stock ItemType:GetCraftSetResult(craftset)
+{
+	if(!(0 <= craftset < cft_Total))
+		return INVALID_ITEM_TYPE;
+
+	return cft_Result[craftset];
+}
+
+// cft_Total
+stock GetCraftSetTotal()
+	return cft_Total;
+
+// cft_SelectedItems
+stock GetPlayerSelectedCraftItems(playerid, output[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data])
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	output = cft_SelectedItems[playerid];
+
+	return 1;
+}
+
+// cft_SelectedItems/cft_selectedItemType
+stock ItemType:GetPlayerSelectedCraftItemType(playerid, index)
+{
+	if(!IsPlayerConnected(playerid))
+		return INVALID_ITEM_TYPE;
+
+	if(!(0 <= index < cft_ItemCount[playerid]))
+		return INVALID_ITEM_TYPE;
+
+	return cft_SelectedItems[playerid][index][cft_selectedItemType];
+}
+
+// cft_SelectedItems/cft_selectedItemID
+stock GetPlayerSelectedCraftItemID(playerid, index)
+{
+	if(!IsPlayerConnected(playerid))
+		return INVALID_ITEM_ID;
+
+	if(!(0 <= index < cft_ItemCount[playerid]))
+		return INVALID_ITEM_ID;
+
+	return cft_SelectedItems[playerid][index][cft_selectedItemID];
+}
+
+// cft_SelectedItemCount
+stock GetPlayerSelectedCraftItemCount(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return cft_SelectedItemCount[playerid];
+}
+
+// cft_SelectionEnvironment
+stock GetPlayerCraftEnvironment(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return cft_SelectionEnvironment[playerid];
 }
