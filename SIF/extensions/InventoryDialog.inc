@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.3.0
+	Module Version: 1.3.1
 
 
 	SIF/Overview
@@ -134,41 +134,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				(none)
 
-		}
-
-		native OnPlayerAddToInventory(playerid, itemid);
-		{
-			Called:
-				When a player adds an item to his inventory by pressing Y.
-
-			Parameters:
-				<playerid> (int)
-					The player who added an item to his inventory.
-
-				<itemid> (int, itemid)
-					The ID handle of the item that was added.
-
-			Returns:
-				1
-					To cancel the action and disallow the player to add the
-					item to his inventory.
-		}
-
-		native OnPlayerAddedToInventory(playerid, itemid);
-		{
-			Called:
-				After a player has added an item to their inventory and the
-				inventory index has been updated with the new item.
-
-			Parameters:
-				<playerid> (int)
-					The player who added an item to his inventory.
-
-				<itemid> (int, itemid)
-					The ID handle of the item that was added.
-
-			Returns:
-				(none)
 		}
 
 		native OnPlayerViewInventoryOpt(playerid);
@@ -421,10 +386,8 @@ static
 forward OnPlayerOpenInventory(playerid);
 forward OnPlayerCloseInventory(playerid);
 forward OnPlayerSelectExtraItem(playerid, item);
-forward OnPlayerAddToInventory(playerid, itemid);
-forward OnPlayerAddedToInventory(playerid, itemid);
-forward OnPlayerRemoveFromInventory(playerid, slotid);
-forward OnPlayerRemovedFromInventory(playerid, slotid);
+forward OnPlayerRemoveFromInventory(playerid, slotid); // TODO
+forward OnPlayerRemovedFromInventory(playerid, slotid); // TODO
 forward OnPlayerViewInventoryOpt(playerid);
 forward OnPlayerSelectInventoryOpt(playerid, option);
 
@@ -566,17 +529,6 @@ stock ClosePlayerInventory(playerid, call = false)
 
 ==============================================================================*/
 
-
-hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
-{
-	if(!IsPlayerInAnyVehicle(playerid))
-	{
-		if(newkeys & KEY_CTRL_BACK)
-			DisplayPlayerInventory(playerid);
-	}
-
-	return 1;
-}
 
 DisplayPlayerInventoryOptions(playerid, slotid)
 {

@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.1.1
+	Module Version: 1.1.2
 
 
 	SIF/Overview
@@ -61,17 +61,41 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/FILENAME/Callbacks
 		native -
 
-		native Func(params)
+		native OnPlayerAddToInventory(playerid, itemid);
 		{
 			Called:
-				-
+				When a player adds an item to his inventory by pressing Y.
 
 			Parameters:
-				-
+				<playerid> (int)
+					The player who added an item to his inventory.
+
+				<itemid> (int, itemid)
+					The ID handle of the item that was added.
 
 			Returns:
-				-
+				1
+					To cancel the action and disallow the player to add the
+					item to his inventory.
 		}
+
+		native OnPlayerAddedToInventory(playerid, itemid);
+		{
+			Called:
+				After a player has added an item to their inventory and the
+				inventory index has been updated with the new item.
+
+			Parameters:
+				<playerid> (int)
+					The player who added an item to his inventory.
+
+				<itemid> (int, itemid)
+					The ID handle of the item that was added.
+
+			Returns:
+				(none)
+		}
+
 	}
 
 	SIF/FILENAME/Interface Functions
@@ -144,6 +168,10 @@ static
 Timer:	inv_PutAwayTimer			[MAX_PLAYERS];
 
 
+forward OnPlayerAddToInventory(playerid, itemid);
+forward OnPlayerAddedToInventory(playerid, itemid);
+
+
 /*==============================================================================
 
 	Zeroing
@@ -169,38 +197,56 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
 	if(!IsPlayerInAnyVehicle(playerid))
 	{
+		if(newkeys & KEY_CTRL_BACK)
+		{
+			DisplayPlayerInventory(playerid);
+		}
+
 		if(newkeys & KEY_YES)
 		{
-			if(tickcount() - inv_PutAwayTick[playerid] < 1000)
-				return 0;
-
-			inv_PutAwayTick[playerid] = tickcount();
-
-			new itemid = GetPlayerItem(playerid);
-
-			if(IsValidItem(itemid))
-			{
-				if(!WillItemTypeFitInInventory(playerid, GetItemType(itemid)))
-				{
-					ShowActionText(playerid, "Inventory full", 3000, 100);
-				}
-				else
-				{
-					ShowActionText(playerid, "Item added to inventory", 3000, 150);
-					ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
-					stop inv_PutAwayTimer[playerid];
-					inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
-				}
-			}
+			_HandlePutItemAway(playerid);
 		}
 	}
 
 	return 1;
 }
 
+_HandlePutItemAway(playerid)
+{
+	if(tickcount() - inv_PutAwayTick[playerid] < 1000)
+		return;
+
+	new itemid = GetPlayerItem(playerid);
+
+	if(!IsValidItem(itemid))
+		return;
+
+	new
+		itemsize = GetItemTypeSize(GetItemType(itemid)),
+		freeslots = GetInventoryFreeSlots(playerid);
+
+	if(itemsize > freeslots)
+	{
+		ShowActionText(playerid, sprintf("An extra %d slots is required", itemsize - freeslots), 3000, 150);
+		return;
+	}
+
+	if(CallLocalFunction("OnPlayerAddToInventory", "dd", playerid, itemid))
+		return;
+
+	inv_PutAwayTick[playerid] = tickcount();
+
+	ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
+	stop inv_PutAwayTimer[playerid];
+	inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
+
+	return;
+}
+
 timer PlayerPutItemInInventory[300](playerid, itemid)
 {
 	AddItemToInventory(playerid, itemid);
+	CallLocalFunction("OnPlayerAddedToInventory", "dd", playerid, itemid);
 }
 
 

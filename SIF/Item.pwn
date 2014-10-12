@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 3.2.0
+	Module Version: 3.2.1
 
 
 	SIF/Overview
@@ -1399,6 +1399,7 @@ Iterator:	itm_WorldIndex<ITM_MAX>,
 
 static
 			itm_TypeData		[ITM_MAX_TYPES][E_ITEM_TYPE_DATA],
+			itm_TypeCount		[ITM_MAX_TYPES],
 			itm_TypeTotal;
 
 static
@@ -1500,6 +1501,7 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	Iter_Add(itm_Index, id);
 
 	itm_Data[id][itm_type] = type;
+	itm_TypeCount[type]++;
 
 	CallLocalFunction("OnItemCreate", "d", id);
 
@@ -1545,6 +1547,8 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 			itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
 		}
 	}
+
+	itm_TypeCount[itm_Data[itemid][itm_type]]--;
 
 	itm_Data[itemid][itm_objId] = -1;
 	itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
@@ -2448,6 +2452,16 @@ stock SetItemLabel(itemid, text[], colour = 0xFFFF00FF, Float:range = 10.0)
 	SetButtonLabel(itm_Data[itemid][itm_button], text, colour, range);
 
 	return 1;
+}
+
+stock GetItemTypeCount(ItemType:itemtype)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeCount]");
+
+	if(!IsValidItemType(itemtype))
+		return 0;
+
+	return itm_TypeCount[itemtype];
 }
 
 // itm_type

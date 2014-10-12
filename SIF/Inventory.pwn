@@ -66,7 +66,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					The ID handle of the item to add.
 
 				<call>
-					Determines whether or not to call OnPlayerAddToInventory.
+					Determines whether or not to call OnItemAddToInventory.
 
 			Returns:
 				0
