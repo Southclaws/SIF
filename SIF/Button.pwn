@@ -996,7 +996,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 			foreach(new i : btn_CurrentlyNearIndex[playerid])
 			{
-				if(index >= BTN_MAX_INRANGE)
+				if(index >= BTN_MAX_INRANGE - 1)
 					break;
 
 				id = btn_CurrentlyNear[playerid][i];
