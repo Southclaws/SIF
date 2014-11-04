@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.4.4
+	Module Version: 1.4.5
 
 
 	SIF/Overview
@@ -66,7 +66,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Container/Core
 		native -
 
-		native CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0, max_med = -1, max_large = -1, max_carry = -1)
+		native CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0)
 		{
 			Description:
 				Creates a container to store items in, can be specified as
@@ -101,15 +101,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					the container won't be directly accessibly in the game world
 					by players, the only way to access the container would be
 					through the function DisplayContainerInventory.
-
-				<max_med> (int)
-					The limit for medium sized items.
-
-				<max_large> (int)
-					The limit for large items.
-
-				<max_carry> (int)
-					The limit for carry-only items.
 
 			Returns:
 				(int, containerid)
@@ -612,7 +603,6 @@ Float:		cnt_posX,
 Float:		cnt_posY,
 Float:		cnt_posZ,
 			cnt_size,
-			cnt_maxOfSize[3],
 			cnt_world,
 			cnt_interior
 }
@@ -633,6 +623,23 @@ forward OnItemRemoveFromContainer(containerid, slotid, playerid);
 forward OnItemRemovedFromContainer(containerid, slotid, playerid);
 
 
+static CNT_DEBUG = -1;
+
+
+/*==============================================================================
+
+	Zeroing
+
+==============================================================================*/
+
+
+hook OnScriptInit()
+{
+	CNT_DEBUG = sif_debug_register_handler("SIF/Container");
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnScriptInit]");
+}
+
+
 /*==============================================================================
 
 	Core Functions
@@ -640,10 +647,9 @@ forward OnItemRemovedFromContainer(containerid, slotid, playerid);
 ==============================================================================*/
 
 
-stock CreateContainer(name[], size,
-	Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0,
-	max_med = -1, max_large = -1, max_carry = -1)
+stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[CreateContainer] '%s' %d %f %f %f %d %d %d %d", name, size, x, y, z, world, interior, label, virtual);
 	new id = Iter_Free(cnt_Index);
 
 	if(id == -1)
@@ -669,9 +675,6 @@ stock CreateContainer(name[], size,
 	cnt_Data[id][cnt_posY]			= y;
 	cnt_Data[id][cnt_posZ]			= z;
 	cnt_Data[id][cnt_size]			= size;
-	cnt_Data[id][cnt_maxOfSize][0]	= max_med;
-	cnt_Data[id][cnt_maxOfSize][1]	= max_large;
-	cnt_Data[id][cnt_maxOfSize][2]	= max_carry;
 	cnt_Data[id][cnt_world]			= world;
 	cnt_Data[id][cnt_interior]		= interior;
 
@@ -685,6 +688,7 @@ stock CreateContainer(name[], size,
 
 stock DestroyContainer(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[DestroyContainer] %d", containerid);
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -720,14 +724,24 @@ stock DestroyContainer(containerid)
 
 stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[AddItemToContainer] %d %d %d", containerid, itemid, playerid);
 	if(!Iter_Contains(cnt_Index, containerid))
+	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[AddItemToContainer] ERROR: Invalid container ID");
 		return 0;
+	}
 
 	if(!IsValidItem(itemid))
+	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[AddItemToContainer] ERROR: Invalid item ID");
 		return 0;
+	}
 
 	if(CallLocalFunction("OnItemAddToContainer", "ddd", containerid, itemid, playerid))
+	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[AddItemToContainer] ERROR: OnItemAddToContainer event returned 1");
 		return 1;
+	}
 
 	new
 		slots,
@@ -735,15 +749,25 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 
 	while(idx < cnt_Data[containerid][cnt_size])
 	{
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:CNT_DEBUG("[AddItemToContainer] Looping %d/%d item: %d", idx, cnt_Data[containerid][cnt_size], cnt_Items[containerid][idx]);
 		if(!IsValidItem(cnt_Items[containerid][idx]))
 			break;
+
+		if(cnt_Items[containerid][idx] == itemid)
+		{
+			sif_d:SIF_DEBUG_LEVEL_LOOPS:CNT_DEBUG("[AddItemToContainer] ERROR: Item is already in container");
+			return -2;
+		}
 
 		slots += GetItemTypeSize(GetItemType(cnt_Items[containerid][idx]));
 		idx++;
 	}
 
 	if(slots + GetItemTypeSize(GetItemType(itemid)) > cnt_Data[containerid][cnt_size])
+	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[AddItemToContainer] ERROR: Item doesn't fit");
 		return -3;
+	}
 
 	cnt_Items[containerid][idx] = itemid;
 	cnt_ItemContainer[itemid] = containerid;
@@ -758,17 +782,21 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 
 stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID, call = 1)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[RemoveItemFromContainer] %d %d %d %d", containerid, slotid, playerid, call);
 	if(!(0 <= slotid < cnt_Data[containerid][cnt_size]))
 		return 0;
 
 	if(!IsValidItem(cnt_Items[containerid][slotid]))
 	{
-		if(cnt_Data[containerid][cnt_size] != INVALID_ITEM_ID)
+		if(cnt_Items[containerid][slotid] != INVALID_ITEM_ID)
 		{
-			cnt_Data[containerid][cnt_size] = INVALID_ITEM_ID;
+			sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[RemoveItemFromContainer] ERROR: Container slot is pointing to an invalid item.");
+			cnt_Items[containerid][slotid] = INVALID_ITEM_ID;
 
 			if(slotid < (cnt_Data[containerid][cnt_size] - 1))
 			{
+				sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[RemoveItemFromContainer] Shifting items down starting from %d.", slotid);
+
 				for(new i = slotid; i < (cnt_Data[containerid][cnt_size] - 1); i++)
 				    cnt_Items[containerid][i] = cnt_Items[containerid][i+1];
 
@@ -782,7 +810,10 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 	if(call)
 	{
 		if(CallLocalFunction("OnItemRemoveFromContainer", "ddd", containerid, slotid, playerid))
+		{
+			sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[RemoveItemFromContainer] ERROR: OnItemRemoveFromContainer returned 1");
 			return 1;
+		}
 	}
 
 	cnt_ItemContainer[cnt_Items[containerid][slotid]] = INVALID_CONTAINER_ID;
@@ -791,6 +822,7 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 
 	if(slotid < (cnt_Data[containerid][cnt_size] - 1))
 	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[RemoveItemFromContainer] Shifting items down starting from %d.", slotid);
 		for(new i = slotid; i < (cnt_Data[containerid][cnt_size] - 1); i++)
 		    cnt_Items[containerid][i] = cnt_Items[containerid][i+1];
 
@@ -813,6 +845,7 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 
 public OnItemDestroy(itemid)
 {
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemDestroy] %d", itemid);
 	cnt_ItemContainer[itemid] = INVALID_CONTAINER_ID;
 	cnt_ItemContainerSlot[itemid] = -1;
 
@@ -842,6 +875,8 @@ public OnItemDestroy(itemid)
 
 stock IsValidContainer(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[IsValidContainer] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -851,6 +886,8 @@ stock IsValidContainer(containerid)
 // cnt_button
 stock GetContainerButton(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerButton] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -860,6 +897,8 @@ stock GetContainerButton(containerid)
 // cnt_name
 stock GetContainerName(containerid, name[])
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerName] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -874,6 +913,8 @@ stock GetContainerName(containerid, name[])
 // cnt_posZ
 stock GetContainerPos(containerid, &Float:x, &Float:y, &Float:z)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerPos] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -885,6 +926,8 @@ stock GetContainerPos(containerid, &Float:x, &Float:y, &Float:z)
 }
 stock SetContainerPos(containerid, Float:x, Float:y, Float:z)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[SetContainerPos] %d %f %f %f", containerid, x, y, z);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -900,6 +943,8 @@ stock SetContainerPos(containerid, Float:x, Float:y, Float:z)
 // cnt_size
 stock GetContainerSize(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerSize] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return -1;
 
@@ -907,6 +952,8 @@ stock GetContainerSize(containerid)
 }
 stock SetContainerSize(containerid, size)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[SetContainerSize] %d %d", containerid, size);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -918,6 +965,8 @@ stock SetContainerSize(containerid, size)
 // cnt_world
 stock GetContainerWorld(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerWorld] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return -1;
 
@@ -925,6 +974,8 @@ stock GetContainerWorld(containerid)
 }
 stock SetContainerWorld(containerid, world)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[SetContainerWorld] %d %d", containerid, world);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -937,6 +988,8 @@ stock SetContainerWorld(containerid, world)
 // cnt_interior
 stock GetContainerInterior(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerInterior] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return -1;
 
@@ -944,6 +997,8 @@ stock GetContainerInterior(containerid)
 }
 stock SetContainerInterior(containerid, interior)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[SetContainerInterior] %d %d", containerid, interior);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -956,6 +1011,8 @@ stock SetContainerInterior(containerid, interior)
 // cnt_Items
 stock GetContainerSlotItem(containerid, slotid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerSlotItem] %d %d", containerid, slotid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return INVALID_ITEM_ID;
 
@@ -967,6 +1024,8 @@ stock GetContainerSlotItem(containerid, slotid)
 
 stock IsContainerSlotUsed(containerid, slotid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[IsContainerSlotUsed] %d %d", containerid, slotid);
+
 	if(!(0 <= slotid < CNT_MAX_SLOTS))
 		return -1;
 
@@ -978,6 +1037,8 @@ stock IsContainerSlotUsed(containerid, slotid)
 
 stock IsContainerFull(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[IsContainerFull] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -986,6 +1047,8 @@ stock IsContainerFull(containerid)
 
 stock IsContainerEmpty(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[IsContainerEmpty] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -994,6 +1057,8 @@ stock IsContainerEmpty(containerid)
 
 stock WillItemTypeFitInContainer(containerid, ItemType:itemtype)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[WillItemTypeFitInContainer] %d %d", containerid, _:itemtype);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -1018,6 +1083,8 @@ stock WillItemTypeFitInContainer(containerid, ItemType:itemtype)
 
 stock GetContainerFreeSlots(containerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerFreeSlots] %d", containerid);
+
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
@@ -1039,6 +1106,8 @@ stock GetContainerFreeSlots(containerid)
 
 stock GetItemContainer(itemid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetItemContainer] %d", itemid);
+
 	if(!IsValidItem(itemid))
 		return INVALID_CONTAINER_ID;
 
@@ -1047,6 +1116,8 @@ stock GetItemContainer(itemid)
 
 stock GetItemContainerSlot(itemid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetItemContainerSlot] %d", itemid);
+
 	if(!IsValidItem(itemid))
 		return INVALID_CONTAINER_ID;
 
@@ -1055,6 +1126,8 @@ stock GetItemContainerSlot(itemid)
 
 stock GetButtonContainer(buttonid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetButtonContainer] %d", buttonid);
+
 	if(!IsValidButton(buttonid))
 		return INVALID_CONTAINER_ID;
 

@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 2.3.3
+	Module Version: 2.3.4
 
 
 	SIF/Overview
@@ -460,6 +460,9 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 	{
 		if(!IsValidItem(inv_Data[playerid][idx]))
 			break;
+
+		if(inv_Data[playerid][idx] == itemid)
+			return -2;
 
 		slots += GetItemTypeSize(GetItemType(inv_Data[playerid][idx]));
 		idx++;
