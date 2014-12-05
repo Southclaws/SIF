@@ -1,4 +1,5 @@
 # SIF - Southclaw's Interaction Framework
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/Southclaw/SIF?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 SIF is a collection of high-level include scripts to make the development of
 interactive features easy for the developer while maintaining quality front-end
 gameplay for players.
