@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 2.0.0
+	Module Version: 2.0.1
 
 
 	SIF/Overview
@@ -700,10 +700,7 @@ _cft_CraftSelected(playerid, craftset)
 		for(new i; i < cft_ItemCount[craftset]; i++)
 		{
 			if(!cft_Ingredients[craftset][i][cft_keepItem])
-			{
-				RemoveItemFromInventory(playerid, GetItemPlayerInventorySlot(cft_SelectedItems[playerid][i][cft_selectedItemID]), 0);
 				DestroyItem(cft_SelectedItems[playerid][i][cft_selectedItemID]);
-			}
 		}
 
 		new itemid = CreateItem(cft_Result[craftset]);
@@ -727,10 +724,7 @@ _cft_CraftSelected(playerid, craftset)
 		for(new i; i < cft_ItemCount[craftset]; i++)
 		{
 			if(!cft_Ingredients[craftset][i][cft_keepItem])
-			{
-				RemoveItemFromContainer(playerid, GetItemContainerSlot(cft_SelectedItems[playerid][i][cft_selectedItemID]), _, 0);
 				DestroyItem(cft_SelectedItems[playerid][i][cft_selectedItemID]);
-			}
 		}
 
 		new itemid = CreateItem(cft_Result[craftset]);
