@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.4.5
+	Module Version: 1.5.0
 
 
 	SIF/Overview
@@ -846,8 +846,10 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 public OnItemDestroy(itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemDestroy] %d", itemid);
-	cnt_ItemContainer[itemid] = INVALID_CONTAINER_ID;
-	cnt_ItemContainerSlot[itemid] = -1;
+	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
+	{
+		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
+	}
 
 	#if defined cnt_OnItemDestroy
 		return cnt_OnItemDestroy(itemid);
@@ -863,6 +865,31 @@ public OnItemDestroy(itemid)
 #define OnItemDestroy cnt_OnItemDestroy
 #if defined cnt_OnItemDestroy
 	forward cnt_OnItemDestroy(itemid);
+#endif
+
+public OnItemCreateInWorld(itemid)
+{
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemCreateInWorld] %d", itemid);
+	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
+	{
+		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
+	}
+
+	#if defined cnt_OnItemCreateInWorld
+		return cnt_OnItemCreateInWorld(itemid);
+	#else
+		return 1;
+	#endif
+}
+#if defined _ALS_OnItemCreateInWorld
+	#undef OnItemCreateInWorld
+#else
+	#define _ALS_OnItemCreateInWorld
+#endif
+ 
+#define OnItemCreateInWorld cnt_OnItemCreateInWorld
+#if defined cnt_OnItemCreateInWorld
+	forward cnt_OnItemCreateInWorld(itemid);
 #endif
 
 
@@ -1042,7 +1069,7 @@ stock IsContainerFull(containerid)
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
-	return IsValidItem(cnt_Items[containerid][cnt_Data[containerid][cnt_size]-1]);
+	return GetContainerFreeSlots(containerid) == 0;
 }
 
 stock IsContainerEmpty(containerid)
