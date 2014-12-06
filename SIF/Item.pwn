@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 3.2.1
+	Module Version: 3.3.0
 
 
 	SIF/Overview
@@ -365,6 +365,51 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 				0
 					If the item is invalid or not in the world.
+		}
+
+		AllocNextItemID(ItemType:type)
+		{	
+			Description:
+				Preallocates an item ID for a specific item type. This doesn't
+				actually create an item but it makes the ID valid so item
+				related functions can be called on it to set various pieces of
+				data before the item is created. Useful for setting data that
+				needs to be valid for when OnItemCreate(InWorld) is called.
+
+			Parameters:
+				<type> (int, ItemType)
+					The type of item to allocate an ID for.
+
+			Returns:
+				INVALID_ITEM_ID
+					If there are no more free item slots.
+
+				-2
+					If the specified type is invalid.
+
+				(int)
+					ID handle of the allocated item.
+		}
+
+		CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
+		{	
+			Description:
+				Creates an item using an ID allocated from AllocNextItemID. This
+				is the only function that can create items that were
+				preallocated.
+
+			Parameters:
+				<itemid> (int)
+					The ID handle of the item to create.
+
+				<same parameters as CreateItemInWorld>
+
+			Returns:
+				1
+					On success.
+
+				0
+					If the ID is invalid or is destroyed in OnItemCreate.
 		}
 	}
 
@@ -1954,6 +1999,55 @@ stock RemoveItemFromWorld(itemid)
 	}
 
 	Iter_Remove(itm_WorldIndex, itemid);
+
+	return 1;
+}
+
+stock AllocNextItemID(ItemType:type)
+{
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[AllocNextItemID]");
+	new id = Iter_Free(itm_Index);
+
+	if(id == -1)
+	{
+		print("ERROR: ITM_MAX reached, please increase this constant!");
+		return INVALID_ITEM_ID;
+	}
+
+	if(!IsValidItemType(type))
+	{
+		printf("ERROR: Item creation with undefined typeid (%d) failed.", _:type);
+		return -2;
+	}
+
+	itm_Data[id][itm_type] = type;
+
+	Iter_Add(itm_Index, id);
+
+	return id;
+}
+
+stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItem_ExplicitID]");
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	itm_TypeCount[itm_Data[itemid][itm_type]]++;
+
+	CallLocalFunction("OnItemCreate", "d", itemid);
+
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	CreateItemInWorld(itemid, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
+
+	CallLocalFunction("OnItemCreated", "d", itemid);
+
+	#if defined DEBUG_LABELS_ITEM
+		itm_DebugLabelID[itemid] = CreateDebugLabel(itm_DebugLabelType, itemid, x, y, z);
+		UpdateItemDebugLabel(itemid);
+	#endif
 
 	return 1;
 }

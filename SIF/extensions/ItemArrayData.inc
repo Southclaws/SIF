@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.3.0
+	Module Version: 1.4.0
 
 
 	SIF/Overview
@@ -388,7 +388,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 static
 	itm_arr_ItemTypeArrayMax[ITM_MAX_TYPES],
 	itm_arr_Data[ITM_MAX][ITM_ARR_MAX_ARRAY_DATA],
-	itm_arr_Length[ITM_MAX];
+	itm_arr_Length[ITM_MAX],
+	itm_arr_NoResetOnCreate[ITM_MAX];
 
 static
 	ITEM_ARRAY_DATA = -1;
@@ -408,10 +409,18 @@ hook OnScriptInit()
 
 public OnItemCreate(itemid)
 {
-	for(new i; i < itm_arr_ItemTypeArrayMax[GetItemType(itemid)]; i++)
-		itm_arr_Data[itemid][i] = 0;
+	if(!itm_arr_NoResetOnCreate[itemid])
+	{
+		for(new i; i < itm_arr_ItemTypeArrayMax[GetItemType(itemid)]; i++)
+			itm_arr_Data[itemid][i] = 0;
 
-	itm_arr_Length[itemid] = 0;
+		itm_arr_Length[itemid] = 0;
+	}
+	else
+	{
+		itm_arr_NoResetOnCreate[itemid] = 0;
+	}
+
 
 	#if defined itmarr_OnItemCreate
 		return itmarr_OnItemCreate(itemid);
@@ -644,6 +653,17 @@ stock RemoveItemArrayData(itemid)
 		return 0;
 
 	itm_arr_Length[itemid] = 0;
+
+	return 1;
+}
+
+stock SetItemNoResetArrayData(itemid, bool:toggle)
+{
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemNoResetArrayData] %d %d", itemid, toggle);
+	if(!IsValidItem(itemid))
+		return 0;
+
+	itm_arr_NoResetOnCreate[itemid] = toggle;
 
 	return 1;
 }
