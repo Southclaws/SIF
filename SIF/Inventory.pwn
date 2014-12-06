@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 2.3.4
+	Module Version: 2.3.5
 
 
 	SIF/Overview
@@ -611,7 +611,7 @@ stock IsPlayerInventoryFull(playerid)
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
-	return IsValidItem(inv_Data[playerid][inv_Size[playerid]-1]);
+	return GetInventoryFreeSlots(playerid) == 0;
 }
 
 stock WillItemTypeFitInInventory(playerid, ItemType:itemtype)
