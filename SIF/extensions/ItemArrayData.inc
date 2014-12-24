@@ -307,12 +307,25 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Returns:
 				-
 		}
+
 		native RemoveItemArrayData(itemid)
 		{
 			Description:
 				Makes data inaccessible and overwritable by setting the item's
 				array data length to 0. Doesn't actually reset any of the data
 				but any future use of the append functions will start at cell 0.
+
+			Parameters:
+				-
+
+			Returns:
+				-
+		}
+
+		native SetItemNoResetArrayData(itemid, bool:toggle)
+		{
+			Description:
+				Forces an item to not reset it's array data when created.
 
 			Parameters:
 				-
