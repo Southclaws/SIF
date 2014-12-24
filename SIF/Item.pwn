@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 3.3.0
+	Module Version: 3.3.1
 
 
 	SIF/Overview
@@ -82,7 +82,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native SIF/Item/Core
 		native -
 
-		native CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
+		native CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0)
 		{
 			Description:
 				Creates an item in the game world at the specified coordinates
@@ -118,6 +118,11 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 				<applyrotoffsets> (boolean)
 					False to make <rx>, <ry>, <rz> rotation values absolute.
+
+				<virtual> (boolean)
+					When true, the item isn't added to the WorldIndex, doesn't
+					have an in-game world position and does not call
+					OnItemCreateInWorld.
 
 			Returns:
 				(int, itemid)
@@ -1526,7 +1531,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
+stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem]");
 	new id = Iter_Free(itm_Index);
@@ -1553,7 +1558,8 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	if(!Iter_Contains(itm_Index, id))
 		return INVALID_ITEM_ID;
 
-	CreateItemInWorld(id, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
+	if(!virtual)
+		CreateItemInWorld(id, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
 
 	CallLocalFunction("OnItemCreated", "d", id);
 
