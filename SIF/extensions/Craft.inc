@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 2.0.1
+	Module Version: 2.0.2
 
 
 	SIF/Overview
@@ -697,14 +697,22 @@ _cft_CraftSelected(playerid, craftset)
 		if(CallLocalFunction("OnPlayerCraft", "dd", playerid, craftset))
 			return 0;
 
-		for(new i; i < cft_ItemCount[craftset]; i++)
+		for(new i; i < cft_SelectedItemCount[playerid]; i++)
 		{
+			sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Looping ingredient item %d (%d)", cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
 			if(!cft_Ingredients[craftset][i][cft_keepItem])
+			{
+				sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Destroying ingredient item %d (%d)", cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
+				RemoveItemFromInventory(playerid, GetItemPlayerInventorySlot(cft_SelectedItems[playerid][i][cft_selectedItemID]), 0);
 				DestroyItem(cft_SelectedItems[playerid][i][cft_selectedItemID]);
+			}
 		}
 
 		new itemid = CreateItem(cft_Result[craftset]);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Created result item %d (%d)", itemid, _:cft_Result[craftset]);
+
 		AddItemToInventory(playerid, itemid, false);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to player %d", itemid, playerid);
 
 		CallLocalFunction("OnPlayerCrafted", "dd", playerid, craftset);
 	}
@@ -721,14 +729,22 @@ _cft_CraftSelected(playerid, craftset)
 		if(CallLocalFunction("OnPlayerCraft", "dd", playerid, craftset))
 			return 0;
 
-		for(new i; i < cft_ItemCount[craftset]; i++)
+		for(new i; i < cft_SelectedItemCount[playerid]; i++)
 		{
+			sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Looping ingredient item %d (%d)", cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
 			if(!cft_Ingredients[craftset][i][cft_keepItem])
+			{
+				sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Destroying ingredient item %d (%d)", cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
+				RemoveItemFromContainer(containerid, GetItemContainerSlot(cft_SelectedItems[playerid][i][cft_selectedItemID]), .call = 0);
 				DestroyItem(cft_SelectedItems[playerid][i][cft_selectedItemID]);
+			}
 		}
 
 		new itemid = CreateItem(cft_Result[craftset]);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Created result item %d (%d)", itemid, _:cft_Result[craftset]);
+
 		AddItemToContainer(containerid, itemid);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to container %d", itemid, containerid);
 
 		CallLocalFunction("OnPlayerCrafted", "dd", playerid, craftset);
 	}
