@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.3.1
+	Module Version: 1.3.2
 
 
 	SIF/Overview
@@ -451,10 +451,14 @@ stock DisplayPlayerInventory(playerid)
 		GetItemName(itemid, tmp);
 
 		format(list, sizeof(list), "%s[%02d]%s\n", list, GetItemTypeSize(GetItemType(itemid)), tmp);
+		inv_ItemListTotal[playerid]++;
 	}
 
 	for(new i; i < GetInventoryFreeSlots(playerid); i++)
+	{
 		strcat(list, "<Empty>\n");
+		inv_ItemListTotal[playerid]++;
+	}
 
 	inv_ExtraItemList[playerid][0] = EOS;
 	inv_ExtraItemCount[playerid] = 0;
@@ -473,7 +477,7 @@ stock DisplayPlayerInventory(playerid)
 
 		if(response)
 		{
-			if(listitem >= GetPlayerInventorySize(playerid))
+			if(listitem >= inv_ItemListTotal[playerid])
 			{
 				CallLocalFunction("OnPlayerSelectExtraItem", "dd", playerid, listitem - inv_ItemListTotal[playerid]);
 				inv_ViewingInventory[playerid] = false;
