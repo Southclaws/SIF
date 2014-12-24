@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.5.0
+	Module Version: 1.5.1
 
 
 	SIF/Overview
@@ -111,13 +111,17 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					limit.
 		}
 
-		native DestroyContainer(containerid)
+		native DestroyContainer(containerid, destroyitems = true)
 		{
 			Description:
 				Removes a container from memory and frees the ID.
 
 			Parameters:
-				-
+				<containerid> (int, containerid)
+					The container to destroy.
+
+				<destroyitems> (boolean)
+					When true, the items in the container are also destroyed.
 
 			Returns:
 				0
@@ -686,7 +690,7 @@ stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	return id;
 }
 
-stock DestroyContainer(containerid)
+stock DestroyContainer(containerid, destroyitems = true)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[DestroyContainer] %d", containerid);
 	if(!Iter_Contains(cnt_Index, containerid))
@@ -700,13 +704,17 @@ stock DestroyContainer(containerid)
 
 	cnt_Data[containerid][cnt_button] = INVALID_BUTTON_ID;
 
-	for(new i; i < cnt_Data[containerid][cnt_size]; i++)
+	if(destroyitems)
 	{
-		if(cnt_Items[containerid][i] == INVALID_ITEM_ID)
-			break;
+		for(new i; i < cnt_Data[containerid][cnt_size]; i++)
+		{
+			if(cnt_Items[containerid][i] == INVALID_ITEM_ID)
+				break;
 
-		DestroyItem(cnt_Items[containerid][i]);
-		cnt_Items[containerid][i] = INVALID_ITEM_ID;
+			cnt_ItemContainer[cnt_Items[containerid][i]] = INVALID_CONTAINER_ID;
+			DestroyItem(cnt_Items[containerid][i]);
+			cnt_Items[containerid][i] = INVALID_ITEM_ID;
+		}
 	}
 
 	cnt_Data[containerid][cnt_name][0]	= EOS;
