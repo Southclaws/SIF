@@ -262,6 +262,8 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 
 	#if defined SIF_OnPlayerEnterDynamicArea
 		return SIF_OnPlayerEnterDynamicArea(playerid, areaid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerEnterDynamicArea
@@ -302,6 +304,8 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 
 	#if defined SIF_OnPlayerLeaveDynamicArea
 		return SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
+	#else
+		return 0;
 	#endif
 }
 #if defined _ALS_OnPlayerLeaveDynamicArea
@@ -417,4 +421,43 @@ stock sif_IsIdleAnim(animidx)
 	}
 
 	return 0;
+}
+
+/*
+	Allows interval checking with GetTickCount regardless of overflow.
+*/
+stock sif_abs(int)
+{
+	if(int < 0)
+		return -int;
+
+	return int;
+}
+
+stock sif_intdiffabs(tick1, tick2)
+{
+	if(tick1 > tick2)
+		return sif_abs(tick1 - tick2);
+
+	else
+		return sif_abs(tick2 - tick1);
+}
+
+stock sif_GetTickCountDiff(a, b)
+{
+	if ((a < 0) && (b > 0))
+	{
+
+		new dist;
+
+		dist = sif_intdiffabs(a, b);
+
+		if(dist > 2147483647)
+			return sif_intdiffabs(a - 2147483647, b - 2147483647);
+
+		else
+			return dist;
+	}
+
+	return sif_intdiffabs(a, b);
 }
