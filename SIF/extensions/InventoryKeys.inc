@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.1.3
+	Module Version: 1.1.4
 
 
 	SIF/Overview
@@ -228,7 +228,7 @@ _HandlePutItemAway(playerid)
 	if(itemsize > freeslots)
 	{
 		new message[37];
-		format(message, sizeof(message), "An extra %d slots is required", itemsize - freeslots);
+		format(message, sizeof(message), "Extra %d slots required", itemsize - freeslots);
 		ShowActionText(playerid, message, 3000, 150);
 		return;
 	}

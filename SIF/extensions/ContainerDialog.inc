@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.3.0
+	Module Version: 1.4.0
 
 
 	SIF/Overview
@@ -466,18 +466,17 @@ DisplayContainerOptions(playerid, slotid)
 					return 0;
 				}
 
-				if(!WillItemTypeFitInInventory(playerid, GetItemType(itemid)))
-				{
-					ShowActionText(playerid, "Inventory full", 3000, 100);
-					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
-					return 0;
-				}
-
 				if(CallLocalFunction("OnMoveItemToInventory", "ddd", playerid, itemid, cnt_CurrentContainer[playerid]))
 					return 0;
 
-				RemoveItemFromContainer(cnt_CurrentContainer[playerid], cnt_SelectedSlot[playerid], playerid, 0);
-				AddItemToInventory(playerid, itemid);
+				new required = AddItemToInventory(playerid, itemid);
+
+				if(required > 0)
+					ShowActionText(playerid, sprintf("Extra %d slots required", required), 3000, 150);
+
+				else if(required == 0)
+					RemoveItemFromContainer(cnt_CurrentContainer[playerid], GetItemContainerSlot(itemid), playerid);
+
 				DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 
 				return 1;
@@ -561,11 +560,14 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 				return 0;
 			}
 
-			if(CallLocalFunction("OnMoveItemToContainer", "ddd", playerid, itemid, cnt_CurrentContainer[playerid]))
-				return 0;
+			new required = AddItemToContainer(cnt_CurrentContainer[playerid], itemid, playerid);
 
-			RemoveItemFromInventory(playerid, slot, 0);
-			AddItemToContainer(cnt_CurrentContainer[playerid], itemid, playerid);
+			if(required == 0)
+			{
+				if(CallLocalFunction("OnMoveItemToContainer", "ddd", playerid, itemid, cnt_CurrentContainer[playerid]))
+					return 0;
+			}
+
 			DisplayPlayerInventory(playerid);
 
 			return 1;

@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 2.3.5
+	Module Version: 2.4.0
 
 
 	SIF/Overview
@@ -409,6 +409,9 @@ forward OnItemRemoveFromInventory(playerid, itemid, slot);
 forward OnItemRemovedFromInventory(playerid, itemid, slot);
 
 
+static INV_DEBUG = -1;
+
+
 /*==============================================================================
 
 	Zeroing
@@ -418,6 +421,9 @@ forward OnItemRemovedFromInventory(playerid, itemid, slot);
 
 hook OnScriptInit()
 {
+	INV_DEBUG = sif_debug_register_handler("SIF/Inventory");
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:INV_DEBUG("[OnScriptInit]");
+
 	for(new i; i < MAX_PLAYERS; i++)
 	{
 		for(new j; j < INV_MAX_SLOTS; j++)
@@ -447,8 +453,9 @@ hook OnPlayerConnect(playerid)
 
 stock AddItemToInventory(playerid, itemid, call = 1)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:INV_DEBUG("[AddItemToInventory] %d %d %d", playerid, itemid, call);
 	if(!IsValidItem(itemid))
-		return 0;
+		return -1;
 
 	new
 		ItemType:itemtype = GetItemType(itemid),
@@ -458,39 +465,68 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 
 	while(idx < inv_Size[playerid])
 	{
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:INV_DEBUG("[AddItemToInventory] Looping %d/%d item: %d", idx, inv_Size[playerid], inv_Data[playerid][idx]);
 		if(!IsValidItem(inv_Data[playerid][idx]))
 			break;
 
 		if(inv_Data[playerid][idx] == itemid)
+		{
+			sif_d:SIF_DEBUG_LEVEL_LOOPS:INV_DEBUG("[AddItemToInventory] ERROR: Item is already in inventory");
 			return -2;
+		}
 
 		slots += GetItemTypeSize(GetItemType(inv_Data[playerid][idx]));
 		idx++;
 	}
 
-	if(slots + itemsize > inv_Size[playerid])
-		return -3;
+	if((slots + itemsize) > inv_Size[playerid])
+	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:INV_DEBUG("[AddItemToInventory] ERROR: Item doesn't fit, size: %d free: %d required: %d.", itemsize, inv_Size[playerid] - slots, (itemsize + slots) - inv_Size[playerid]);
+		return (slots + itemsize) - inv_Size[playerid];
+	}
 
 	if(call)
 	{
 		if(CallLocalFunction("OnItemAddToInventory", "ddd", playerid, itemid, idx))
-			return -1;
+		{
+			sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:INV_DEBUG("[AddItemToInventory] ERROR: OnItemAddToInventory event returned 1");
+			return -4;
+		}
 	}
+
+	if(inv_ItemPlayer[itemid] != INVALID_PLAYER_ID)
+	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:INV_DEBUG("[AddItemToInventory] WARNING: Item is currently in player inventory %d slot %d, removing.", inv_ItemPlayer[itemid], inv_ItemPlayerSlot[itemid]);
+		if(!RemoveItemFromInventory(inv_ItemPlayer[itemid], inv_ItemPlayerSlot[itemid]))
+			return -5;
+	}
+
+	#if defined _SIF_CONTAINER_INCLUDED
+	if(GetItemContainer(itemid) != INVALID_CONTAINER_ID)
+	{
+		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNTINV_DEBUG("[AddItemToInventory] WARNING: Item is currently in container %d slot %d, removing.", GetItemContainer(itemid), GetItemContainerSlot(itemid));
+		if(!RemoveItemFromContainer(GetItemContainer(itemid), GetItemContainerSlot(itemid)))
+			return 1;
+	}
+	#endif
 
 	inv_Data[playerid][idx] = itemid;
 	inv_ItemPlayer[itemid] = playerid;
 	inv_ItemPlayerSlot[itemid] = idx;
+
+	sif_d:SIF_DEBUG_LEVEL_CORE:INV_DEBUG("[AddItemToInventory] Added item %d to player inventory %d at slot %d", itemid, playerid, idx);
 
 	RemoveItemFromWorld(itemid);
 
 	if(call)
 		CallLocalFunction("OnItemAddedToInventory", "ddd", playerid, itemid, idx);
 
-	return 1;
+	return 0;
 }
 
 stock RemoveItemFromInventory(playerid, slotid, call = 1)
 {
+	sif_d:SIF_DEBUG_LEVEL_CORE:INV_DEBUG("[RemoveItemFromInventory] %d %d %d", playerid, slotid, call);
 	if(!(0 <= slotid < inv_Size[playerid]))
 		return 0;
 
@@ -503,7 +539,12 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 			if(slotid < (inv_Size[playerid] - 1))
 			{
 				for(new i = slotid; i < (inv_Size[playerid] - 1); i++)
+				{
 				    inv_Data[playerid][i] = inv_Data[playerid][i+1];
+
+					if(inv_Data[playerid][i] != INVALID_ITEM_ID)
+						inv_ItemPlayerSlot[inv_Data[playerid][i]] = i;
+				}
 
 				inv_Data[playerid][(inv_Size[playerid] - 1)] = INVALID_ITEM_ID;
 			}
@@ -527,7 +568,12 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 	if(slotid < (inv_Size[playerid] - 1))
 	{
 		for(new i = slotid; i < (inv_Size[playerid] - 1); i++)
+		{
 		    inv_Data[playerid][i] = inv_Data[playerid][i+1];
+
+			if(inv_Data[playerid][i] != INVALID_ITEM_ID)
+				inv_ItemPlayerSlot[inv_Data[playerid][i]] = i;
+		}
 
 		inv_Data[playerid][(inv_Size[playerid] - 1)] = INVALID_ITEM_ID;
 	}
@@ -548,8 +594,11 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 
 public OnItemDestroy(itemid)
 {
-	inv_ItemPlayer[itemid] = INVALID_PLAYER_ID;
-	inv_ItemPlayerSlot[itemid] = -1;
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:INV_DEBUG("[OnItemDestroy] %d", itemid);
+	if(inv_ItemPlayer[itemid] != INVALID_PLAYER_ID)
+	{
+		RemoveItemFromInventory(inv_ItemPlayer[itemid], inv_ItemPlayerSlot[itemid]);
+	}
 
 	#if defined inv_OnItemDestroy
 		return inv_OnItemDestroy(itemid);
@@ -572,6 +621,7 @@ hook OnPlayerDisconnect(playerid)
 
 timer DestroyPlayerInventoryItems[1](playerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:INV_DEBUG("[DestroyPlayerInventoryItems] %d", playerid);
 	for(new i; i < inv_Size[playerid]; i++)
 	{
 		DestroyItem(inv_Data[playerid][0]);
@@ -589,6 +639,7 @@ timer DestroyPlayerInventoryItems[1](playerid)
 
 stock GetInventorySlotItem(playerid, slotid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetInventorySlotItem] %d %d", playerid, slotid);
 	if(!(0 <= slotid < inv_Size[playerid]))
 		return INVALID_ITEM_ID;
 
@@ -597,6 +648,7 @@ stock GetInventorySlotItem(playerid, slotid)
 
 stock IsInventorySlotUsed(playerid, slotid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[IsInventorySlotUsed] %d %d", playerid, slotid);
 	if(!(0 <= slotid < inv_Size[playerid]))
 		return -1;
 
@@ -608,6 +660,7 @@ stock IsInventorySlotUsed(playerid, slotid)
 
 stock IsPlayerInventoryFull(playerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[IsPlayerInventoryFull] %d", playerid);
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
@@ -616,6 +669,7 @@ stock IsPlayerInventoryFull(playerid)
 
 stock WillItemTypeFitInInventory(playerid, ItemType:itemtype)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[WillItemTypeFitInInventory] %d %d", playerid, _:itemtype);
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
@@ -640,6 +694,7 @@ stock WillItemTypeFitInInventory(playerid, ItemType:itemtype)
 
 stock GetInventoryFreeSlots(playerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetInventoryFreeSlots] %d", playerid);
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
@@ -661,6 +716,7 @@ stock GetInventoryFreeSlots(playerid)
 
 stock GetItemPlayerInventory(itemid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetItemPlayerInventory] %d", itemid);
 	if(!IsValidItem(itemid))
 		return INVALID_PLAYER_ID;
 
@@ -669,6 +725,7 @@ stock GetItemPlayerInventory(itemid)
 
 stock GetItemPlayerInventorySlot(itemid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetItemPlayerInventorySlot] %d", itemid);
 	if(!IsValidItem(itemid))
 		return INVALID_PLAYER_ID;
 
@@ -677,6 +734,7 @@ stock GetItemPlayerInventorySlot(itemid)
 
 stock SetPlayerInventorySize(playerid, slots)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[SetPlayerInventorySize] %d %d", playerid, slots);
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
@@ -687,6 +745,7 @@ stock SetPlayerInventorySize(playerid, slots)
 
 stock GetPlayerInventorySize(playerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetPlayerInventorySize] %d", playerid);
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
