@@ -213,7 +213,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 _HandlePutItemAway(playerid)
 {
-	if(tickcount() - inv_PutAwayTick[playerid] < 1000)
+	if(sif_GetTickCountDiff(GetTickCount(), inv_PutAwayTick[playerid]) < 1000)
 		return;
 
 	new itemid = GetPlayerItem(playerid);
@@ -236,7 +236,7 @@ _HandlePutItemAway(playerid)
 	if(CallLocalFunction("OnPlayerAddToInventory", "dd", playerid, itemid))
 		return;
 
-	inv_PutAwayTick[playerid] = tickcount();
+	inv_PutAwayTick[playerid] = GetTickCount();
 
 	ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
 	stop inv_PutAwayTimer[playerid];

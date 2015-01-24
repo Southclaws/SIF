@@ -364,6 +364,12 @@ stock DisplayContainerInventory(playerid, containerid)
 			}
 			else
 			{
+				if(!(0 <= listitem < CNT_MAX_SLOTS))
+				{
+					printf("ERROR: Invalid listitem value: %d", listitem);
+					return 0;
+				}
+
 				if(!IsValidItem(cnt_Items[cnt_CurrentContainer[playerid]][listitem]))
 				{
 					DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
