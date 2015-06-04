@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.5.1
+	Module Version: 1.6.0
 
 
 	SIF/Overview
@@ -1192,43 +1192,64 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 process_LeaveDynamicArea(playerid, areaid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea]")<playerid>;
-	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
+
+	if(!IsValidDynamicArea(areaid))
 	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player is valid")<playerid>;
-		new data[2];
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] area ID is invalid")<playerid>;
+		return 1;
+	}
 
-		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
+	if(IsPlayerInAnyVehicle(playerid))
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player is in vehicle")<playerid>;
+		return 1;
+	}
 
-		// Due to odd streamer behavior reversing data arrays:
-		// Only use this if you are using streamer v2.7.1 or lower
-		// new tmp = data[0];
-		// data[0] = data[1];
-		// data[1] = tmp;
-		// end
+	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player nearindex is empty")<playerid>;
+		return 2;
+	}
 
-		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
+	new data[2];
+
+	Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
+
+	// Due to odd streamer behavior reversing data arrays:
+	// Only use this if you are using streamer v2.7.1 or lower
+	// new tmp = data[0];
+	// data[0] = data[1];
+	// data[1] = tmp;
+	// end
+
+	if(data[0] != BTN_STREAMER_AREA_IDENTIFIER)
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] area is not a button area")<playerid>;
+		return 3;
+	}
+
+	if(!Iter_Contains(btn_Index, data[1]))
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] button ID is invalid")<playerid>;
+		return 4;
+	}
+
+	HideActionText(playerid);
+	CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
+
+	foreach(new i : btn_CurrentlyNearIndex[playerid])
+	{
+		sif_dp:SIF_DEBUG_LEVEL_LOOPS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] looping player list")<playerid>;
+
+		if(btn_CurrentlyNear[playerid][i] == data[1])
 		{
-			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] area is valid")<playerid>;
-			if(Iter_Contains(btn_Index, data[1]))
-			{
-				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] in index")<playerid>;
-				HideActionText(playerid);
-				CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
-
-				foreach(new i : btn_CurrentlyNearIndex[playerid])
-				{
-					sif_dp:SIF_DEBUG_LEVEL_LOOPS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] looping player list")<playerid>;
-					// ^ Add when debug supports format strings
-					if(btn_CurrentlyNear[playerid][i] == data[1])
-					{
-						sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] removing from player list")<playerid>;
-						Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
-						break;
-					}
-				}
-			}
+			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] removing from player list")<playerid>;
+			Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
+			break;
 		}
 	}
+
+	return 0;
 }
 
 #if defined DEBUG_LABELS_BUTTON
