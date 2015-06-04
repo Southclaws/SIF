@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.4.0
+	Module Version: 2.0.0
 
 
 	SIF/Overview
@@ -230,12 +230,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		Hooked functions or callbacks, either SA:MP natives or from other
 		scripts or plugins.
 
-		SIF/OnButtonPress
-		{
-			Reason:
-				Allowing container entities to be interacted with.
-		}
-
 		SIF/OnPlayerViewInventoryOpt
 		{
 			Reason:
@@ -263,6 +257,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #endif
 
 #include <YSI\y_hooks>
+#include <YSI\y_dialog>
 
 #define _SIF_CONTAINER_DIALOG_INCLUDED
 
@@ -277,6 +272,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 static
 			cnt_CurrentContainer		[MAX_PLAYERS],
 			cnt_SelectedSlot			[MAX_PLAYERS],
+			cnt_InventoryString			[MAX_PLAYERS][CNT_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)],
 			cnt_OptionsList				[MAX_PLAYERS][128],
 			cnt_OptionsCount			[MAX_PLAYERS],
 			cnt_InventoryContainerItem	[MAX_PLAYERS],
@@ -319,9 +315,10 @@ stock DisplayContainerInventory(playerid, containerid)
 	new
 		title[CNT_MAX_NAME + 9],
 		containername[CNT_MAX_NAME],
-		list[CNT_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)],
 		itemid,
 		tmp[ITM_MAX_NAME + ITM_MAX_TEXT];
+
+	cnt_InventoryString[playerid][0] = EOS;
 
 	for(new i; i < GetContainerSize(containerid); i++)
 	{
@@ -332,13 +329,13 @@ stock DisplayContainerInventory(playerid, containerid)
 
 		GetItemName(itemid, tmp);
 
-		format(list, sizeof(list), "%s[%02d]%s\n", list, GetItemTypeSize(GetItemType(itemid)), tmp);
+		format(cnt_InventoryString[playerid], sizeof(cnt_InventoryString[]), "%s[%02d]%s\n", cnt_InventoryString[playerid], GetItemTypeSize(GetItemType(itemid)), tmp);
 	}
 
 	for(new i; i < GetContainerFreeSlots(containerid); i++)
-		strcat(list, "<Empty>\n");
+		strcat(cnt_InventoryString[playerid], "<Empty>\n");
 
-	strcat(list, "My Inventory >");
+	strcat(cnt_InventoryString[playerid], "My Inventory >");
 
 	cnt_CurrentContainer[playerid] = containerid;
 
@@ -386,7 +383,9 @@ stock DisplayContainerInventory(playerid, containerid)
 			ClosePlayerContainer(playerid, true);
 		}
 	}
-	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, title, list, "Options", "Close");
+	if(strlen(cnt_InventoryString[playerid]) >= 2048)
+		printf("ERROR: cnt_InventoryString is over 2048 chars: %d", strlen(cnt_InventoryString[playerid]));
+	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, title, cnt_InventoryString[playerid], "Options", "Close");
 
 	return 1;
 }
@@ -497,31 +496,6 @@ DisplayContainerOptions(playerid, slotid)
 
 	return 1;
 }
-
-public OnButtonPress(playerid, buttonid)
-{
-	new containerid = GetButtonContainer(buttonid);
-
-	if(IsValidContainer(containerid))
-	{
-		DisplayContainerInventory(playerid, containerid);
-	}
-
-	#if defined cnt_OnButtonPress
-		return cnt_OnButtonPress(playerid, buttonid);
-	#else
-		return 0;
-	#endif
-}
-#if defined _ALS_OnButtonPress
-	#undef OnButtonPress
-#else
-	#define _ALS_OnButtonPress
-#endif
-#define OnButtonPress cnt_OnButtonPress
-#if defined cnt_OnButtonPress
-	forward cnt_OnButtonPress(playerid, buttonid);
-#endif
 
 public OnPlayerViewInventoryOpt(playerid)
 {

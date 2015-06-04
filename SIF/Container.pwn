@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 1.6.0
+	Module Version: 2.0.0
 
 
 	SIF/Overview
@@ -66,7 +66,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Container/Core
 		native -
 
-		native CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0)
+		native CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID)
 		{
 			Description:
 				Creates a container to store items in, can be specified as
@@ -81,26 +81,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<size> (int)
 					The maximum capacity of items the container can store.
 
-				<x>, <y>, <z> (float, absolute world position)
-					The position to create the container access button if the
-					container isn't virtual.
-
-				<world> (int)
-					The virtual world to create the access button.
-
-				<interior> (int)
-					The interior to create the access button.
-
-				<label> (boolean)
-					Determines whether or not the container button is created
-					with a 3D Text Label at it's position.
-
-				<virtual> (boolean)
-					Determines whether or not the container is a virtual
-					container. If it is, a button will not be created and thus
-					the container won't be directly accessibly in the game world
-					by players, the only way to access the container would be
-					through the function DisplayContainerInventory.
+				<buttonid> (int, buttonid)
+					If specified, the container is associated with a button
+					which, when pressed, opens the container UI for a player.
 
 			Returns:
 				(int, containerid)
@@ -322,31 +305,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					Success state.
 		}
 
-		native GetContainerPos(containerid, &Float:x, &Float:y, &Float:z)
-		{
-			Description:
-				Returns a container's button position.
-
-			Parameters:
-				-
-
-			Returns:
-				(bool)
-					Success state.
-		}
-
-		native SetContainerPos(containerid, Float:x, Float:y, Float:z)
-		{
-			Description:
-				Updates a container's button position in the world.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
 		native GetContainerSize(containerid)
 		{
 			Description:
@@ -547,6 +505,12 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 			Reason:
 				Zero initialised array cells.
 		}
+
+		SIF/OnButtonPress
+		{
+			Reason:
+				Allowing container entities to be interacted with.
+		}
 	}
 
 ==============================================================================*/
@@ -596,19 +560,14 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #endif
 
 
-#define INVALID_CONTAINER_ID		(-1)
+#define INVALID_CONTAINER_ID			(-1)
 
 
 enum E_CONTAINER_DATA
 {
-			cnt_button,
 			cnt_name[CNT_MAX_NAME],
-Float:		cnt_posX,
-Float:		cnt_posY,
-Float:		cnt_posZ,
 			cnt_size,
-			cnt_world,
-			cnt_interior
+			cnt_buttonId
 }
 
 
@@ -621,6 +580,8 @@ Iterator:	cnt_Index<CNT_MAX>,
 			cnt_ButtonContainer			[BTN_MAX] = {INVALID_CONTAINER_ID, ...};
 
 
+forward OnContainerCreate(containerid);
+forward OnContainerDestroy(containerid);
 forward OnItemAddToContainer(containerid, itemid, playerid);
 forward OnItemAddedToContainer(containerid, itemid, playerid);
 forward OnItemRemoveFromContainer(containerid, slotid, playerid);
@@ -651,9 +612,9 @@ hook OnScriptInit()
 ==============================================================================*/
 
 
-stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, world = 0, interior = 0, label = 1, virtual = 0)
+stock CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[CreateContainer] '%s' %d %f %f %f %d %d %d %d", name, size, x, y, z, world, interior, label, virtual);
+	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[CreateContainer] '%s' %d", name, size);
 	new id = Iter_Free(cnt_Index);
 
 	if(id == -1)
@@ -664,45 +625,32 @@ stock CreateContainer(name[], size, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 
 	size = (size > CNT_MAX_SLOTS) ? CNT_MAX_SLOTS : size;
 
-	if(!virtual)
-	{
-		cnt_Data[id][cnt_button] = CreateButton(x, y, z, "Press F to open", world, interior, 1.0, label, name);
-		cnt_ButtonContainer[cnt_Data[id][cnt_button]] = id;
-	}
-	else
-	{
-		cnt_Data[id][cnt_button] = INVALID_BUTTON_ID;
-	}
-
 	strcpy(cnt_Data[id][cnt_name], name, CNT_MAX_NAME);
-	cnt_Data[id][cnt_posX]			= x;
-	cnt_Data[id][cnt_posY]			= y;
-	cnt_Data[id][cnt_posZ]			= z;
 	cnt_Data[id][cnt_size]			= size;
-	cnt_Data[id][cnt_world]			= world;
-	cnt_Data[id][cnt_interior]		= interior;
+	cnt_Data[id][cnt_buttonId]		= buttonid;
+
+	if(IsValidButton(buttonid))
+	{
+		cnt_ButtonContainer[buttonid] = id;
+	}
 
 	for(new i; i < CNT_MAX_SLOTS; i++)
 		cnt_Items[id][i] = INVALID_ITEM_ID;
 
 	Iter_Add(cnt_Index, id);
 
+	CallLocalFunction("OnContainerDestroy", "d", id);
+
 	return id;
 }
 
-stock DestroyContainer(containerid, destroyitems = true)
+stock DestroyContainer(containerid, destroyitems = true, destroybutton = true)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[DestroyContainer] %d", containerid);
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
-	if(IsValidButton(cnt_Data[containerid][cnt_button]))
-	{
-		DestroyButton(cnt_Data[containerid][cnt_button]);
-		cnt_ButtonContainer[cnt_Data[containerid][cnt_button]] = INVALID_CONTAINER_ID;
-	}
-
-	cnt_Data[containerid][cnt_button] = INVALID_BUTTON_ID;
+	CallLocalFunction("OnContainerDestroy", "d", containerid);
 
 	if(destroyitems)
 	{
@@ -717,13 +665,17 @@ stock DestroyContainer(containerid, destroyitems = true)
 		}
 	}
 
+	if(IsValidButton(cnt_Data[containerid][cnt_buttonId]))
+	{
+		cnt_ButtonContainer[cnt_Data[containerid][cnt_buttonId]] = INVALID_CONTAINER_ID;
+
+		if(destroybutton)
+			DestroyButton(cnt_Data[containerid][cnt_buttonId]);
+	}
+
 	cnt_Data[containerid][cnt_name][0]	= EOS;
-	cnt_Data[containerid][cnt_posX]		= 0.0;
-	cnt_Data[containerid][cnt_posY]		= 0.0;
-	cnt_Data[containerid][cnt_posZ]		= 0.0;
 	cnt_Data[containerid][cnt_size]		= 0;
-	cnt_Data[containerid][cnt_world]	= 0;
-	cnt_Data[containerid][cnt_interior]	= 0;
+	cnt_Data[containerid][cnt_buttonId]	= INVALID_BUTTON_ID;
 
 	Iter_Remove(cnt_Index, containerid);
 
@@ -930,6 +882,32 @@ public OnItemCreateInWorld(itemid)
 	forward cnt_OnItemCreateInWorld(itemid);
 #endif
 
+public OnButtonPress(playerid, buttonid)
+{
+	new containerid = GetButtonContainer(buttonid);
+
+	if(IsValidContainer(containerid))
+	{
+		ClearAnimations(playerid, 1);
+		DisplayContainerInventory(playerid, containerid);
+	}
+
+	#if defined cnt_OnButtonPress
+		return cnt_OnButtonPress(playerid, buttonid);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnButtonPress
+	#undef OnButtonPress
+#else
+	#define _ALS_OnButtonPress
+#endif
+#define OnButtonPress cnt_OnButtonPress
+#if defined cnt_OnButtonPress
+	forward cnt_OnButtonPress(playerid, buttonid);
+#endif
+
 
 /*==============================================================================
 
@@ -948,7 +926,7 @@ stock IsValidContainer(containerid)
 	return 1;
 }
 
-// cnt_button
+// cnt_buttonId
 stock GetContainerButton(containerid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerButton] %d", containerid);
@@ -956,7 +934,7 @@ stock GetContainerButton(containerid)
 	if(!Iter_Contains(cnt_Index, containerid))
 		return 0;
 
-	return cnt_Data[containerid][cnt_button];
+	return cnt_Data[containerid][cnt_buttonId];
 }
 
 // cnt_name
@@ -969,38 +947,6 @@ stock GetContainerName(containerid, name[])
 
 	name[0] = EOS;
 	strcat(name, cnt_Data[containerid][cnt_name], CNT_MAX_NAME);
-
-	return 1;
-}
-
-// cnt_posX
-// cnt_posY
-// cnt_posZ
-stock GetContainerPos(containerid, &Float:x, &Float:y, &Float:z)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerPos] %d", containerid);
-
-	if(!Iter_Contains(cnt_Index, containerid))
-		return 0;
-
-	x = cnt_Data[containerid][cnt_posX];
-	y = cnt_Data[containerid][cnt_posY];
-	z = cnt_Data[containerid][cnt_posZ];
-
-	return 1;
-}
-stock SetContainerPos(containerid, Float:x, Float:y, Float:z)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[SetContainerPos] %d %f %f %f", containerid, x, y, z);
-
-	if(!Iter_Contains(cnt_Index, containerid))
-		return 0;
-
-	SetButtonPos(cnt_Data[containerid][cnt_button], x, y, z);
-
-	cnt_Data[containerid][cnt_posX] = x;
-	cnt_Data[containerid][cnt_posY] = y;
-	cnt_Data[containerid][cnt_posZ] = z;
 
 	return 1;
 }
@@ -1023,52 +969,6 @@ stock SetContainerSize(containerid, size)
 		return 0;
 
 	cnt_Data[containerid][cnt_size] = size;
-
-	return 1;
-}
-
-// cnt_world
-stock GetContainerWorld(containerid)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerWorld] %d", containerid);
-
-	if(!Iter_Contains(cnt_Index, containerid))
-		return -1;
-
-	return cnt_Data[containerid][cnt_world];
-}
-stock SetContainerWorld(containerid, world)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[SetContainerWorld] %d %d", containerid, world);
-
-	if(!Iter_Contains(cnt_Index, containerid))
-		return 0;
-
-	SetButtonWorld(cnt_Data[containerid][cnt_button], world);
-	cnt_Data[containerid][cnt_world] = world;
-
-	return 1;
-}
-
-// cnt_interior
-stock GetContainerInterior(containerid)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerInterior] %d", containerid);
-
-	if(!Iter_Contains(cnt_Index, containerid))
-		return -1;
-
-	return cnt_Data[containerid][cnt_interior];
-}
-stock SetContainerInterior(containerid, interior)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[SetContainerInterior] %d %d", containerid, interior);
-
-	if(!Iter_Contains(cnt_Index, containerid))
-		return 0;
-
-	SetButtonWorld(cnt_Data[containerid][cnt_button], interior);
-	cnt_Data[containerid][cnt_interior] = interior;
 
 	return 1;
 }
