@@ -720,6 +720,9 @@ _cft_CraftSelected(playerid, craftset)
 	{
 		new containerid = GetPlayerCurrentContainer(playerid);
 
+		if(!IsValidContainer(containerid))
+			return 0;
+
 		freeslots = GetContainerFreeSlots(containerid);
 		totalslots = GetContainerSize(containerid);
 

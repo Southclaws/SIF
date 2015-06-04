@@ -202,7 +202,7 @@ static MBT_DEBUG = -1;
 
 hook OnScriptInit()
 {
-	MBT_DEBUG = sif_debug_register_handler("SIF/MultiButton", SIF_DEBUG_LEVEL_LOOPS);
+	MBT_DEBUG = sif_debug_register_handler("SIF/MultiButton");
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:MBT_DEBUG("[OnScriptInit]");
 }
 
@@ -309,7 +309,7 @@ _mbt_HandleTriggerButton(triggerid, buttonid)
 	{
 		if(sif_GetTickCountDiff(mbt_Data[triggerid][mbt_activateTick], GetTickCount()) > mbt_Data[triggerid][mbt_time])
 		{
-			print("OUT OF TIME, END!");
+			sif_d:SIF_DEBUG_LEVEL_INTERNAL:MBT_DEBUG("[_mbt_ButtonPress]");
 			_mbt_Reset(triggerid);
 			return;
 		}
