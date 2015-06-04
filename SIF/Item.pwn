@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 3.3.1
+	Module Version: 3.4.0
 
 
 	SIF/Overview
@@ -819,6 +819,19 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					If the ID handle of the item is invalid.
 		}
 
+		native GetItemTypeCount(ItemType:itemtype)
+		{
+			Description:
+				Returns the amount of created items of the given type.
+
+			Parameters:
+				-
+
+			Returns:
+				(int)
+					Amount of items of the given type.
+		}
+
 		native GetItemType(itemid)
 		{
 			Description:
@@ -1558,6 +1571,9 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	if(!Iter_Contains(itm_Index, id))
 		return INVALID_ITEM_ID;
 
+	if(x == 0.0 && y == 0.0 && z == 0.0)
+		virtual = 1;
+
 	if(!virtual)
 		CreateItemInWorld(id, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
 
@@ -1947,12 +1963,7 @@ stock RemoveCurrentItem(playerid)
 	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
 		return INVALID_ITEM_ID;
 
-	new
-		itemid = itm_Holding[playerid],
-		Float:x,
-		Float:y,
-		Float:z,
-		Float:r;
+	new itemid = itm_Holding[playerid];
 
 	RemovePlayerAttachedObject(playerid, ITM_ATTACH_INDEX);
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_NONE);
@@ -1962,15 +1973,7 @@ stock RemoveCurrentItem(playerid)
 	itm_Holder[itemid] = INVALID_PLAYER_ID;
 	itm_Interactor[itemid] = INVALID_PLAYER_ID;
 
-	GetPlayerPos(playerid, x, y, z);
-	GetPlayerFacingAngle(playerid, r);
-
-	CreateItemInWorld(itemid,
-		x + (0.5 * floatsin(-r, degrees)),
-		y + (0.5 * floatcos(-r, degrees)),
-		z - FLOOR_OFFSET,
-		0.0, 0.0, r,
-		FLOOR_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
+	CallLocalFunction("OnItemRemovedFromPlayer", "dd", playerid, itemid);
 
 	return itemid;
 
@@ -1984,12 +1987,7 @@ stock RemoveItemFromWorld(itemid)
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
-		CallLocalFunction("OnItemRemovedFromPlayer", "dd", itm_Holder[itemid], itemid);
-		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
-		itm_Holding[itm_Holder[itemid]] = INVALID_ITEM_ID;
-		itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
-		itm_Holder[itemid] = INVALID_PLAYER_ID;
-		itm_Interactor[itemid] = INVALID_PLAYER_ID;
+		RemoveCurrentItem(itm_Holder[itemid]);
 	}
 	else
 	{
@@ -2002,9 +2000,9 @@ stock RemoveItemFromWorld(itemid)
 
 		itm_Data[itemid][itm_objId] = -1;
 		itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
-	}
 
-	Iter_Remove(itm_WorldIndex, itemid);
+		Iter_Remove(itm_WorldIndex, itemid);
+	}
 
 	return 1;
 }
