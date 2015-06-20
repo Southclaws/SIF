@@ -81,7 +81,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Inventory/Callbacks
 		native -
 
-		native OnPlayerCraft(playerid, craftset)
+		native OnPlayerCraft(playerid, craftset, result)
 		{
 			Called:
 				When a player completes a crafting combination but before any
@@ -96,6 +96,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<craftset> (int, craftset ID)
 					The craftset the player completed. Can be used to get data.
 
+				<result>
+					The crafted itemid.
 			Returns:
 				1
 					To cancel the action. Prevents ingredients from being used
@@ -386,7 +388,7 @@ static
 
 
 forward OnPlayerCraft(playerid, craftset);
-forward OnPlayerCrafted(playerid, craftset);
+forward OnPlayerCrafted(playerid, craftset, result);
 
 
 static CRAFT_DEBUG = -1;
@@ -714,7 +716,7 @@ _cft_CraftSelected(playerid, craftset)
 		AddItemToInventory(playerid, itemid, false);
 		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to player %d", itemid, playerid);
 
-		CallLocalFunction("OnPlayerCrafted", "dd", playerid, craftset);
+		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, itemid);
 	}
 	else
 	{
@@ -749,7 +751,7 @@ _cft_CraftSelected(playerid, craftset)
 		AddItemToContainer(containerid, itemid);
 		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to container %d", itemid, containerid);
 
-		CallLocalFunction("OnPlayerCrafted", "dd", playerid, craftset);
+		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, itemid);
 	}
 
 	new
