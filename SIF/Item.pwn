@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 3.4.0
+	Module Version: 3.5.0
 
 
 	SIF/Overview
@@ -396,7 +396,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					ID handle of the allocated item.
 		}
 
-		CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
+		CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0)
 		{	
 			Description:
 				Creates an item using an ID allocated from AllocNextItemID. This
@@ -408,6 +408,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					The ID handle of the item to create.
 
 				<same parameters as CreateItemInWorld>
+
+				<virtual> (bool)
+					If true, CreateItemInWorld is never called.
 
 			Returns:
 				1
@@ -2031,7 +2034,7 @@ stock AllocNextItemID(ItemType:type)
 	return id;
 }
 
-stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
+stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItem_ExplicitID]");
 	if(!Iter_Contains(itm_Index, itemid))
@@ -2044,7 +2047,11 @@ stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
-	CreateItemInWorld(itemid, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
+	if(x == 0.0 && y == 0.0 && z == 0.0)
+		virtual = 1;
+
+	if(!virtual)
+		CreateItemInWorld(itemid, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
 
 	CallLocalFunction("OnItemCreated", "d", itemid);
 
