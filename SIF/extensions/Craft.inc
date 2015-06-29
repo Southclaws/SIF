@@ -3,7 +3,7 @@
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
-	Module Version: 2.0.2
+	Module Version: 2.1.0
 
 
 	SIF/Overview
@@ -116,6 +116,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 				<craftset> (int, craftset ID)
 					The craftset the player completed. Can be used to get data.
+
+				<result> (int, itemid)
+					The ID handle of the resulting item of the combination.
 
 			Returns:
 				-
@@ -386,7 +389,7 @@ static
 
 
 forward OnPlayerCraft(playerid, craftset);
-forward OnPlayerCrafted(playerid, craftset);
+forward OnPlayerCrafted(playerid, craftset, result);
 
 
 static CRAFT_DEBUG = -1;
@@ -714,7 +717,7 @@ _cft_CraftSelected(playerid, craftset)
 		AddItemToInventory(playerid, itemid, false);
 		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to player %d", itemid, playerid);
 
-		CallLocalFunction("OnPlayerCrafted", "dd", playerid, craftset);
+		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, itemid);
 	}
 	else
 	{
@@ -749,7 +752,7 @@ _cft_CraftSelected(playerid, craftset)
 		AddItemToContainer(containerid, itemid);
 		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to container %d", itemid, containerid);
 
-		CallLocalFunction("OnPlayerCrafted", "dd", playerid, craftset);
+		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, itemid);
 	}
 
 	new
