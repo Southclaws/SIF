@@ -2912,6 +2912,15 @@ stock IsItemInWorld(itemid)
 	return 1;
 }
 
+// itm_ButtonIndex
+stock GetItemFromButtonID(buttonid)
+{
+	if(!IsValidButton(buttonid))
+		return INVALID_ITEM_ID;
+
+	return itm_ButtonIndex[buttonid];
+}
+
 stock GetItemName(itemid, string[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemName]");
