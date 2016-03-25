@@ -1,688 +1,49 @@
 /*==============================================================================
 
-Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
+# Southclaw's Interactivity Framework (SIF) v1.4.0
 
-	SIF Version: 1.4.0
-	Module Version: 1.6.0
+## Overview
 
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
 
-	SIF/Overview
-	{
-		SIF is a collection of high-level include scripts to make the
-		development of interactive features easy for the developer while
-		maintaining quality front-end gameplay for players.
-	}
+## Description
 
-	SIF/Button/Description
-	{
-		A simple framework using streamer areas and key checks to give
-		the in-game effect of physical buttons that players must press instead
-		of using a command. It was created as an alternative to the default
-		GTA:SA spinning pickups for a few reasons:
+A simple framework using streamer areas and key checks to give
+the in-game effect of physical buttons that players must press instead
+of using a command. It was created as an alternative to the default
+GTA:SA spinning pickups for a few reasons:
 
-			1. A player might want to stand where a pickup is but not use it
-			(if the	pickup is a building entrance or interior warp, he might
-			want to stand in the doorway without being teleported.)
+1. A player might want to stand where a pickup is but not use it (if the pickup
+   is a building entrance or interior warp, he might want to stand in the doorway
+   without being teleported.)
 
-			2. Making hidden doors or secrets that can only be found by walking
-			near the button area and seeing the textdraw. (or spamming F!)
+2. Making hidden doors or secrets that can only be found by walking near the
+   button area and seeing the textdraw. (or spamming F!)
 
-			3. Spinning objects don't really add immersion to a role-play
-			environment!
-	}
+3. Spinning objects don't really add immersion to a role-play environment!
 
-	SIF/Button/Dependencies
-	{
-		Streamer Plugin
-		YSI\y_hooks
-		YSI\y_timers
-	}
+## Dependencies
 
-	SIF/Button/Credits
-	{
-		SA:MP Team						- Amazing mod!
-		SA:MP Community					- Inspiration and support
-		Incognito						- Very useful streamer plugin
-		Y_Less							- YSI framework
-	}
+- Streamer Plugin
+- YSI\y_hooks
+- YSI\y_timers
 
-	SIF/Button/Constants
-	{
-		These can be altered by defining their values before the include line.
+## Hooks
 
-		BTN_MAX
-			Maximum amount of buttons that can be created.
+- OnScriptInit: Zero initialised array cells.
+- OnPlayerConnect: Zero y_iterator and some player array data.
+- OnPlayerKeyStateChange: Catch F/Enter key presses for button interaction.
+- OnPlayerEnterDynamicArea: Monitor what buttons the player has walked near.
+- OnPlayerLeaveDynamicArea: Detect when a player has walked away from a button.
 
-		BTN_MAX_TEXT
-			Maximum string length for labels and action-text strings.
+## Credits
 
-		BTN_DEFAULT_STREAMDIST
-			Default maximum stream range for button label text.
-
-		BTN_MAX_INRANGE
-			Maximum amount of buttons to load into the list of buttons that the
-			player is in range of when they press the interact key.
-
-		BTN_STREAMER_AREA_IDENTIFIER
-			A value to identify streamer object EXTRA_ID data array type.
-
-		BTN_TELEPORT_FREEZE_TIME
-			The time in milliseconds to freeze a player upon using a linked
-			teleport button.
-	}
-
-	SIF/Button/Core Functions
-	{
-		The functions that control the core features of this script.
-
-		native -
-		native - SIF/Button/Core
-		native -
-
-		native CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST)
-		{
-			Description:
-				Creates an interactive button players can activate by pressing F.
-
-			Parameters:
-				<x>, <y>, <z> (float)
-					X, Y and Z world position.
-
-				<text> (string)
-					Message box text for when the player approaches the button.
-
-				<world>	(int)
-					The virtual world to show the button in.
-
-				<interior> (int)
-					The interior world to show the button in.
-
-				<areasize> (float)
-					Size of the button's detection area.
-
-				<label> (boolean)
-					Determines whether a 3D Text Label should be at the button.
-
-				<labeltext> (string)
-					The text that the label should show.
-
-				<labelcolour> (int)
-					The colour of the label.
-
-				<streamdist> (float)
-					Stream distance of the label.
-
-
-			Returns:
-				(int, buttonid)
-					Button ID handle of the newly created button.
-
-				INVALID_BUTTON_ID
-					If another button cannot be created due to BTN_MAX limit.
-		}
-
-		native DestroyButton(buttonid)
-		{
-			Description:
-				Destroys a button.
-
-			Parameters:
-				<buttonid> (int, buttonid)
-					The button handle ID to delete.
-
-			Returns:
-				1
-					If destroying the button was successful
-
-				0
-					If <buttonid> is an invalid button ID handle.
-		}
-	
-		native LinkTP(buttonid1, buttonid2)
-		{
-			Description:
-				Links two buttons to be teleport buttons, if a user presses
-				<buttonid1> he will be teleported to the position of <buttonid2>
-				and vice versa, the buttonids require no particular order.
-	
-			Parameters:
-				<buttonid1> (int, buttonid)
-					The first button ID to link.
-
-				<buttonid2> (int, buttonid)
-					The second button ID to link <buttonid1> to.
-
-			Returns:
-				1
-					If the link was successful
-				0
-					If either of the button IDs are invalid.
-		}
-	
-		native UnLinkTP(buttonid1, buttonid2)
-		{
-			Description:
-				Un-links two linked buttons
-	
-			Parameters:
-				<buttonid1> (int, buttonid)
-					The first button ID to un-link, must be a linked button.
-
-				<buttonid2> (int, buttonid)
-					The second button ID to un-link, must be a linked button.
-
-			Returns:
-				0
-					If either of the button IDs are invalid.
-
-				-1
-					If either of the button IDs are not linked.
-
-				-2
-					If both buttons are linked, but not to each other.
-		}
-	}
-
-	SIF/Button/Events
-	{
-		Events called by player actions done by using features from this script.
-
-		native -
-		native - SIF/Button/Callbacks
-		native -
-
-		native OnButtonPress(playerid, buttonid)
-		{
-			Called:
-				When a player presses the F/Enter key while at a button.
-
-			Parameters:
-				<playerid> (int)
-					The ID of the player who pressed the button.
-
-				<buttonid> (int, buttonid)
-					The ID handle of the button he pressed.
-
-			Returns:
-				0
-					To allow a linked button teleport.
-
-				1
-					To deny a linked button teleport.
-		}
-
-		native OnButtonRelease(playerid, buttonid)
-		{
-			Called:
-				When a player releases the F/Enter key after pressing it while
-				at a button.
-
-			Parameters:
-				<playerid> (int)
-					The ID of the player who originally pressed the button.
-
-				<buttonid> (int, buttonid)
-					The ID handle of the button he was at when he originally
-					pressed the F/Enter key.
-
-			Returns:
-				(none)
-		}
-
-		native OnPlayerEnterButtonArea(playerid, buttonid)
-		{
-			Called:
-				When a player enters the dynamic streamed area of a button.
-
-			Parameters:
-				<playerid> (int)
-					The ID of the player who entered the button area.
-
-				<buttonid> (int, buttonid)
-					The ID handle of the button.
-
-			Returns:
-				(none)
-		}
-
-		native OnPlayerLeaveButtonArea(playerid, buttonid)
-		{
-			Called:
-				When a player leaves the dynamic streamed area of a button.
-
-			Parameters:
-				<playerid> (int)
-					The ID of the player who left the button area.
-
-				<buttonid> (int, buttonid)
-					The ID handle of the button.
-
-			Returns:
-				(none)
-		}
-	}
-
-	SIF/Button/Interface Functions
-	{
-		Functions to get or set data values in this script without editing
-		the data directly. These include automatic ID validation checks.
-
-		native -
-		native - SIF/Button/Interface
-		native -
-
-		native IsValidButton(buttonid)
-		{
-			Description:
-				Checks if <buttonid> is a valid button ID handle.
-
-			Parameters:
-				<buttonid> (int, buttonid)
-					The button ID handle to check.
-
-			Returns:
-				1
-					If the button ID handle <buttonid> is valid.
-
-				0
-					If the button ID handle <buttonid> is invalid.
-		}
-
-		native GetButtonArea(buttonid)
-		{
-			Description:
-				Returns the streamer area ID used by a button.
-
-			Parameters:
-				-
-
-			Returns:
-				(int, areaid)
-		}
-
-		native SetButtonArea(buttonid, areaid)
-		{
-			Description:
-				Updates a button's streamer area ID. Note that this does not
-				remove the existing area from memory so that should be got with
-				GetButtonArea and deleted beforehand.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
-		{
-			Description:
-				Creates a 3D Text Label at the specified button ID handle, if
-				a label already exists it updates the text, colour and range.
-
-			Parameters:
-				<buttonid> (int, buttonid)
-					The button ID handle to set the label of.
-
-				<text> (string)
-					The text to display in the label.
-
-				<colour> (int)
-					The colour of the label.
-
-				<range> (float)
-					The stream range of the label.
-
-			Returns:
-				0
-					If the button ID handle is invalid
-
-				1
-					If the label was created successfully.
-
-				2
-					If the label already existed and was updated successfully.
-		}
-
-		native DestroyButtonLabel(buttonid)
-		{
-			Description:
-				Removes the label from a button.
-
-			Parameters:
-				<buttonid>
-					The button ID handle to remove the label from.
-
-			Returns:
-				0
-					If the button ID handle is invalid
-
-				-1
-					If the button does not have a label to remove.
-		}
-
-		native GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z)
-		{
-			Description:
-
-			Parameters:
-				<buttonid> (int, buttonid)
-					The ID handle of the button to get the position of.
-
-				<x, y, z> (float)
-					The X, Y and Z values of the button's position in the world.
-
-			Returns:
-				1
-					If the position was obtained successfully.
-
-				0
-					If <buttonid> is an invalid button ID handle.
-		}
-
-		native SetButtonPos(buttonid, Float:x, Float:y, Float:z)
-		{
-			Description:
-				Sets the world position for a button area and 3D Text label
-				if it exists.
-
-			Parameters:
-				<buttonid> (int, buttonid)
-					The ID handle of the button to set the position of.
-
-				<x, y, z> (float)
-					The X, Y and Z position values to set the button to.
-
-			Returns:
-				1
-					If the position was set successfully.
-
-				0
-					If <buttonid> is an invalid button ID handle.
-		}
-
-		native GetButtonSize(buttonid)
-		{
-			Description:
-				Returns the size of the specified button's dynamic area.
-
-			Parameters:
-				-
-
-			Returns:
-				0.0
-					If the specified button ID handle is invalid.
-		}
-
-		native SetButtonSize(buttonid, Float:size)
-		{
-			Description:
-				Sets a button's detection area size.
-
-			Parameters:
-				<size> (float)
-					The size of the button area.
-
-			Returns:
-				1
-					If the size was set successfully.
-
-				0
-					If <buttonid> is an invalid button ID handle.
-		}
-
-		native GetButtonWorld(buttonid)
-		{
-			Description:
-				Returns the virtual world that a button exists in.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native SetButtonWorld(buttonid, world)
-		{
-			Description:
-				Updates a button's virtual world. Moves all streamer entities
-				to the world too.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetButtonInterior(buttonid)
-		{
-			Description:
-				Returns the interior that a button exists in.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native SetButtonInterior(buttonid, interior)
-		{
-			Description:
-				Updates a button's interior. Moves all streamer entities
-				to the interior too.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetButtonLinkedID(buttonid)
-		{
-			Description:
-				Returns the linked button of <buttonid>.
-
-			Parameters:
-				<buttonid> (int, buttonid)
-					The button ID handle to get the linked button from.
-
-			Returns:
-				(int, buttonid)
-					The button ID handle that <buttonid> is linked to
-
-				INVALID_BUTTON_ID
-					If the button isn't linked to another button.
-		}
-
-		native GetButtonText(buttonid, text[])
-		{
-			Description:
-				Returns the text assigned to a button that appears on-screen
-				when a player walks near it.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native SetButtonText(buttonid, text[])
-		{
-			Description:
-				Updates the text that appears on-screen when a player walks near
-				the button.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native SetButtonExtraData(buttonid, data)
-		{
-			Description:
-				Sets the button's extra data field, this is one cell of blank
-				space allocated for each button.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetButtonExtraData(buttonid)
-		{
-			Description:
-				Retrieves the integer assigned to the button set with
-				SetButtonExtraData.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetPlayerPressingButton(playerid)
-		{
-			Description:
-				Returns the ID of the button that the player is currently
-				pressing. This will only return a value while <playerid> is
-				holding down the interact key at a button.
-
-			Parameters:
-				-
-
-			Returns:
-				(int, buttonid)
-		}
-
-		native GetPlayerButtonID(playerid)
-		{
-			Description:
-				Returns the ID of the closest button that a player is standing
-				within the area of.
-
-			Parameters:
-				-
-
-			Returns:
-				(int, buttonid)
-		}
-
-		native GetPlayerButtonList(playerid, list[], &size, bool:validate = false)
-		{
-			Description:
-				Returns a list of buttons that a player is standing in the areas
-				of.
-
-			Parameters:
-				<playerid> (int, playerid)
-					Player to get a list of buttons from.
-
-				<list> (array)
-					Array to store the buttons in (Must be BTN_MAX_INRANGE size)
-
-				<size> (int, ref)
-					Stores the amount of buttons in the list.
-
-				<validate>
-					If true, the function will check if the player is actually
-					in each button in the list. This is a small workaround for a
-					larger problem that is currently unknown that results in a
-					button not being removed from a player's list when they
-					leave the area for it.
-
-			Returns:
-				1
-					On success
-		}
-
-		native GetPlayerAngleToButton(playerid, buttonid)
-		{
-			Description:
-				Returns the angle in degrees from a player to a button.
-
-			Parameters:
-				-
-
-			Returns:
-				(float, angle, degrees)
-		}
-
-		native GetButtonAngleToPlayer(playerid, buttonid)
-		{
-			Description:
-				Returns the angle in degrees from a button to a player.
-
-			Parameters:
-				-
-
-			Returns:
-				(float, angle, degrees)
-		}
-
-	}
-
-	SIF/Button/Internal Functions
-	{
-		Internal events called by player actions done by using features from
-		this script.
-	
-		_btn_SortButtons(array[][e_button_range_data], left, right)
-		{
-			Description:
-				Sorts the list of buttons that a player is nearby so they can be
-				triggered in order of distance from the player (closest first).
-		}
-
-		Internal_OnButtonPress(playerid, buttonid)
-		{
-			Description:
-				Called to handle linked button teleports, 
-		}
-	}
-
-	SIF/Button/Hooks
-	{
-		Hooked functions or callbacks, either SA:MP natives or from other
-		scripts or plugins.
-
-		SAMP/OnPlayerKeyStateChange
-		{
-			Reason:
-				To detect player key inputs to allow players to press the
-				default F/Enter keys to operate buttons and call OnButtonPress
-				or OnButtonRelease.
-		}
-
-		YSI/OnScriptInit
-		{
-			Reason:
-				Zero initialised array cells.
-		}
-
-		Streamer/OnPlayerEnterDynamicArea
-		{
-			Reason:
-				To detect if a player enters a button's area and call
-				OnPlayerEnterButtonArea.
-		}
-
-		Streamer/OnPlayerLeaveDynamicArea
-		{
-			Reason:
-				To detect if a player leaves a button's area and call
-				OnPlayerLeaveButtonArea.
-		}
-	}
+- SA:MP Team: Amazing mod!
+- SA:MP Community: Inspiration and support
+- Incognito: Very useful streamer plugin
+- Y_Less: YSI framework
 
 ==============================================================================*/
 
@@ -700,7 +61,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #endif
 
 #if defined DEBUG_LABELS_BUTTON
-	#include <SIF\extensions/DebugLabels.inc>
+	#include <SIF\extensions\DebugLabels.inc>
 #endif
 
 #include <YSI\y_iterate>
@@ -713,37 +74,320 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 /*==============================================================================
 
-	Setup
+	Constant Definitions, Function Declarations and Documentation
 
 ==============================================================================*/
 
 
+// Maximum amount of buttons that can be created.
 #if !defined BTN_MAX
-	#define BTN_MAX			(8192)
+	#define BTN_MAX (8192)
 #endif
 
+// Maximum string length for labels and action-text strings.
 #if !defined BTN_MAX_TEXT
-	#define BTN_MAX_TEXT	(128)
+	#define BTN_MAX_TEXT (128)
 #endif
 
+// Default maximum stream range for button label text.
 #if !defined BTN_DEFAULT_STREAMDIST
-	#define BTN_DEFAULT_STREAMDIST	(4.0)
+	#define BTN_DEFAULT_STREAMDIST (4.0)
 #endif
 
+// Maximum amount of buttons to record the player being near to.
 #if !defined BTN_MAX_INRANGE
-	#define BTN_MAX_INRANGE	(8)
+	#define BTN_MAX_INRANGE (8)
 #endif
 
+// A value to identify streamer object EXTRA_ID data array type.
 #if !defined BTN_STREAMER_AREA_IDENTIFIER
 	#define BTN_STREAMER_AREA_IDENTIFIER (100)
 #endif
 
+// Time in milliseconds to freeze a player upon using a linked teleport button.
 #if !defined BTN_TELEPORT_FREEZE_TIME
 	#define BTN_TELEPORT_FREEZE_TIME (1000)
 #endif
 
+// Validity check constant
+#define INVALID_BUTTON_ID (-1)
 
-#define INVALID_BUTTON_ID	(-1)
+
+// Functions
+
+
+forward CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST);
+/*
+# Description
+Creates an interactive button players can activate by pressing F.
+
+# Parameters
+- x, y, z: World position.
+- text: Message box text for when the player approaches the button.
+- world: The virtual world to show the button in.
+- interior: The interior world to show the button in.
+- areasize: Size of the button's detection area.
+- label: Determines whether a 3D Text Label should be at the button.
+- labeltext: The text that the label should show.
+- labelcolour: The colour of the label.
+- streamdist: Stream distance of the label.
+
+# Returns
+Button ID handle of the newly created button or INVALID_BUTTON_ID if another
+button cannot be created due to BTN_MAX limit.
+*/
+
+forward DestroyButton(buttonid);
+/*
+# Description
+Destroys a button.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward LinkTP(buttonid1, buttonid2);
+/*
+# Description
+Links two buttons to be teleport buttons, if a user presses buttonid1 he will be
+teleported to the position of buttonid2 and vice versa.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward UnLinkTP(buttonid1, buttonid2);
+/*
+# Description
+Un-links two linked buttons
+
+# Returns
+-1 if buttons are not linked at all. -2 if either is linked to another button.
+*/
+
+forward IsValidButton(buttonid);
+/*
+# Description
+Checks if buttonid is a valid button ID handle.
+*/
+
+forward GetButtonArea(buttonid);
+/*
+# Description
+Returns the streamer area ID used by a button.
+*/
+
+forward SetButtonArea(buttonid, areaid);
+/*
+# Description
+Updates a button's streamer area ID. Note that this does not remove the existing
+area from memory.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST);
+/*
+# Description
+Creates a 3D Text Label at the specified button ID handle, if a label already
+exists it updates the text, colour and range.
+*/
+
+forward DestroyButtonLabel(buttonid);
+/*
+# Description
+Removes the label from a button.
+
+# Returns
+Boolean to indicate success or failure. -1 if the button did not have a label.
+*/
+
+forward GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z);
+/*
+# Description
+Stores the button's X, Y and Z into parameters.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward SetButtonPos(buttonid, Float:x, Float:y, Float:z);
+/*
+# Description
+Changes the button position (area, label, etc).
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward Float:GetButtonSize(buttonid);
+/*
+# Description
+Returns the size of the specified button's dynamic area.
+
+# Returns
+0.0 if the specified button ID handle is invalid.
+*/
+
+forward SetButtonSize(buttonid, Float:size);
+/*
+# Description
+Sets a button's detection area size.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetButtonWorld(buttonid);
+/*
+# Description
+Returns the virtual world that a button exists in.
+*/
+
+forward SetButtonWorld(buttonid, world);
+/*
+# Description
+Updates a button's virtual world. Moves all streamer entities to the world too.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetButtonInterior(buttonid);
+/*
+# Description
+Returns the interior that a button exists in.
+*/
+
+forward SetButtonInterior(buttonid, interior);
+/*
+# Description
+Updates a button's interior. Moves all streamer entities to the interior too.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetButtonLinkedID(buttonid);
+/*
+# Description
+Returns the linked button of buttonid.
+*/
+
+forward GetButtonText(buttonid, text[]);
+/*
+# Description
+Returns the text assigned to a button that appears on-screen when a player walks near it.
+*/
+
+forward SetButtonText(buttonid, text[]);
+/*
+# Description
+Updates the text that appears on-screen when a player walks near the button.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward SetButtonExtraData(buttonid, data);
+/*
+# Description
+Sets the button's extra data field, this is one cell of blank space allocated for each button.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetButtonExtraData(buttonid);
+/*
+# Description
+Retrieves the integer assigned to the button set with SetButtonExtraData.
+*/
+
+forward GetPlayerPressingButton(playerid);
+/*
+# Description
+Returns the ID of the button that the player is currently pressing. This will
+only return a value while playerid is holding down the interact key at a button.
+*/
+
+forward GetPlayerButtonID(playerid);
+/*
+# Description
+Returns the closest button that a player is standing within the area of.
+*/
+
+forward GetPlayerButtonList(playerid, list[], &size, bool:validate = false);
+/*
+# Description
+Returns a list of buttons that a player is standing in the areas of.
+
+# Parameters
+- playerid: Player to get a list of buttons from.
+
+- list: Array to store the buttons in (Must be BTN_MAX_INRANGE size)
+
+- size: Stores the amount of buttons in the list.
+
+- validate: If true, the function will check if the player is actually in each
+  button in the list. This is a small workaround for a larger problem that is
+  currently unknown that results in a button not being removed from a player's
+  list when they leave the area for it.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward Float:GetPlayerAngleToButton(playerid, buttonid);
+/*
+# Description
+Returns the angle in degrees from a player to a button.
+*/
+
+forward Float:GetButtonAngleToPlayer(playerid, buttonid);
+/*
+# Description
+Returns the angle in degrees from a button to a player.
+*/
+
+
+// Events
+
+
+forward OnButtonPress(playerid, buttonid);
+/*
+# Called
+When a player presses the F/Enter key while at a button.
+
+# Returns
+If the button is a linked teleporter, return 1 to prevent teleporting.
+*/
+
+forward OnButtonRelease(playerid, buttonid);
+/*
+# Called
+When a player releases the F/Enter key after pressing it while at a button.
+*/
+
+forward OnPlayerEnterButtonArea(playerid, buttonid);
+/*
+# Called
+When a player enters the dynamic streamed area of a button.
+*/
+
+forward OnPlayerLeaveButtonArea(playerid, buttonid);
+/*
+# Called
+When a player leaves the dynamic streamed area of a button.
+*/
+
+
+/*==============================================================================
+
+	Setup
+
+==============================================================================*/
 
 
 enum E_BTN_DATA
@@ -783,12 +427,6 @@ static
 			btn_CurrentlyNear[MAX_PLAYERS][BTN_MAX_INRANGE],
 Iterator:	btn_CurrentlyNearIndex[MAX_PLAYERS]<BTN_MAX_INRANGE>,
 			btn_CurrentlyPressing[MAX_PLAYERS];
-
-
-forward OnButtonPress(playerid, buttonid);
-forward OnButtonRelease(playerid, buttonid);
-forward OnPlayerEnterButtonArea(playerid, buttonid);
-forward OnPlayerLeaveButtonArea(playerid, buttonid);
 
 
 static BUTTON_DEBUG = -1;
@@ -877,6 +515,7 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 
 	return id;
 }
+
 stock DestroyButton(buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[DestroyButton]");
@@ -922,7 +561,7 @@ stock DestroyButton(buttonid)
 	return 1;
 }
 
-stock LinkTP(buttonid1, buttonid2)
+stock LinkTP(buttonid1, buttonid2, id3)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[LinkTP]");
 	if(!Iter_Contains(btn_Index, buttonid1) || !Iter_Contains(btn_Index, buttonid2))
@@ -961,315 +600,6 @@ stock UnLinkTP(buttonid1, buttonid2)
 
 	return 1;
 }
-
-
-/*==============================================================================
-
-	Internal Functions and Hooks
-
-==============================================================================*/
-
-
-hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
-{
-	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerKeyStateChange]")<playerid>;
-	if(newkeys & 16)
-	{
-		if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
-		{
-			if(!IsPlayerInAnyDynamicArea(playerid))
-			{
-				printf("[WARNING] Player %d is not in areas but list isn't empty. Purging list.", playerid);
-				Iter_Clear(btn_CurrentlyNearIndex[playerid]);
-			}
-
-			new
-				id,
-				Float:x,
-				Float:y,
-				Float:z,
-				Float:distance,
-				list[BTN_MAX_INRANGE][e_button_range_data],
-				index;
-
-			GetPlayerPos(playerid, x, y, z);
-
-			foreach(new i : btn_CurrentlyNearIndex[playerid])
-			{
-				if(index >= BTN_MAX_INRANGE - 1)
-					break;
-
-				id = btn_CurrentlyNear[playerid][i];
-
-				distance = sif_Distance(x, y, z, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
-
-				if(distance > btn_Data[id][btn_size])
-					continue;
-
-				if(!(btn_Data[id][btn_posZ] - btn_Data[id][btn_size] <= z <= btn_Data[id][btn_posZ] + btn_Data[id][btn_size]))
-					continue;
-
-
-				list[index][btn_buttonId] = id;
-				list[index][btn_distance] = distance;
-
-				index++;
-			}
-
-			_btn_SortButtons(list, 0, index);
-
-			for(new i = index - 1; i >= 0; i--)
-			{
-				if(Internal_OnButtonPress(playerid, list[i][btn_buttonId]))
-					break;
-			}
-		}
-
-		if(oldkeys & 16)
-		{
-			if(btn_CurrentlyPressing[playerid] != INVALID_BUTTON_ID)
-			{
-				CallLocalFunction("OnButtonRelease", "dd", playerid, btn_CurrentlyPressing[playerid]);
-				btn_CurrentlyPressing[playerid] = INVALID_BUTTON_ID;
-			}
-		}
-	}
-	return 1;
-}
-
-_btn_SortButtons(array[][e_button_range_data], left, right)
-{
-	new
-		tmp_left = left,
-		tmp_right = right,
-		Float:pivot = array[(left + right) / 2][btn_distance],
-		buttonid,
-		Float:distance;
-
-	while(tmp_left <= tmp_right)
-	{
-		while(array[tmp_left][btn_distance] > pivot)
-			tmp_left++;
-
-		while(array[tmp_right][btn_distance] < pivot)
-			tmp_right--;
-
-		if(tmp_left <= tmp_right)
-		{
-			buttonid = array[tmp_left][btn_buttonId];
-			array[tmp_left][btn_buttonId] = array[tmp_right][btn_buttonId];
-			array[tmp_right][btn_buttonId] = buttonid;
-
-			distance = array[tmp_left][btn_distance];
-			array[tmp_left][btn_distance] = array[tmp_right][btn_distance];
-			array[tmp_right][btn_distance] = distance;
-
-			tmp_left++;
-			tmp_right--;
-		}
-	}
-
-	if(left < tmp_right)
-		_btn_SortButtons(array, left, tmp_right);
-
-	if(tmp_left < right)
-		_btn_SortButtons(array, tmp_left, right);
-}
-
-Internal_OnButtonPress(playerid, buttonid)
-{
-	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:BUTTON_DEBUG("[Internal_OnButtonPress]")<playerid>;
-	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
-
-	new id = btn_Data[buttonid][btn_link];
-
-	if(Iter_Contains(btn_Index, id))
-	{
-		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
-			return 1;
-
-		TogglePlayerControllable(playerid, false);
-		defer btn_Unfreeze(playerid);
-
-		Streamer_UpdateEx(playerid,
-			btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ],
-			btn_Data[id][btn_world], btn_Data[id][btn_interior]);
-
-		SetPlayerVirtualWorld(playerid, btn_Data[id][btn_world]);
-		SetPlayerInterior(playerid, btn_Data[id][btn_interior]);
-		SetPlayerPos(playerid, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
-	}
-	else
-	{
-		btn_CurrentlyPressing[playerid] = buttonid;
-
-		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
-			return 1;
-	}
-
-	return 0;
-}
-
-timer btn_Unfreeze[BTN_TELEPORT_FREEZE_TIME](playerid)
-{
-	TogglePlayerControllable(playerid, true);
-}
-
-public OnPlayerEnterDynamicArea(playerid, areaid)
-{
-	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerEnterDynamicArea]")<playerid>;
-	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) < BTN_MAX_INRANGE)
-	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] player is valid")<playerid>;
-		new data[2];
-
-		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
-
-		// Due to odd streamer behavior reversing data arrays:
-		// Only use this if you are using streamer v2.7.1 or lower
-		// new tmp = data[0];
-		// data[0] = data[1];
-		// data[1] = tmp;
-		// end
-
-		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
-		{
-			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] area is valid")<playerid>;
-			if(Iter_Contains(btn_Index, data[1]))
-			{
-				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] in index")<playerid>;
-				new cell = Iter_Free(btn_CurrentlyNearIndex[playerid]);
-
-				btn_CurrentlyNear[playerid][cell] = data[1];
-				Iter_Add(btn_CurrentlyNearIndex[playerid], cell);
-
-				ShowActionText(playerid, btn_Data[data[1]][btn_text]);
-				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, data[1]);
-			}
-		}
-	}
-
-	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] end")<playerid>;
-
-	#if defined btn_OnPlayerEnterDynamicArea
-		return btn_OnPlayerEnterDynamicArea(playerid, areaid);
-	#else
-		return 0;
-	#endif
-}
-#if defined _ALS_OnPlayerEnterDynamicArea
-	#undef OnPlayerEnterDynamicArea
-#else
-	#define _ALS_OnPlayerEnterDynamicArea
-#endif
-#define OnPlayerEnterDynamicArea btn_OnPlayerEnterDynamicArea
-#if defined btn_OnPlayerEnterDynamicArea
-	forward btn_OnPlayerEnterDynamicArea(playerid, areaid);
-#endif
-
-
-public OnPlayerLeaveDynamicArea(playerid, areaid)
-{
-	process_LeaveDynamicArea(playerid, areaid);
-
-	#if defined btn_OnPlayerLeaveDynamicArea
-		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
-	#else
-		return 0;
-	#endif
-}
-#if defined _ALS_OnPlayerLeaveDynamicArea
-	#undef OnPlayerLeaveDynamicArea
-#else
-	#define _ALS_OnPlayerLeaveDynamicArea
-#endif
-#define OnPlayerLeaveDynamicArea btn_OnPlayerLeaveDynamicArea
-#if defined btn_OnPlayerLeaveDynamicArea
-	forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
-#endif
-
-process_LeaveDynamicArea(playerid, areaid)
-{
-	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea]")<playerid>;
-
-	if(!IsValidDynamicArea(areaid))
-	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] area ID is invalid")<playerid>;
-		return 1;
-	}
-
-	if(IsPlayerInAnyVehicle(playerid))
-	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player is in vehicle")<playerid>;
-		return 1;
-	}
-
-	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
-	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player nearindex is empty")<playerid>;
-		return 2;
-	}
-
-	new data[2];
-
-	Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
-
-	// Due to odd streamer behavior reversing data arrays:
-	// Only use this if you are using streamer v2.7.1 or lower
-	// new tmp = data[0];
-	// data[0] = data[1];
-	// data[1] = tmp;
-	// end
-
-	if(data[0] != BTN_STREAMER_AREA_IDENTIFIER)
-	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] area is not a button area")<playerid>;
-		return 3;
-	}
-
-	if(!Iter_Contains(btn_Index, data[1]))
-	{
-		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] button ID is invalid")<playerid>;
-		return 4;
-	}
-
-	HideActionText(playerid);
-	CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
-
-	foreach(new i : btn_CurrentlyNearIndex[playerid])
-	{
-		sif_dp:SIF_DEBUG_LEVEL_LOOPS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] looping player list")<playerid>;
-
-		if(btn_CurrentlyNear[playerid][i] == data[1])
-		{
-			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] removing from player list")<playerid>;
-			Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
-			break;
-		}
-	}
-
-	return 0;
-}
-
-#if defined DEBUG_LABELS_BUTTON
-	UpdateButtonDebugLabel(buttonid)
-	{
-		new string[64];
-
-		format(string, sizeof(string), "EXDATA: %d SIZE: %.1f LINK: %d", btn_Data[buttonid][btn_exData], btn_Data[buttonid][btn_size], btn_Data[buttonid][btn_link]);
-
-		UpdateDebugLabelString(btn_DebugLabelID[buttonid], string);
-	}
-#endif
-
-
-/*==============================================================================
-
-	Interface Functions
-
-==============================================================================*/
-
 
 stock IsValidButton(buttonid)
 {
@@ -1636,6 +966,307 @@ stock Float:GetButtonAngleToPlayer(playerid, buttonid)
 
 	return sif_GetAngleToPoint(btn_Data[buttonid][btn_posX], btn_Data[buttonid][btn_posY], x, y);
 }
+
+
+/*==============================================================================
+
+	Internal Functions and Hooks
+
+==============================================================================*/
+
+
+hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
+{
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerKeyStateChange]")<playerid>;
+	if(newkeys & 16)
+	{
+		if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
+		{
+			if(!IsPlayerInAnyDynamicArea(playerid))
+			{
+				printf("[WARNING] Player %d is not in areas but list isn't empty. Purging list.", playerid);
+				Iter_Clear(btn_CurrentlyNearIndex[playerid]);
+			}
+
+			new
+				id,
+				Float:x,
+				Float:y,
+				Float:z,
+				Float:distance,
+				list[BTN_MAX_INRANGE][e_button_range_data],
+				index;
+
+			GetPlayerPos(playerid, x, y, z);
+
+			foreach(new i : btn_CurrentlyNearIndex[playerid])
+			{
+				if(index >= BTN_MAX_INRANGE - 1)
+					break;
+
+				id = btn_CurrentlyNear[playerid][i];
+
+				distance = sif_Distance(x, y, z, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
+
+				if(distance > btn_Data[id][btn_size])
+					continue;
+
+				if(!(btn_Data[id][btn_posZ] - btn_Data[id][btn_size] <= z <= btn_Data[id][btn_posZ] + btn_Data[id][btn_size]))
+					continue;
+
+
+				list[index][btn_buttonId] = id;
+				list[index][btn_distance] = distance;
+
+				index++;
+			}
+
+			_btn_SortButtons(list, 0, index);
+
+			for(new i = index - 1; i >= 0; i--)
+			{
+				if(Internal_OnButtonPress(playerid, list[i][btn_buttonId]))
+					break;
+			}
+		}
+
+		if(oldkeys & 16)
+		{
+			if(btn_CurrentlyPressing[playerid] != INVALID_BUTTON_ID)
+			{
+				CallLocalFunction("OnButtonRelease", "dd", playerid, btn_CurrentlyPressing[playerid]);
+				btn_CurrentlyPressing[playerid] = INVALID_BUTTON_ID;
+			}
+		}
+	}
+	return 1;
+}
+
+_btn_SortButtons(array[][e_button_range_data], left, right)
+{
+	new
+		tmp_left = left,
+		tmp_right = right,
+		Float:pivot = array[(left + right) / 2][btn_distance],
+		buttonid,
+		Float:distance;
+
+	while(tmp_left <= tmp_right)
+	{
+		while(array[tmp_left][btn_distance] > pivot)
+			tmp_left++;
+
+		while(array[tmp_right][btn_distance] < pivot)
+			tmp_right--;
+
+		if(tmp_left <= tmp_right)
+		{
+			buttonid = array[tmp_left][btn_buttonId];
+			array[tmp_left][btn_buttonId] = array[tmp_right][btn_buttonId];
+			array[tmp_right][btn_buttonId] = buttonid;
+
+			distance = array[tmp_left][btn_distance];
+			array[tmp_left][btn_distance] = array[tmp_right][btn_distance];
+			array[tmp_right][btn_distance] = distance;
+
+			tmp_left++;
+			tmp_right--;
+		}
+	}
+
+	if(left < tmp_right)
+		_btn_SortButtons(array, left, tmp_right);
+
+	if(tmp_left < right)
+		_btn_SortButtons(array, tmp_left, right);
+}
+
+Internal_OnButtonPress(playerid, buttonid)
+{
+	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:BUTTON_DEBUG("[Internal_OnButtonPress]")<playerid>;
+	if(!Iter_Contains(btn_Index, buttonid))
+		return 0;
+
+	new id = btn_Data[buttonid][btn_link];
+
+	if(Iter_Contains(btn_Index, id))
+	{
+		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
+			return 1;
+
+		TogglePlayerControllable(playerid, false);
+		defer btn_Unfreeze(playerid);
+
+		Streamer_UpdateEx(playerid,
+			btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ],
+			btn_Data[id][btn_world], btn_Data[id][btn_interior]);
+
+		SetPlayerVirtualWorld(playerid, btn_Data[id][btn_world]);
+		SetPlayerInterior(playerid, btn_Data[id][btn_interior]);
+		SetPlayerPos(playerid, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
+	}
+	else
+	{
+		btn_CurrentlyPressing[playerid] = buttonid;
+
+		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
+			return 1;
+	}
+
+	return 0;
+}
+
+timer btn_Unfreeze[BTN_TELEPORT_FREEZE_TIME](playerid)
+{
+	TogglePlayerControllable(playerid, true);
+}
+
+public OnPlayerEnterDynamicArea(playerid, areaid)
+{
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerEnterDynamicArea]")<playerid>;
+	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) < BTN_MAX_INRANGE)
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] player is valid")<playerid>;
+		new data[2];
+
+		Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
+
+		// Due to odd streamer behavior reversing data arrays:
+		// Only use this if you are using streamer v2.7.1 or lower
+		// new tmp = data[0];
+		// data[0] = data[1];
+		// data[1] = tmp;
+		// end
+
+		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
+		{
+			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] area is valid")<playerid>;
+			if(Iter_Contains(btn_Index, data[1]))
+			{
+				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] in index")<playerid>;
+				new cell = Iter_Free(btn_CurrentlyNearIndex[playerid]);
+
+				btn_CurrentlyNear[playerid][cell] = data[1];
+				Iter_Add(btn_CurrentlyNearIndex[playerid], cell);
+
+				ShowActionText(playerid, btn_Data[data[1]][btn_text]);
+				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, data[1]);
+			}
+		}
+	}
+
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] end")<playerid>;
+
+	#if defined btn_OnPlayerEnterDynamicArea
+		return btn_OnPlayerEnterDynamicArea(playerid, areaid);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnPlayerEnterDynamicArea
+	#undef OnPlayerEnterDynamicArea
+#else
+	#define _ALS_OnPlayerEnterDynamicArea
+#endif
+#define OnPlayerEnterDynamicArea btn_OnPlayerEnterDynamicArea
+#if defined btn_OnPlayerEnterDynamicArea
+	forward btn_OnPlayerEnterDynamicArea(playerid, areaid);
+#endif
+
+
+public OnPlayerLeaveDynamicArea(playerid, areaid)
+{
+	process_LeaveDynamicArea(playerid, areaid);
+
+	#if defined btn_OnPlayerLeaveDynamicArea
+		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnPlayerLeaveDynamicArea
+	#undef OnPlayerLeaveDynamicArea
+#else
+	#define _ALS_OnPlayerLeaveDynamicArea
+#endif
+#define OnPlayerLeaveDynamicArea btn_OnPlayerLeaveDynamicArea
+#if defined btn_OnPlayerLeaveDynamicArea
+	forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
+#endif
+
+process_LeaveDynamicArea(playerid, areaid)
+{
+	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea]")<playerid>;
+
+	if(!IsValidDynamicArea(areaid))
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] area ID is invalid")<playerid>;
+		return 1;
+	}
+
+	if(IsPlayerInAnyVehicle(playerid))
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player is in vehicle")<playerid>;
+		return 1;
+	}
+
+	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player nearindex is empty")<playerid>;
+		return 2;
+	}
+
+	new data[2];
+
+	Streamer_GetArrayData(STREAMER_TYPE_AREA, areaid, E_STREAMER_EXTRA_ID, data, 2);
+
+	// Due to odd streamer behavior reversing data arrays:
+	// Only use this if you are using streamer v2.7.1 or lower
+	// new tmp = data[0];
+	// data[0] = data[1];
+	// data[1] = tmp;
+	// end
+
+	if(data[0] != BTN_STREAMER_AREA_IDENTIFIER)
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] area is not a button area")<playerid>;
+		return 3;
+	}
+
+	if(!Iter_Contains(btn_Index, data[1]))
+	{
+		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] button ID is invalid")<playerid>;
+		return 4;
+	}
+
+	HideActionText(playerid);
+	CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
+
+	foreach(new i : btn_CurrentlyNearIndex[playerid])
+	{
+		sif_dp:SIF_DEBUG_LEVEL_LOOPS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] looping player list")<playerid>;
+
+		if(btn_CurrentlyNear[playerid][i] == data[1])
+		{
+			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] removing from player list")<playerid>;
+			Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
+			break;
+		}
+	}
+
+	return 0;
+}
+
+#if defined DEBUG_LABELS_BUTTON
+	UpdateButtonDebugLabel(buttonid)
+	{
+		new string[64];
+
+		format(string, sizeof(string), "EXDATA: %d SIZE: %.1f LINK: %d", btn_Data[buttonid][btn_exData], btn_Data[buttonid][btn_size], btn_Data[buttonid][btn_link]);
+
+		UpdateDebugLabelString(btn_DebugLabelID[buttonid], string);
+	}
+#endif
 
 
 /*==============================================================================
