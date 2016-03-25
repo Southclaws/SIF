@@ -1,517 +1,46 @@
 /*==============================================================================
 
-Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
+# Southclaw's Interactivity Framework (SIF)
 
-	SIF Version: 1.4.0
-	Module Version: 2.0.0
+## Overview
 
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
 
-	SIF/Overview
-	{
-		SIF is a collection of high-level include scripts to make the
-		development of interactive features easy for the developer while
-		maintaining quality front-end gameplay for players.
-	}
+## Description
 
-	SIF/Container/Description
-	{
-		A complex script that allows 'virtual inventories' to be created in
-		order to store items in. Containers can be interacted with just like
-		anything else with a button or a virtual container can be created
-		without a way of interacting in the game world so the contents of if can
-		be shown from a script function instead.
+A complex script that allows 'virtual inventories' to be created in order to
+store items in. Containers can be interacted with just like anything else with a
+button or a virtual container can be created without a way of interacting in the
+game world so the contents of if can be shown from a script function instead.
 
-		This script hooks a lot of Inventory functions and uses the interface
-		functions to allow players to switch between a container item list and
-		their own inventory to make swapping items or looting quick and easy.
-	}
+This script hooks a lot of Inventory functions and uses the interface functions
+to allow players to switch between a container item list and their own inventory
+to make swapping items or looting quick and easy.
 
-	SIF/Container/Dependencies
-	{
-		SIF/Button
-		SIF/Item
-		SIF/Inventory
-		Streamer Plugin
-		YSI\y_hooks
-		YSI\y_timers
-	}
-
-	SIF/Container/Credits
-	{
-		SA:MP Team						- Amazing mod!
-		SA:MP Community					- Inspiration and support
-		Incognito						- Very useful streamer plugin
-		Y_Less							- YSI framework
-	}
-
-	SIF/Container/Constants
-	{
-		These can be altered by defining their values before the include line.
-
-		CNT_MAX
-			Maximum amount of containers that can be created.
-
-		CNT_MAX_NAME
-			Maximum string length for container names.
-
-		CNT_MAX_SLOTS
-			Maximum slot size amount for containers.
-	}
-
-	SIF/Container/Core Functions
-	{
-		The functions that control the core features of this script.
-
-		native -
-		native - SIF/Container/Core
-		native -
-
-		native CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID)
-		{
-			Description:
-				Creates a container to store items in, can be specified as
-				virtual to not create a button or label so the container is only
-				accessible via the script.
-
-			Parameters:
-				<name> (string)
-					The name given to the container. Also applied to the button
-					label if created in the world.
-
-				<size> (int)
-					The maximum capacity of items the container can store.
-
-				<buttonid> (int, buttonid)
-					If specified, the container is associated with a button
-					which, when pressed, opens the container UI for a player.
-
-			Returns:
-				(int, containerid)
-					Container ID handle of the newly created container.
-
-				INVALID_CONTAINER_ID
-					If another container cannot be created due to CNT_MAX
-					limit.
-		}
-
-		native DestroyContainer(containerid, destroyitems = true)
-		{
-			Description:
-				Removes a container from memory and frees the ID.
-
-			Parameters:
-				<containerid> (int, containerid)
-					The container to destroy.
-
-				<destroyitems> (boolean)
-					When true, the items in the container are also destroyed.
-
-			Returns:
-				0
-					If the containerid is invalid.
-		}
-
-		native AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
-		{
-			Description:
-				Adds an item to a container list, calls OnItemAddToContainer.
-
-			Parameters:
-				<containerid> (int, containerid)
-					The container to add the item to.
-
-				<itemid> (int)
-					The item to add (must be valid, may be virtual)
-
-				<playerid> (int)
-					Can tell other scripts that the item was added by a player
-					and not automatically.
-
-			Returns:
-				0
-					If the function completed successfully.
-
-				(int+)
-					The amount of slots required to fit the item in.
-
-				(int-)
-					A negative integer error code.
-		}
-
-		native RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID)
-		{
-			Description:
-				Removes an item from a container slot.
-
-			Parameters:
-				<containerid> (int)
-					The container to remove from.
-
-				<slotid> (int)
-					The slot in the container to remove an item from. NOT an
-					itemid!
-
-				<playerid> (int)
-					Can tell other scripts that a player caused the item
-					removal rather than the script.
-
-			Returns:
-				1
-					On success.
-
-				0
-					If the specified slot was out of bounds.
-
-				-1
-					If the specified slot contained an invalid item ID.
-		}
-	}
-
-	SIF/Container/Events
-	{
-		Events called by player actions done by using features from this script.
-
-		native -
-		native - SIF/Container/Callbacks
-		native -
-
-		native OnItemAddToContainer(containerid, itemid, playerid);
-		{
-			Called:
-				When an item is added to a container. Note that the item won't
-				actually be in the container list when this is called.
-
-			Parameters:
-				<containerid> (int)
-					The container the item will be added to.
-
-				<itemid> (int)
-					The item that will be added.
-
-				<playerid> (int)
-					The player who is adding it (specified in
-					AddItemToContainer)
-
-			Returns:
-				1
-					To cancel the item being added.
-		}
-
-		native OnItemAddedToContainer(containerid, itemid, playerid);
-		{
-			Called:
-				After an item has been added to a container.
-
-			Parameters:
-				<containerid> (int)
-					The container the item was added to.
-
-				<itemid> (int)
-					The item that was added.
-
-				<playerid> (int)
-					The player who added it (specified in AddItemToContainer)
-
-			Returns:
-				(none)
-		}
-
-		native OnItemRemoveFromContainer(containerid, slotid, playerid);
-		{
-			Called:
-				As an item is removed from a container. Note that the item will
-				still be in the container list when this is called.
-
-			Parameters:
-				<containerid> (int)
-					The container the item will be removed from.
-
-				<itemid> (int)
-					The item that will be removed.
-
-				<playerid> (int)
-					The player who is removing it (specified in
-					RemoveItemFromContainer)
-
-			Returns:
-				1
-					To cancel the item being removed.
-		}
-
-		native OnItemRemovedFromContainer(containerid, slotid, playerid);
-		{
-			Called:
-				After an item has been removed from a container.
-
-			Parameters:
-				<containerid> (int)
-					The container the item was removed from.
-
-				<itemid> (int)
-					The item that was removed.
-
-				<playerid> (int)
-					The player who removed it (specified in
-					RemoveItemFromContainer)
-
-			Returns:
-				(nothing)
-		}
-	}
-
-	SIF/Container/Interface Functions
-	{
-		Functions to get or set data values in this script without editing
-		the data directly. These include automatic ID validation checks.
-
-		native -
-		native - SIF/Container/Interface
-		native -
-
-		native IsValidContainer(containerid)
-		{
-			Description:
-				Checks if a container ID is valid.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetContainerButton(containerid)
-		{
-			Description:
-				Returns the button ID used by a container (if not virtual).
-
-			Parameters:
-				-
-
-			Returns:
-				(int, buttonid)
-		}
-
-		native GetContainerName(containerid, name[])
-		{
-			Description:
-				Returns a container's name.
-
-			Parameters:
-				-
-
-			Returns:
-				(bool)
-					Success state.
-		}
-
-		native GetContainerSize(containerid)
-		{
-			Description:
-				Returns a container's item capacity.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native SetContainerSize(containerid, size)
-		{
-			Description:
-				Sets a container's item capacity.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetContainerWorld(containerid)
-		{
-			Description:
-				Returns the virtual world a container's button exists in.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native SetContainerWorld(containerid, world)
-		{
-			Description:
-				Sets the virtual world that a container's button will exist in.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetContainerInterior(containerid)
-		{
-			Description:
-				Returns the interior world a container's button exists in.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native SetContainerInterior(containerid, interior)
-		{
-			Description:
-				Sets the interior world that a container's button will exist in.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetContainerSlotItem(containerid, slot)
-		{
-			Description:
-				Returns the item stored in the specified slot.
-
-			Parameters:
-				-
-
-			Returns:
-				(int, itemid)
-		}
-
-		native IsContainerSlotUsed(containerid, slotid)
-		{
-			Description:
-				Checks if a slot in a container is occupied by an item.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native IsContainerFull(containerid)
-		{
-			Description:
-				Checks if a container is full.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native IsContainerEmpty(containerid)
-		{
-			Description:
-				Checks if a container is empty.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native WillItemTypeFitInContainer(containerid, ItemType:itemtype)
-		{
-			Description:
-				Checks if an item type will fit into a container.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetContainerFreeSlots(containerid)
-		{
-			Description:
-				Returns the number of free item slots in a container.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native GetItemContainer(itemid)
-		{
-			Description:
-				Returns the ID of the container that <itemid> is stored in.
-
-			Parameters:
-				-
-
-			Returns:
-				(int, containerid)
-		}
-
-		native GetItemContainerSlot(itemid)
-		{
-			Description:
-				Returns the container slot that the item is stored in if inside
-				a container.
-
-			Parameters:
-				-
-
-			Returns:
-				(int)
-		}
-
-		native GetButtonContainer(buttonid)
-		{
-			Description:
-				Returns the ID of the container that <buttonid> is created for.
-
-			Parameters:
-				-
-
-			Returns:
-				(int, containerid)
-		}
-	}
-
-	SIF/Container/Internal Functions
-	{
-		Internal events called by player actions done by using features from
-		this script.
+## Dependencies
 	
-		-
-	}
+- SIF\Button
+- SIF\Item
+- SIF\Inventory
+- Streamer Plugin
+- YSI\y_hooks
+- YSI\y_timers
 
-	SIF/Container/Hooks
-	{
-		Hooked functions or callbacks, either SA:MP natives or from other
-		scripts or plugins.
+## Hooks
 
-		YSI/OnScriptInit
-		{
-			Reason:
-				Zero initialised array cells.
-		}
+- OnScriptInit: Zero initialised array cells.
+- OnItemDestroy: To remove destroyed items from containers.
+- OnItemCreateInWorld: To clean item container IDs that may be left over.
+- OnButtonPress: Allowing container entities to be interacted with.
 
-		SIF/OnButtonPress
-		{
-			Reason:
-				Allowing container entities to be interacted with.
-		}
-	}
+## Credits
+
+- SA:MP Team: Amazing mod!
+- SA:MP Community: Inspiration and support
+- Incognito: Very useful streamer plugin
+- Y_Less: YSI framework
 
 ==============================================================================*/
 
@@ -542,25 +71,229 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 /*==============================================================================
 
-	Setup
+	Constant Definitions, Function Declarations and Documentation
 
 ==============================================================================*/
 
 
+// Maximum amount of containers that can be created.
 #if !defined CNT_MAX
 	#define CNT_MAX						(4096)
 #endif
 
+// Maximum string length for container names.
 #if !defined CNT_MAX_NAME
 	#define CNT_MAX_NAME				(32)
 #endif
 
+// Maximum slot size amount for containers.
 #if !defined CNT_MAX_SLOTS
 	#define CNT_MAX_SLOTS				(24)
 #endif
 
 
 #define INVALID_CONTAINER_ID			(-1)
+
+
+// Functions
+
+
+forward CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID);
+/*
+# Description
+Creates a container to store items in, can be specified as virtual to not create
+a button or label so the container is only accessible via the script.
+
+# Parameters
+- name: A name given to the container, for menus etc.
+- size: The maximum capacity of items the container can store.
+- buttonid: If specified, the container is associated with a button which, when
+  pressed, opens the container UI for a player.
+
+# Returns
+ID of the newly created container or INVALID_CONTAINER_ID if the function failed
+due to CNT_MAX limit being reached.
+*/
+
+forward DestroyContainer(containerid, destroyitems = true, destroybutton = true);
+/*
+# Description
+Removes a container from memory and frees the ID.
+
+# Parameters
+- destroyitems: If true, items inside will also be deleted.
+- destroybutton: If true, and if a button is associated, button will be deleted.
+*/
+
+forward AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID);
+/*
+# Description
+Adds an item to a container list, calls OnItemAddToContainer.
+
+# Parameters
+- playerid: If set, can tell other modules that a player triggered the event.
+
+# Returns
+Returns 0 on success. If item doesn't fit, returns a positive integer
+representing required item slots, otherwise -1 if containerid invalid, -2 if
+itemid invalid, -3 if item is already in container, -4 if OnItemAddToContainer
+returned non-zero, -5 if item is inside another container, -6 if item is inside
+a player inventory from the SIF/Inventory module.
+*/
+
+forward RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID, call = 1);
+/*
+# Description
+Removes an item from a container slot.
+
+# Parameters
+- slotid: The slot to remove an item from (not the item ID).
+- playerid: If set, can tell other modules that a player triggered the removal.
+- call: If true, will call OnItemRemoveFromContainer
+*/
+
+forward IsValidContainer(containerid);
+/*
+# Description
+Checks if a container ID is valid.
+*/
+
+forward GetContainerButton(containerid);
+/*
+# Description
+Returns the button ID used by a container (if not virtual).
+*/
+
+forward GetContainerName(containerid, name[]);
+/*
+# Description
+Returns a container's name.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetContainerSize(containerid);
+/*
+# Description
+Returns a container's item capacity.
+*/
+
+forward SetContainerSize(containerid, size);
+/*
+# Description
+Sets a container's item capacity.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetContainerSlotItem(containerid, slotid);
+/*
+# Description
+Returns the item stored in the specified slot.
+*/
+
+forward IsContainerSlotUsed(containerid, slotid);
+/*
+# Description
+Checks if a slot in a container is occupied by an item.
+*/
+
+forward IsContainerFull(containerid);
+/*
+# Description
+Checks if a container is full.
+*/
+
+forward IsContainerEmpty(containerid);
+/*
+# Description
+Checks if a container is empty.
+*/
+
+forward WillItemTypeFitInContainer(containerid, ItemType:itemtype);
+/*
+# Description
+Checks if an item type will fit into a container.
+*/
+
+forward GetContainerFreeSlots(containerid);
+/*
+# Description
+Returns the number of free item slots in a container.
+*/
+
+forward GetItemContainer(itemid);
+/*
+# Description
+Returns the ID of the container that itemid is stored in.
+*/
+
+forward GetItemContainerSlot(itemid);
+/*
+# Description
+Returns the container slot that the item is stored in if inside a container.
+*/
+
+forward GetButtonContainer(buttonid);
+/*
+# Description
+Returns the ID of the container that buttonid is created for.
+*/
+
+
+// Events
+
+
+forward OnContainerCreate(containerid);
+/*
+# Called
+Upon the creation of a container.
+*/
+
+forward OnContainerDestroy(containerid);
+/*
+# Called
+Upon the destruction of a container.
+*/
+
+forward OnItemAddToContainer(containerid, itemid, playerid);
+/*
+# Called
+When an item is added to a container. Note that the item won't actually be in the container list when this is called.
+
+# Returns
+1 to cancel the item being added.
+*/
+
+forward OnItemAddedToContainer(containerid, itemid, playerid);
+/*
+# Called
+After an item has been added to a container.
+*/
+
+forward OnItemRemoveFromContainer(containerid, slotid, playerid);
+/*
+# Called
+As an item is removed from a container. Note that the item will still be in the container list when this is called.
+
+# Returns
+1 to cancel the item being removed.
+*/
+
+forward OnItemRemovedFromContainer(containerid, slotid, playerid);
+/*
+# Called
+After an item has been removed from a container.
+*/
+
+
+/*==============================================================================
+
+	Setup
+
+==============================================================================*/
 
 
 enum E_CONTAINER_DATA
@@ -578,14 +311,6 @@ Iterator:	cnt_Index<CNT_MAX>,
 			cnt_ItemContainer			[ITM_MAX] = {INVALID_CONTAINER_ID, ...},
 			cnt_ItemContainerSlot		[ITM_MAX] = {-1, ...},
 			cnt_ButtonContainer			[BTN_MAX] = {INVALID_CONTAINER_ID, ...};
-
-
-forward OnContainerCreate(containerid);
-forward OnContainerDestroy(containerid);
-forward OnItemAddToContainer(containerid, itemid, playerid);
-forward OnItemAddedToContainer(containerid, itemid, playerid);
-forward OnItemRemoveFromContainer(containerid, slotid, playerid);
-forward OnItemRemovedFromContainer(containerid, slotid, playerid);
 
 
 static CNT_DEBUG = -1;
@@ -639,7 +364,7 @@ stock CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID)
 
 	Iter_Add(cnt_Index, id);
 
-	CallLocalFunction("OnContainerDestroy", "d", id);
+	CallLocalFunction("OnContainerCreate", "d", id);
 
 	return id;
 }
@@ -825,97 +550,6 @@ stock RemoveItemFromContainer(containerid, slotid, playerid = INVALID_PLAYER_ID,
 	return 1;
 }
 
-
-/*==============================================================================
-
-	Internal Functions and Hooks
-
-==============================================================================*/
-
-
-public OnItemDestroy(itemid)
-{
-	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemDestroy] %d", itemid);
-	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
-	{
-		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
-	}
-
-	#if defined cnt_OnItemDestroy
-		return cnt_OnItemDestroy(itemid);
-	#else
-		return 0;
-	#endif
-}
-#if defined _ALS_OnItemDestroy
-	#undef OnItemDestroy
-#else
-	#define _ALS_OnItemDestroy
-#endif
-#define OnItemDestroy cnt_OnItemDestroy
-#if defined cnt_OnItemDestroy
-	forward cnt_OnItemDestroy(itemid);
-#endif
-
-public OnItemCreateInWorld(itemid)
-{
-	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemCreateInWorld] %d", itemid);
-	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
-	{
-		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
-	}
-
-	#if defined cnt_OnItemCreateInWorld
-		return cnt_OnItemCreateInWorld(itemid);
-	#else
-		return 1;
-	#endif
-}
-#if defined _ALS_OnItemCreateInWorld
-	#undef OnItemCreateInWorld
-#else
-	#define _ALS_OnItemCreateInWorld
-#endif
- 
-#define OnItemCreateInWorld cnt_OnItemCreateInWorld
-#if defined cnt_OnItemCreateInWorld
-	forward cnt_OnItemCreateInWorld(itemid);
-#endif
-
-public OnButtonPress(playerid, buttonid)
-{
-	new containerid = GetButtonContainer(buttonid);
-
-	if(IsValidContainer(containerid))
-	{
-		ClearAnimations(playerid, 1);
-		DisplayContainerInventory(playerid, containerid);
-	}
-
-	#if defined cnt_OnButtonPress
-		return cnt_OnButtonPress(playerid, buttonid);
-	#else
-		return 0;
-	#endif
-}
-#if defined _ALS_OnButtonPress
-	#undef OnButtonPress
-#else
-	#define _ALS_OnButtonPress
-#endif
-#define OnButtonPress cnt_OnButtonPress
-#if defined cnt_OnButtonPress
-	forward cnt_OnButtonPress(playerid, buttonid);
-#endif
-
-
-/*==============================================================================
-
-	Interface
-
-==============================================================================*/
-
-
 stock IsValidContainer(containerid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[IsValidContainer] %d", containerid);
@@ -1098,3 +732,98 @@ stock GetButtonContainer(buttonid)
 
 	return cnt_ButtonContainer[buttonid];
 }
+
+
+/*==============================================================================
+
+	Internal Functions and Hooks
+
+==============================================================================*/
+
+
+public OnItemDestroy(itemid)
+{
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemDestroy] %d", itemid);
+	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
+	{
+		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
+	}
+
+	#if defined cnt_OnItemDestroy
+		return cnt_OnItemDestroy(itemid);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnItemDestroy
+	#undef OnItemDestroy
+#else
+	#define _ALS_OnItemDestroy
+#endif
+#define OnItemDestroy cnt_OnItemDestroy
+#if defined cnt_OnItemDestroy
+	forward cnt_OnItemDestroy(itemid);
+#endif
+
+public OnItemCreateInWorld(itemid)
+{
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemCreateInWorld] %d", itemid);
+	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
+	{
+		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
+	}
+
+	#if defined cnt_OnItemCreateInWorld
+		return cnt_OnItemCreateInWorld(itemid);
+	#else
+		return 1;
+	#endif
+}
+#if defined _ALS_OnItemCreateInWorld
+	#undef OnItemCreateInWorld
+#else
+	#define _ALS_OnItemCreateInWorld
+#endif
+ 
+#define OnItemCreateInWorld cnt_OnItemCreateInWorld
+#if defined cnt_OnItemCreateInWorld
+	forward cnt_OnItemCreateInWorld(itemid);
+#endif
+
+public OnButtonPress(playerid, buttonid)
+{
+	new containerid = GetButtonContainer(buttonid);
+
+	if(IsValidContainer(containerid))
+	{
+		ClearAnimations(playerid, 1);
+		DisplayContainerInventory(playerid, containerid);
+	}
+
+	#if defined cnt_OnButtonPress
+		return cnt_OnButtonPress(playerid, buttonid);
+	#else
+		return 0;
+	#endif
+}
+#if defined _ALS_OnButtonPress
+	#undef OnButtonPress
+#else
+	#define _ALS_OnButtonPress
+#endif
+#define OnButtonPress cnt_OnButtonPress
+#if defined cnt_OnButtonPress
+	forward cnt_OnButtonPress(playerid, buttonid);
+#endif
+
+
+/*==============================================================================
+
+	Testing
+
+==============================================================================*/
+
+
+#if defined RUN_TESTS
+	#include <SIF\testing\Container.pwn>
+#endif

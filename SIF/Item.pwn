@@ -1,6 +1,6 @@
 /*==============================================================================
 
-# Southclaw's Interactivity Framework (SIF) v1.4.0
+# Southclaw's Interactivity Framework (SIF)
 
 ## Overview
 
