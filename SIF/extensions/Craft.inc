@@ -102,7 +102,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					and the result item from being created.
 		}
 
-		native OnPlayerCrafted(playerid, craftset)
+		native OnPlayerCrafted(playerid, craftset, result)
 		{
 			Called:
 				After a player completed a crafting combination and all changes
@@ -654,7 +654,7 @@ _cft_AddItemToCraftList(playerid, itemid)
 
 	if(cft_SelectedItemCount[playerid] >= 2)
 	{
-		new craftset = _cft_CompareSelected(playerid);
+		new craftset = _cft_FindCraftset(cft_SelectedItems[playerid], cft_SelectedItemCount[playerid]);
 
 		if(craftset != -1)
 			_cft_CraftSelected(playerid, craftset);
@@ -768,33 +768,33 @@ _cft_CraftSelected(playerid, craftset)
 	return 1;
 }
 
-_cft_CompareSelected(playerid)
+_cft_FindCraftset(list[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data], size)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CompareSelected]");
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_FindCraftset]");
 
-	_btn_SortSelectedItems(cft_SelectedItems[playerid], 0, cft_SelectedItemCount[playerid]);
+	_btn_SortSelectedItems(list, 0, size);
 
 	for(new i; i < cft_Total; i++)
 	{
-		if(cft_ItemCount[i] != cft_SelectedItemCount[playerid])
+		if(cft_ItemCount[i] != size)
 			continue;
 
-		if(_cft_CompareListToCraftSet(playerid, i))
+		if(_cft_CompareListToCraftSet(list, i))
 			return i;
 	}
 
 	return -1;
 }
 
-_cft_CompareListToCraftSet(playerid, craftset)
+_cft_CompareListToCraftSet(list[][e_selected_item_data], craftset)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CompareListToCraftSet] player %d craftset %d", playerid, craftset);
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CompareListToCraftSet] craftset %d", craftset);
 
 	for(new i; i < cft_ItemCount[craftset]; i++)
 	{
-		sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CompareListToCraftSet] Item type in %d/%d craftset: %d, player selected: %d", i, cft_ItemCount[craftset], _:cft_Ingredients[craftset][i][cft_itemType], _:cft_SelectedItems[playerid][i][cft_selectedItemType]);
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CompareListToCraftSet] Item type in %d/%d craftset: %d, player selected: %d", i, cft_ItemCount[craftset], _:cft_Ingredients[craftset][i][cft_itemType], _:list[i][cft_selectedItemType]);
 
-		if(cft_Ingredients[craftset][i][cft_itemType] != cft_SelectedItems[playerid][i][cft_selectedItemType])
+		if(cft_Ingredients[craftset][i][cft_itemType] != list[i][cft_selectedItemType])
 			return 0;
 	}
 
@@ -890,6 +890,15 @@ _btn_SortSelectedItems(array[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data], lef
 
 ==============================================================================*/
 
+
+// cft_Total
+stock IsValidCraftSet(craftset)
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	return 1;
+}
 
 // cft_Ingredients
 stock GetCraftSetIngredients(craftset, ItemType:output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data])
