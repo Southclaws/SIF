@@ -1,125 +1,39 @@
 /*==============================================================================
 
-Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
+# Southclaw's Interactivity Framework (SIF)
 
-	SIF Version: 1.4.0
-	Module Version: 1.2.1
+## Overview
 
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
 
-	SIF/Overview
-	{
-		SIF is a collection of high-level include scripts to make the
-		development of interactive features easy for the developer while
-		maintaining quality front-end gameplay for players.
-	}
+## Description
 
-	SIF/Core/Description
-	{
-		A fundamental library with features used by multiple SIF scripts.
-	}
+A fundamental library with features used by SIF modules.
 
-	SIF/Core/Dependencies
-	{
-		Streamer Plugin
-		YSI\y_hooks
-		YSI\y_timers
-	}
+## Dependencies
 
-	SIF/Core/Credits
-	{
-		SA:MP Team						- Amazing mod!
-		SA:MP Community					- Inspiration and support
-		Incognito						- Very useful streamer plugin
-		Y_Less							- YSI framework
-	}
+- Streamer Plugin
+- YSI\y_hooks
+- YSI\y_timers
 
-	SIF/Core/Core Functions
-	{
-		The functions that control the core features of this script.
+## Hooks
 
-		native -
-		native - SIF/Core/Core
-		native -
+- OnFilterScriptInit: -
+- OnFilterScriptExit: -
+- OnPlayerConnect: -
+- OnPlayerDisconnect: -
+- OnPlayerSpawn: -
+- OnPlayerEnterDynamicArea: -
+- OnPlayerLeaveDynamicArea: -
 
-		native Func(params)
-		{
-			Description:
-				-
+## Credits
 
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/Core/Events
-	{
-		Events called by player actions done by using features from this script.
-
-		native -
-		native - SIF/Core/Callbacks
-		native -
-
-		native Func(params)
-		{
-			Called:
-				-
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/Core/Interface Functions
-	{
-		Functions to get or set data values in this script without editing
-		the data directly. These include automatic ID validation checks.
-
-		native -
-		native - SIF/Core/Interface
-		native -
-
-		native Func(params)
-		{
-			Description:
-				-
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/Core/Internal Functions
-	{
-		Internal events called by player actions done by using features from
-		this script.
-	
-		Func(params)
-		{
-			Description:
-				-
-		}
-	}
-
-	SIF/Core/Hooks
-	{
-		Hooked functions or callbacks, either SA:MP natives or from other
-		scripts or plugins.
-
-		SAMP/OnPlayerSomething
-		{
-			Reason:
-				-
-		}
-	}
+- SA:MP Team: Amazing mod!
+- SA:MP Community: Inspiration and support
+- Incognito: Very useful streamer plugin
+- Y_Less: YSI framework
 
 ==============================================================================*/
 
@@ -140,6 +54,92 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 #define _SIF_CORE_INCLUDED
 
 
+// Functions
+
+
+forward IsPlayerInPlayerArea(playerid, targetid);
+/*
+# Description
+Checks if a player is standing next to another player.
+*/
+
+forward ShowActionText(playerid, message[], time=0, width=200);
+/*
+# Description
+Display a small message in the center of the player's screen.
+*/
+
+forward HideActionText(playerid);
+/*
+# Description
+Hide the message displayed by ShowActionText.
+*/
+
+forward bool:IsPlayerViewingActionText(playerid);
+/*
+# Description
+True if a player has a message from ShowActionText on their screen.
+*/
+
+forward Float:sif_absoluteangle(Float:angle);
+/*
+# Description
+Returns an absolute angle (0-360).
+*/
+
+forward Float:sif_GetAngleToPoint(Float:fPointX, Float:fPointY, Float:fDestX, Float:fDestY);
+/*
+# Description
+Returns the angle in degrees from one point to another with 0 being along +Y.
+*/
+
+forward Float:sif_Distance(Float:x1, Float:y1, Float:z1, Float:x2, Float:y2, Float:z2);
+/*
+# Description
+Return a 3D distance from one point to another.
+*/
+
+forward sif_IsIdleAnim(animidx);
+/*
+# Description
+Checks if the specified animation index is an idle animation.
+*/
+
+forward sif_abs(int);
+/*
+# Description
+Returns the absolute value of an integer.
+*/
+
+forward sif_intdiffabs(tick1, tick2);
+/*
+# Description
+Used in sif_GetTickCountDiff to get an absolute integer difference.
+*/
+
+forward sif_GetTickCountDiff(a, b);
+/*
+# Description
+Returns a corrected difference between two tick values (GetTickCount fix).
+*/
+
+
+// Events
+
+
+forward OnPlayerEnterPlayerArea(playerid, targetid);
+/*
+# Called
+When a player walks within 2m of another player.
+*/
+
+forward OnPlayerLeavePlayerArea(playerid, targetid);
+/*
+# Called
+When a player leaves the 2m boundary of another player.
+*/
+
+
 /*==============================================================================
 
 	Setup
@@ -152,10 +152,6 @@ new
 PlayerText:	ActionText				[MAX_PLAYERS],
 bool:		gViewingActionText		[MAX_PLAYERS],
 Timer:		gPlayerActionTextTimer	[MAX_PLAYERS];
-
-
-forward OnPlayerEnterPlayerArea(playerid, targetid);
-forward OnPlayerLeavePlayerArea(playerid, targetid);
 
 
 /*==============================================================================
