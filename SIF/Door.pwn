@@ -1,514 +1,34 @@
 /*==============================================================================
 
-Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
+# Southclaw's Interactivity Framework (SIF)
 
-	SIF Version: 1.4.0
-	Module Version: 1.1.0
+## Overview
 
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
 
-	SIF/Overview
-	{
-		SIF is a collection of high-level include scripts to make the
-		development of interactive features easy for the developer while
-		maintaining quality front-end gameplay for players.
-	}
+## Description
 
-	SIF/Door/Description
-	{
-		A simple object movement manager that supports buttons as the default
-		method of interacting. Doors support multiple buttons, so a button on
-		the inside and outside of a door is possible. Doors can be opened and
-		closed manually by calling OpenDoor or CloseDoor. The door state change
-		callbacks can be used to restrict the use of doors by returning 1.
-	}
+A simple object movement manager that supports buttons as the default method of
+interacting. Doors support multiple buttons, so a button on the inside and
+outside of a door is possible. Doors can be opened and closed manually by
+calling OpenDoor or CloseDoor. The door state change callbacks can be used to
+restrict the use of doors by returning 1.
 
-	SIF/Door/Dependencies
-	{
-		SIF/Button
-		Streamer Plugin
-		YSI\y_hooks
-		YSI\y_timers
-	}
+## Dependencies
 
-	SIF/Door/Credits
-	{
-		SA:MP Team						- Amazing mod!
-		SA:MP Community					- Inspiration and support
-		Incognito						- Very useful streamer plugin
-		Y_Less							- YSI framework
-	}
+- SIF/Button
+- Streamer Plugin
+- YSI\y_hooks
+- YSI\y_timers
 
-	SIF/Door/Constants
-	{
-		These can be altered by defining their values before the include line.
+## Credits
 
-		DR_MAX
-			Maximum amount of doors that can be created.
-
-		DR_MAX_BUTTONS_PER
-			Maximum amount of buttons that can be assigned to a door.
-
-		DR_STATE_INVALID
-			Invalid door state.
-
-		DR_STATE_OPEN
-			Door is open.
-
-		DR_STATE_CLOSED
-			Door is closed.
-
-		DR_STATE_OPENING
-			Door is moving from closed to open position.
-
-		DR_STATE_CLOSING
-			Door is moving from open to closed position.
-	}
-
-	SIF/Door/Core Functions
-	{
-		The functions that control the core features of this script.
-
-		native -
-		native - SIF/Door/Core
-		native -
-
-		CreateDoor(model, buttonids[], Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz, Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz, Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids), movesound = -1, stopsound = -1, worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED)
-		{
-			Description:
-				Creates a world object that is assigned a move position and a
-				set of buttons that will trigger it's movement.
-
-			Parameters:
-				<model> (int)
-					The GTA model ID of the door.
-
-				<buttonids[]> (array)
-					An array of buttons that will be used to activate the door.
-
-				<px>, <py>, <pz> (float, absolute world position)
-					The world position of the door object.
-
-				<rx>, <ry>, <rz> (float, euler rotation)
-					The rotation of the door object.
-
-				<mpx>, <mpy>, <mpz> (float, absolute world position)
-					The world position which the door will move to.
-
-				<mrx>, <mry>, <mrz> (float, euler rotation)
-					The rotation which the door will rotate to when moved.
-
-				<movespeed> (int)
-					The speed at which the door will move (both open and close)
-
-				<closedelay> (int)
-					The time before closing after opening, when 0, the door will
-					not automatically close after it finishes opening.
-
-				<maxbuttons> (int)
-					Maximum amount of buttons, automatically set to the size of
-					the button array.
-
-				<movesound> (int)
-					The sound that will be played when the door moves. (either
-					when opening or closing)
-
-				<stopsound> (int)
-					The sound that will be played when the door stops moving.
-					(either when it finishes opening or finishes closing.)
-
-				<worldid> (int)
-					The virtual world in which the door object will be made.
-					(be aware that this doesn't affect the buttons)
-
-				<interiorid> (int)
-					The interior world in which the door object will be made.
-					(be aware that this doesn't affect the buttons)
-
-				<initstate> (int)
-					The initial state which the door will be created as, valid
-					values are: DOOR_STATE_OPEN or DOOR_STATE_CLOSED.
-
-			Returns:
-				(int, doorid)
-					Door ID handle of the newly created door.
-
-				INVALID_DOOR_ID
-					If another door cannot be created due to DR_MAX limit.
-		}
-
-		DestroyDoor(doorid)
-		{
-			Description:
-				Destroys a door object and clears it's memory. This does not
-				destroy the buttons associated with the door.
-
-			Parameters:
-				<doorid> (int, doorid)
-					The ID handle of the door to destroy.
-
-			Returns:
-				0
-					If the door ID handle is invalid.
-		}
-	}
-
-	SIF/Door/Events
-	{
-		Events called by player actions done by using features from this script.
-
-		native -
-		native - SIF/Door/Callbacks
-		native -
-
-		native OnPlayerActivateDoor(playerid, doorid, newstate)
-		{
-			Called:
-				Called when a player presses a door button. Depending on whether
-				the door is currently open, closed, opening or closing the
-				door will act differently.
-
-			Parameters:
-				<playerid> (int)
-					Player who triggered the door.
-
-				<doorid> (int, doorid)
-					The ID handle of the door that was activated.
-
-				<newstate> (int)
-					The new state the door is in after being activated.
-
-			Returns:
-				1
-					To cancel the door action request. This will stop the door
-					from opening or closing. Useful for a door lock system.
-		}
-		native OnDoorStateChange(doorid, doorstate)
-		{
-			Called:
-				Called when a door changes state between:
-					DOOR_STATE_OPEN,
-					DOOR_STATE_CLOSED,
-					DOOR_STATE_OPENING,
-					DOOR_STATE_CLOSING.
-				Note: A door can never change state between OPEN and CLOSED
-				without CLOSING or OPENING in between.
-
-			Parameters:
-				<doorid> (int, doorid)
-					The ID handle of the door which changed state.
-
-				<doorstate> (int, DOOR_STATE_*)
-					The state which the door changed to.
-
-			Returns:
-				(nothing)
-		}
-
-	}
-
-	SIF/Door/Interface Functions
-	{
-		Functions to get or set data values in this script without editing
-		the data directly. These include automatic ID validation checks.
-
-		native -
-		native - SIF/Door/Interface
-		native -
-
-		native IsValidDOor(doorid)
-		{
-			Description:
-				Checks if a door is valid.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorModel(doorid)
-		{
-			Description:
-				Returns the model ID used for the door.
-
-			Parameters:
-				-
-
-			Returns:
-				-1
-					If the door handle ID is invalid.
-		}
-		native SetDoorModel(doorid, model)
-		{
-			Description:
-				Changes a door object model.
-
-			Parameters:
-				-
-
-			Returns:
-				0
-					If the door handle ID is invalid.
-		}
-		native GetDoorObjectID(doorid)
-		{
-			Description:
-				Returns the dynamic object ID that acts as the door.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorButton(doorid, slot)
-		{
-			Description:
-				Returns the button ID handle in the specified slot of a door.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorButtonCount(doorid)
-		{
-			Description:
-				Returns the amount of buttons assigned to a door.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorCloseDelay(doorid)
-		{
-			Description:
-				Returns the close delay for a door in milliseconds.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native SetDoorCloseDelay(doorid, closedelay)
-		{
-			Description:
-				Sets the close delay for a door in milliseconds.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorMoveSpeed(doorid)
-		{
-			Description:
-				Returns a door open/close move speed.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native SetDoorMoveSpeed(doorid, movespeed)
-		{
-			Description:
-				Sets a door open/close move speed.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorMoveSound(doorid)
-		{
-			Description:
-				Returns a door sound ID for when it moves.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native SetDoorMoveSound(doorid, movesound)
-		{
-			Description:
-				Sets the door sound ID for when it moves.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorStopSound(doorid)
-		{
-			Description:
-				Returns the door sound ID for when it stops moving.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native SetDoorStopSound(doorid, stopsound)
-		{
-			Description:
-				Sets the door sound ID for when it stops moving.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorPos(doorid, &Float:x, &Float:y, &Float:z)
-		{
-			Description:
-				Assigns the door object position into the referenced variables.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native SetDoorPos(doorid, Float:x, Float:y, Float:z)
-		{
-			Description:
-				Sets the door object position.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorRot(doorid, &Float:rx, &Float:ry, &Float:rz)
-		{
-			Description:
-				Assigns the door object rotation into the referenced variables.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native SetDoorRot(doorid, &Float:rx, &Float:ry, &Float:rz)
-		{
-			Description:
-				Sets the door object rotation.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorMovePos(doorid, &Float:x, &Float:y, &Float:z)
-		{
-			Description:
-				Assigns the door object move position into the referenced
-				variables.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native SetDoorMovePos(doorid, Float:x, Float:y, Float:z)
-		{
-			Description:
-				Sets the door object move position.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorMoveRot(doorid, &Float:rx, &Float:ry, &Float:rz)
-		{
-			Description:
-				Assigns the door object move rotation into the referenced
-				variables.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native SetDoorMoveRot(doorid, Float:rx, Float:ry, Float:rz)
-		{
-			Description:
-				Sets the door object move rotation.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-		native GetDoorState(doorid)
-		{
-			Description:
-				Returns the state of a door.
-
-			Parameters:
-				-
-
-			Returns:
-				-1
-					If the specified door handle ID is invalid.
-		}
-	}
-
-	SIF/Door/Internal Functions
-	{
-		Internal events called by player actions done by using features from
-		this script.
-
-		OpenDoor(doorid)
-		{
-			Description:
-				Moves a door object to it's open position.
-		}
-		CloseDoor(doorid)
-		{
-			Description:
-				Moves a door object to it's closed position.
-		}
-	}
-
-	SIF/Door/Hooks
-	{
-		Hooked functions or callbacks, either SA:MP natives or from other
-		scripts or plugins.
-
-		SIF/Button/OnButtonPress
-		{
-			Reason:
-				Detect when a player presses a button associated with a door.
-		}
-		Streamer/OnDynamicObjectMoved
-		{
-			Reason:
-				Detect when a door object stops moving in order to play the stop
-				sound and close it again if a close delay value is set.
-		}
-	}
+- SA:MP Team: Amazing mod!
+- SA:MP Community: Inspiration and support
+- Incognito: Very useful streamer plugin
+- Y_Less: YSI framework
 
 ==============================================================================*/
 
@@ -535,26 +55,289 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 /*==============================================================================
 
-	Setup
+	Constant Definitions, Function Declarations and Documentation
 
 ==============================================================================*/
 
 
+// DR_MAX: Maximum amount of doors that can be created.
 #if !defined DR_MAX
 	#define DR_MAX				(64)
 #endif
 
+// DR_MAX_BUTTONS_PER: Maximum amount of buttons that can be assigned to a door.
 #if !defined DR_MAX_BUTTONS_PER
 	#define DR_MAX_BUTTONS_PER	(4)
 #endif
 
-
+// Validity check constant
 #define INVALID_DOOR_ID			(-1)
+
+// Invalid door state.
 #define DR_STATE_INVALID		(-1)
+
+// Door is open.
 #define DR_STATE_OPEN			(0)
+
+// Door is closed.
 #define DR_STATE_CLOSED			(1)
+
+// Door is moving from closed to open position.
 #define DR_STATE_OPENING		(2)
+
+// Door is moving from open to closed position.
 #define DR_STATE_CLOSING		(3)
+
+
+// Functions
+
+
+forward CreateDoor(model, buttonids[], Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz, Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz, Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids), movesound = 1186, stopsound = 1186, worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED);
+/*
+# Description
+Creates a world object that is assigned a move position and a set of buttons
+that will trigger it's movement.
+
+# Parameters
+
+- model: The GTA model ID of the door.
+- buttonids[]: An array of buttons that will be used to activate the door.
+- px, py, pz: The world position of the door object.
+- rx, ry, rz: The rotation of the door object.
+- mpx, mpy, mpz: The world position which the door will move to.
+- mrx, mry, mrz: The rotation which the door will rotate to when moved.
+- movespeed: The speed at which the door will move (both open and close)
+- closedelay: Time to stay open, 0 to disable automatic closing.
+- maxbuttons: Size of button array.
+- movesound: The sound that will be played when the door moves.
+- stopsound: The sound that will be played when the door stops moving.
+- worldid: The virtual world in which the door object will be made.
+- interiorid: The interior world in which the door object will be made.
+- initstate: The initial state for the door, either open or closed.
+
+# Returns
+ID of the newly created door or INVALID_DOOR_ID upon failure.
+*/
+
+forward DestroyDoor(doorid);
+/*
+# Description
+Destroys a door object and clears it's memory. This does not destroy the buttons
+associated with the door.
+*/
+
+forward OpenDoor(doorid);
+/*
+# Description
+Moves a door object to it's open position.
+*/
+
+forward CloseDoor(doorid);
+/*
+# Description
+Moves a door object to it's closed position.
+*/
+
+forward IsValidDOor(doorid);
+/*
+# Description
+Checks if a door is valid.
+*/
+
+forward GetDoorObjectID(doorid);
+/*
+# Description
+Returns the object ID used for the door.
+*/
+
+forward GetDoorModel(doorid);
+/*
+# Description
+Returns the model ID used for the door.
+*/
+
+forward SetDoorModel(doorid, model);
+/*
+# Description
+Changes a door object model.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorButton(doorid, slot);
+/*
+# Description
+Returns the button ID handle in the specified slot of a door.
+*/
+
+forward GetDoorButtonCount(doorid);
+/*
+# Description
+Returns the amount of buttons assigned to a door.
+*/
+
+forward GetDoorCloseDelay(doorid);
+/*
+# Description
+Returns the close delay for a door in milliseconds.
+*/
+
+forward SetDoorCloseDelay(doorid, closedelay);
+/*
+# Description
+Sets the close delay for a door in milliseconds.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorMoveSpeed(doorid);
+/*
+# Description
+Returns a door open/close move speed.
+*/
+
+forward SetDoorMoveSpeed(doorid, Float:movespeed);
+/*
+# Description
+Sets a door open/close move speed.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorMoveSound(doorid);
+/*
+# Description
+Returns a door sound ID for when it moves.
+*/
+
+forward SetDoorMoveSound(doorid, movesound);
+/*
+# Description
+Sets the door sound ID for when it moves.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorStopSound(doorid);
+/*
+# Description
+Returns the door sound ID for when it stops moving.
+*/
+
+forward SetDoorStopSound(doorid, stopsound);
+/*
+# Description
+Sets the door sound ID for when it stops moving.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorPos(doorid, &Float:x, &Float:y, &Float:z);
+/*
+# Description
+Assigns the door object position into the referenced variables.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward SetDoorPos(doorid, Float:x, Float:y, Float:z);
+/*
+# Description
+Sets the door object position.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorRot(doorid, &Float:rx, &Float:ry, &Float:rz);
+/*
+# Description
+Assigns the door object rotation into the referenced variables.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward SetDoorRot(doorid, Float:rx, Float:ry, Float:rz);
+/*
+# Description
+Sets the door object rotation.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorMovePos(doorid, &Float:x, &Float:y, &Float:z);
+/*
+# Description
+Assigns the door object move position into the referenced variables.
+*/
+
+forward SetDoorMovePos(doorid, Float:x, Float:y, Float:z);
+/*
+# Description
+Sets the door object move position.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorMoveRot(doorid, &Float:rx, &Float:ry, &Float:rz);
+/*
+# Description
+Assigns the door object move rotation into the referenced variables.
+*/
+
+forward SetDoorMoveRot(doorid, Float:rx, Float:ry, Float:rz);
+/*
+# Description
+Sets the door object move rotation.
+
+# Returns
+Boolean to indicate success or failure.
+*/
+
+forward GetDoorState(doorid);
+/*
+# Description
+Returns the state of a door.
+*/
+
+
+// Events
+
+
+forward OnPlayerActivateDoor(playerid, doorid, newstate);
+/*
+# Called
+Called when a player presses a door button. Depending on whether the door is
+currently open, closed, opening or closing the door will act differently.
+
+# Returns
+1 To cancel the door action request. This will stop the door from opening or
+closing. Useful for a door lock system.
+*/
+
+forward OnDoorStateChange(doorid, doorstate);
+/*
+# Called
+Called when a door changes state between: DOOR_STATE_OPEN, DOOR_STATE_CLOSED,
+DOOR_STATE_OPENING, DOOR_STATE_CLOSING. Note: A door can never change state
+between OPEN and CLOSED without CLOSING or OPENING in between.
+*/
+
+
+/*==============================================================================
+
+	Setup
+
+==============================================================================*/
 
 
 enum E_DOOR_DATA
@@ -589,10 +372,6 @@ static
 Iterator:	dr_Index<DR_MAX>;
 
 
-forward OnPlayerActivateDoor(playerid, doorid, newstate);
-forward OnDoorStateChange(doorid, doorstate);
-
-
 /*==============================================================================
 
 	Core Functions
@@ -600,12 +379,7 @@ forward OnDoorStateChange(doorid, doorstate);
 ==============================================================================*/
 
 
-stock CreateDoor(model, buttonids[],
-	Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz,
-	Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz,
-	Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids),
-	movesound = 1186, stopsound = 1186,
-	worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED)
+stock CreateDoor(model, buttonids[], Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz, Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz, Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids), movesound = 1186, stopsound = 1186, worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED)
 {
 	new id = Iter_Free(dr_Index);
 
@@ -685,55 +459,7 @@ stock DestroyDoor(doorid)
 	return 1;
 }
 
-
-/*==============================================================================
-
-	Internal Functions and Hooks
-
-==============================================================================*/
-
-
-public OnButtonPress(playerid, buttonid)
-{
-	foreach(new i : dr_Index)
-	{
-		for(new j; j < dr_Data[i][dr_buttonCount]; j++)
-		{
-			if(buttonid == dr_Data[i][dr_buttonArray][j])
-			{
-				if(dr_State{i} == DR_STATE_CLOSED || dr_State{i} == DR_STATE_CLOSING)
-				{
-					if(CallLocalFunction("OnPlayerActivateDoor", "ddd", playerid, i, DR_STATE_OPENING))
-						return 0;
-
-					OpenDoor(i);
-				}
-				else if(dr_State{i} == DR_STATE_OPEN || dr_State{i} == DR_STATE_OPENING)
-				{
-					if(CallLocalFunction("OnPlayerActivateDoor", "ddd", playerid, i, DR_STATE_CLOSING))
-						return 0;
-
-					CloseDoor(i);
-				}
-			}
-		}
-	}
-	#if defined dr_OnButtonPress
-		return dr_OnButtonPress(playerid, buttonid);
-	#endif
-}
-#if defined _ALS_OnButtonPress
-	#undef OnButtonPress
-#else
-	#define _ALS_OnButtonPress
-#endif
-#define OnButtonPress dr_OnButtonPress
-#if defined dr_OnButtonPress
-	forward dr_OnButtonPress(playerid, buttonid);
-#endif
-
-
-OpenDoor(doorid)
+stock OpenDoor(doorid)
 {
 	if(!Iter_Contains(dr_Index, doorid))return 0;
 
@@ -751,7 +477,7 @@ OpenDoor(doorid)
 	return 1;
 }
 
-timer CloseDoor[ dr_Data[doorid][dr_closeDelay] ](doorid)
+stock CloseDoor(doorid)
 {
 	if(!Iter_Contains(dr_Index, doorid))return 0;
 
@@ -768,62 +494,6 @@ timer CloseDoor[ dr_Data[doorid][dr_closeDelay] ](doorid)
 
 	return 1;
 }
-
-dr_PlaySoundForAll(sound, Float:x, Float:y, Float:z)
-{
-	foreach(new i : Player)
-	{
-		PlayerPlaySound(i, sound, x, y, z);
-	}
-	return 1;
-}
-
-public OnDynamicObjectMoved(objectid)
-{
-	foreach(new i : dr_Index)
-	{
-		if(objectid == dr_Data[i][dr_objectid] && dr_State{i} == DR_STATE_OPENING)
-		{
-			dr_State{i} = DR_STATE_OPEN;
-			if(dr_Data[i][dr_closeDelay] >= 0)
-				defer CloseDoor(i);
-
-			if(dr_Data[i][dr_stopSound] != -1)
-				dr_PlaySoundForAll(dr_Data[i][dr_stopSound], dr_Data[i][dr_posX], dr_Data[i][dr_posY], dr_Data[i][dr_posZ]);
-
-			CallLocalFunction("OnDoorStateChange", "dd", i, DR_STATE_OPEN);
-		}
-		if(objectid == dr_Data[i][dr_objectid] && dr_State{i} == DR_STATE_CLOSING)
-		{
-			dr_State{i} = DR_STATE_CLOSED;
-
-			if(dr_Data[i][dr_stopSound] != -1)
-				dr_PlaySoundForAll(dr_Data[i][dr_stopSound], dr_Data[i][dr_posX], dr_Data[i][dr_posY], dr_Data[i][dr_posZ]);
-
-			CallLocalFunction("OnDoorStateChange", "dd", i, DR_STATE_CLOSED);
-		}
-	}
-	#if defined dr_OnDynamicObjectMoved
-		return dr_OnDynamicObjectMoved(objectid);
-	#endif
-}
-#if defined _ALS_OnDynamicObjectMoved
-	#undef OnDynamicObjectMoved
-#else
-	#define _ALS_OnDynamicObjectMoved
-#endif
-#define OnDynamicObjectMoved dr_OnDynamicObjectMoved
-#if defined dr_OnDynamicObjectMoved
-	forward dr_OnDynamicObjectMoved(objectid);
-#endif
-
-
-/*==============================================================================
-
-	Interface Functions
-
-==============================================================================*/
-
 
 stock IsValidDOor(doorid)
 {
@@ -1070,3 +740,115 @@ stock GetDoorState(doorid)
 
 	return dr_State{doorid};
 }
+
+
+/*==============================================================================
+
+	Internal Functions and Hooks
+
+==============================================================================*/
+
+
+public OnButtonPress(playerid, buttonid)
+{
+	foreach(new i : dr_Index)
+	{
+		for(new j; j < dr_Data[i][dr_buttonCount]; j++)
+		{
+			if(buttonid == dr_Data[i][dr_buttonArray][j])
+			{
+				if(dr_State{i} == DR_STATE_CLOSED || dr_State{i} == DR_STATE_CLOSING)
+				{
+					if(CallLocalFunction("OnPlayerActivateDoor", "ddd", playerid, i, DR_STATE_OPENING))
+						return 0;
+
+					OpenDoor(i);
+				}
+				else if(dr_State{i} == DR_STATE_OPEN || dr_State{i} == DR_STATE_OPENING)
+				{
+					if(CallLocalFunction("OnPlayerActivateDoor", "ddd", playerid, i, DR_STATE_CLOSING))
+						return 0;
+
+					CloseDoor(i);
+				}
+			}
+		}
+	}
+	#if defined dr_OnButtonPress
+		return dr_OnButtonPress(playerid, buttonid);
+	#endif
+}
+#if defined _ALS_OnButtonPress
+	#undef OnButtonPress
+#else
+	#define _ALS_OnButtonPress
+#endif
+#define OnButtonPress dr_OnButtonPress
+#if defined dr_OnButtonPress
+	forward dr_OnButtonPress(playerid, buttonid);
+#endif
+
+timer _CloseDoorTimer[ dr_Data[doorid][dr_closeDelay] ](doorid)
+{
+	CloseDoor(doorid);
+}
+
+dr_PlaySoundForAll(sound, Float:x, Float:y, Float:z)
+{
+	foreach(new i : Player)
+	{
+		PlayerPlaySound(i, sound, x, y, z);
+	}
+	return 1;
+}
+
+public OnDynamicObjectMoved(objectid)
+{
+	foreach(new i : dr_Index)
+	{
+		if(objectid == dr_Data[i][dr_objectid] && dr_State{i} == DR_STATE_OPENING)
+		{
+			dr_State{i} = DR_STATE_OPEN;
+			if(dr_Data[i][dr_closeDelay] >= 0)
+				defer _CloseDoorTimer(i);
+
+			if(dr_Data[i][dr_stopSound] != -1)
+				dr_PlaySoundForAll(dr_Data[i][dr_stopSound], dr_Data[i][dr_posX], dr_Data[i][dr_posY], dr_Data[i][dr_posZ]);
+
+			CallLocalFunction("OnDoorStateChange", "dd", i, DR_STATE_OPEN);
+		}
+		if(objectid == dr_Data[i][dr_objectid] && dr_State{i} == DR_STATE_CLOSING)
+		{
+			dr_State{i} = DR_STATE_CLOSED;
+
+			if(dr_Data[i][dr_stopSound] != -1)
+				dr_PlaySoundForAll(dr_Data[i][dr_stopSound], dr_Data[i][dr_posX], dr_Data[i][dr_posY], dr_Data[i][dr_posZ]);
+
+			CallLocalFunction("OnDoorStateChange", "dd", i, DR_STATE_CLOSED);
+		}
+	}
+	#if defined dr_OnDynamicObjectMoved
+		return dr_OnDynamicObjectMoved(objectid);
+	#endif
+}
+#if defined _ALS_OnDynamicObjectMoved
+	#undef OnDynamicObjectMoved
+#else
+	#define _ALS_OnDynamicObjectMoved
+#endif
+#define OnDynamicObjectMoved dr_OnDynamicObjectMoved
+#if defined dr_OnDynamicObjectMoved
+	forward dr_OnDynamicObjectMoved(objectid);
+#endif
+
+
+/*==============================================================================
+
+	Testing
+
+==============================================================================*/
+
+
+#if defined RUN_TESTS
+	#include <SIF\testing\Door.pwn>
+#endif
