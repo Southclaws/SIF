@@ -90,7 +90,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					The max size for the item type's array data.
 		}
 
-		native SetItemArrayData(itemid, data[], length)
+		native SetItemArrayData(itemid, data[], length, call = 1)
 		{
 			Description:
 				Sets an item's array data and length to input parameters.
@@ -105,6 +105,9 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<length> (int)
 					Length of the data, must be equal to or less than the size
 					of <data>.
+
+				<call> (bool)
+					Whether or not to call OnItemArrayDataChanged
 
 			Returns:
 				0
@@ -137,7 +140,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 					On success.
 		}
 
-		native SetItemArrayDataAtCell(itemid, data, cell)
+		native SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0, call = 1)
 		{
 			Description:
 				Sets item array data in a specific cell.
@@ -152,6 +155,12 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<cell> (int)
 					The cell in the array to set. Must be less than the item's
 					array length and item type's array size max.
+
+				<autoadjustsize> (bool)
+					Automatically adjust the length of array data for new data.
+
+				<call> (bool)
+					Whether or not to call OnItemArrayDataChanged
 
 			Returns:
 				0
@@ -335,6 +344,28 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		}
 	}
 
+	SIF/ItemArrayData/Events
+	{
+		Events called by features from this script.
+
+		native -
+		native - SIF/Button/Callbacks
+		native -
+
+		native OnItemArrayDataChanged(itemid)
+		{
+			Called:
+				When the array data of an item is updated.
+
+			Parameters:
+				<itemid> (int, itemid)
+					The ID of the item that had it's array data changed.
+
+			Returns:
+				-
+		}
+	}
+
 	SIF/ItemArrayData/Hooks
 	{
 		Hooked functions or callbacks, either SA:MP natives or from other
@@ -406,6 +437,9 @@ static
 
 static
 	ITEM_ARRAY_DATA = -1;
+
+
+forward OnItemArrayDataChanged(itemid);
 
 
 /*==============================================================================
@@ -483,7 +517,7 @@ stock GetItemTypeArrayDataSize(ItemType:itemtype)
 	return itm_arr_ItemTypeArrayMax[itemtype];
 }
 
-stock SetItemArrayData(itemid, data[], length)
+stock SetItemArrayData(itemid, data[], length, call = 1)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayData] %d %d", itemid, length);
 	if(!IsValidItem(itemid))
@@ -497,12 +531,15 @@ stock SetItemArrayData(itemid, data[], length)
 
 	itm_arr_Length[itemid] = 0;
 
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayData] Setting item array data");
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayData] Setting item array data");
 	for(new i; i < length; i++)
 	{
 		sif_d:SIF_DEBUG_LEVEL_LOOPS:ITEM_ARRAY_DATA("[SetItemArrayData] Data at %04d: %d", i, data[i]);
 		itm_arr_Data[itemid][itm_arr_Length[itemid]++] = data[i];
 	}
+
+	if(call)
+		CallLocalFunction("OnItemArrayDataChanged", "d", itemid);
 
 	return 1;
 }
@@ -523,7 +560,7 @@ stock GetItemArrayData(itemid, data[])
 	return 1;
 }
 
-stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0)
+stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0, call = 1)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] %d %d", itemid, cell);
 	if(!IsValidItem(itemid))
@@ -555,6 +592,9 @@ stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0)
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] Setting cell %d data to %d", cell, data);
 	itm_arr_Data[itemid][cell] = data;
+
+	if(call)
+		CallLocalFunction("OnItemArrayDataChanged", "d", itemid);
 
 	return 1;
 }
