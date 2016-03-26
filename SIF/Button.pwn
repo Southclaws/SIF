@@ -561,7 +561,7 @@ stock DestroyButton(buttonid)
 	return 1;
 }
 
-stock LinkTP(buttonid1, buttonid2, id3)
+stock LinkTP(buttonid1, buttonid2)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[LinkTP]");
 	if(!Iter_Contains(btn_Index, buttonid1) || !Iter_Contains(btn_Index, buttonid2))
