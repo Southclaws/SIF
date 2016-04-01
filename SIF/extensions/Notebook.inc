@@ -2,7 +2,7 @@
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_4\y_hooks>
 
 #define _SIF_NOTEBOOK_INCLUDED
 
@@ -204,48 +204,22 @@ hook OnPlayerClickTextDraw(playerid, Text:clickedid)
 	}
 }
 
-public OnPlayerOpenInventory(playerid)
+hook OnPlayerOpenInventory(playerid)
 {
 	nbk_InventoryItem[playerid] = AddInventoryListItem(playerid, "Notebook");
 
-	#if defined nbk_OnPlayerOpenInventory
-		return nbk_OnPlayerOpenInventory(playerid);
-	#else
-		return 0;
-	#endif
+	return 0;
 }
-#if defined _ALS_OnPlayerOpenInventory
-	#undef OnPlayerOpenInventory
-#else
-	#define _ALS_OnPlayerOpenInventory
-#endif
-#define OnPlayerOpenInventory nbk_OnPlayerOpenInventory
-#if defined nbk_OnPlayerOpenInventory
-	forward nbk_OnPlayerOpenInventory(playerid);
-#endif
 
-public OnPlayerSelectExtraItem(playerid, item)
+hook OnPlayerSelectExtraItem(playerid, item)
 {
 	if(item == nbk_InventoryItem[playerid])
 	{
 		ShowPlayerNotebook(playerid, 0);
 	}
 
-	#if defined nbk_OnPlayerSelectExtraItem
-		return nbk_OnPlayerSelectExtraItem(playerid, item);
-	#else
-		return 0;
-	#endif
+	return 0;
 }
-#if defined _ALS_OnPlayerSelectExtraItem
-	#undef OnPlayerSelectExtraItem
-#else
-	#define _ALS_OnPlayerSelectExtraItem
-#endif
-#define OnPlayerSelectExtraItem nbk_OnPlayerSelectExtraItem
-#if defined nbk_OnPlayerSelectExtraItem
-	forward nbk_OnPlayerSelectExtraItem(playerid, item);
-#endif
 
 hook OnScriptInit()
 {

@@ -139,8 +139,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#include <SIF\Button.pwn>
 #endif
 
-#include <YSI\y_iterate>
-#include <YSI\y_hooks>
+#include <YSI_4\y_iterate>
+#include <YSI_4\y_hooks>
 
 #define _SIF_MULTI_BUTTON_INCLUDED
 
@@ -265,27 +265,13 @@ stock DestroyMultiButtonTrigger(triggerid)
 ==============================================================================*/
 
 
-public OnButtonPress(playerid, buttonid)
+hook OnButtonPress(playerid, buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:MBT_DEBUG("[OnButtonPress]");
 	_mbt_ButtonPress(buttonid);
 
-	#if defined mbt_OnButtonPress
-		return mbt_OnButtonPress(playerid, buttonid);
-	#else
-		return 1;
-	#endif
+	return 0;
 }
-#if defined _ALS_OnButtonPress
-	#undef OnButtonPress
-#else
-	#define _ALS_OnButtonPress
-#endif
- 
-#define OnButtonPress mbt_OnButtonPress
-#if defined mbt_OnButtonPress
-	forward mbt_OnButtonPress(playerid, buttonid);
-#endif
 
 _mbt_ButtonPress(buttonid)
 {

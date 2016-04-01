@@ -4,7 +4,7 @@
 #include <SIF\Item.pwn>
 #include <SIF\extensions/ItemArrayData>
 #include <SIF\extensions/ItemList>
-#include <YSI\y_hooks>
+#include <YSI_4\y_hooks>
 #include <modio>
 
 

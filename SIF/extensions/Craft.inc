@@ -333,7 +333,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_4\y_hooks>
 
 #define _SIF_CRAFT_INCLUDED
 
@@ -458,7 +458,7 @@ stock DefineItemCraftSet(ItemType:result, {ItemType, _}:...)
 ==============================================================================*/
 
 
-public OnPlayerViewInventoryOpt(playerid)
+hook OnPlayerViewInvOpt(playerid)
 {
 	if(cft_SelectedItemCount[playerid] == 0)
 	{
@@ -486,23 +486,10 @@ public OnPlayerViewInventoryOpt(playerid)
 		cft_MenuOptionID[playerid] = AddInventoryOption(playerid, string);
 	}
 
-	#if defined cft_OnPlayerViewInventoryOpt
-		return cft_OnPlayerViewInventoryOpt(playerid);
-	#else
-		return 0;
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerViewInventoryOpt
-	#undef OnPlayerViewInventoryOpt
-#else
-	#define _ALS_OnPlayerViewInventoryOpt
-#endif
-#define OnPlayerViewInventoryOpt cft_OnPlayerViewInventoryOpt
-#if defined cft_OnPlayerViewInventoryOpt
-	forward cft_OnPlayerViewInventoryOpt(playerid);
-#endif
 
-public OnPlayerSelectInventoryOpt(playerid, option)
+hook OnPlayerSelectInvOpt(playerid, option)
 {
 	if(option == cft_MenuOptionID[playerid])
 	{
@@ -515,23 +502,10 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 		DisplayPlayerInventory(playerid);
 	}
 
-	#if defined cft_OnPlayerSelectInventoryOpt
-		return cft_OnPlayerSelectInventoryOpt(playerid, option);
-	#else
-		return 0;
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerSelectInventoryOpt
-	#undef OnPlayerSelectInventoryOpt
-#else
-	#define _ALS_OnPlayerSelectInventoryOpt
-#endif
-#define OnPlayerSelectInventoryOpt cft_OnPlayerSelectInventoryOpt
-#if defined cft_OnPlayerSelectInventoryOpt
-	forward cft_OnPlayerSelectInventoryOpt(playerid, option);
-#endif
 
-public OnPlayerViewContainerOpt(playerid, containerid)
+hook OnPlayerViewCntOpt(playerid, containerid)
 {
 	if(cft_SelectedItemCount[playerid] == 0)
 	{
@@ -559,21 +533,10 @@ public OnPlayerViewContainerOpt(playerid, containerid)
 		cft_MenuOptionID[playerid] = AddContainerOption(playerid, string);
 	}
 
-	#if defined cft_OnPlayerViewContainerOpt
-		return cft_OnPlayerViewContainerOpt(playerid, containerid);
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerViewContainerOpt
-	#undef OnPlayerViewContainerOpt
-#else
-	#define _ALS_OnPlayerViewContainerOpt
-#endif
-#define OnPlayerViewContainerOpt cft_OnPlayerViewContainerOpt
-#if defined cft_OnPlayerViewContainerOpt
-	forward cft_OnPlayerViewContainerOpt(playerid, containerid);
-#endif
 
-public OnPlayerSelectContainerOpt(playerid, containerid, option)
+hook OnPlayerSelectCntOpt(playerid, containerid, option)
 {
 	if(option == cft_MenuOptionID[playerid])
 	{
@@ -586,61 +549,22 @@ public OnPlayerSelectContainerOpt(playerid, containerid, option)
 		DisplayContainerInventory(playerid, containerid);
 	}
 
-	#if defined cft_OnPlayerSelectContainerOpt
-		return cft_OnPlayerSelectContainerOpt(playerid, containerid, option);
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerSelectContainerOpt
-	#undef OnPlayerSelectContainerOpt
-#else
-	#define _ALS_OnPlayerSelectContainerOpt
-#endif
-#define OnPlayerSelectContainerOpt cft_OnPlayerSelectContainerOpt
-#if defined cft_OnPlayerSelectContainerOpt
-	forward cft_OnPlayerSelectContainerOpt(playerid, containerid, option);
-#endif
 
-public OnPlayerCloseInventory(playerid)
+hook OnPlayerCloseInventory(playerid)
 {
 	_cft_ClearCraftList(playerid);
 
-	#if defined cft_OnPlayerCloseInventory
-		return cft_OnPlayerCloseInventory(playerid);
-	#else
-		return 1;
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerCloseInventory
-	#undef OnPlayerCloseInventory
-#else
-	#define _ALS_OnPlayerCloseInventory
-#endif
- 
-#define OnPlayerCloseInventory cft_OnPlayerCloseInventory
-#if defined cft_OnPlayerCloseInventory
-	forward cft_OnPlayerCloseInventory(playerid);
-#endif
 
-public OnPlayerCloseContainer(playerid, containerid)
+hook OnPlayerCloseContainer(playerid, containerid)
 {
 	_cft_ClearCraftList(playerid);
 
-	#if defined cft_OnPlayerCloseContainer
-		return cft_OnPlayerCloseContainer(playerid, containerid);
-	#else
-		return 1;
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerCloseContainer
-	#undef OnPlayerCloseContainer
-#else
-	#define _ALS_OnPlayerCloseContainer
-#endif
- 
-#define OnPlayerCloseContainer cft_OnPlayerCloseContainer
-#if defined cft_OnPlayerCloseContainer
-	forward cft_OnPlayerCloseContainer(playerid, containerid);
-#endif
 
 _cft_AddItemToCraftList(playerid, itemid)
 {

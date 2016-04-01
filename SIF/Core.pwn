@@ -46,9 +46,9 @@ A fundamental library with features used by SIF modules.
 	#include <SIF\Debug.pwn>
 #endif
 
-#include <YSI\y_iterate>
-#include <YSI\y_timers>
-#include <YSI\y_hooks>
+#include <YSI_4\y_iterate>
+#include <YSI_4\y_timers>
+#include <YSI_4\y_hooks>
 #include <streamer>
 
 #define _SIF_CORE_INCLUDED
@@ -230,7 +230,7 @@ hook OnPlayerSpawn(playerid)
 ==============================================================================*/
 
 
-public OnPlayerEnterDynamicArea(playerid, areaid)
+hook OnPlayerEnterDynArea(playerid, areaid)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_SPECTATING && !IsPlayerInAnyVehicle(playerid))
 	{
@@ -255,24 +255,9 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 			}
 		}
 	}
-
-	#if defined SIF_OnPlayerEnterDynamicArea
-		return SIF_OnPlayerEnterDynamicArea(playerid, areaid);
-	#else
-		return 0;
-	#endif
 }
-#if defined _ALS_OnPlayerEnterDynamicArea
-	#undef OnPlayerEnterDynamicArea
-#else
-	#define _ALS_OnPlayerEnterDynamicArea
-#endif
-#define OnPlayerEnterDynamicArea SIF_OnPlayerEnterDynamicArea
-#if defined SIF_OnPlayerEnterDynamicArea
-	forward SIF_OnPlayerEnterDynamicArea(playerid, areaid);
-#endif
 
-public OnPlayerLeaveDynamicArea(playerid, areaid)
+hook OnPlayerLeaveDynArea(playerid, areaid)
 {
 	if(GetPlayerState(playerid) != PLAYER_STATE_SPECTATING && !IsPlayerInAnyVehicle(playerid))
 	{
@@ -297,22 +282,7 @@ public OnPlayerLeaveDynamicArea(playerid, areaid)
 			}
 		}
 	}
-
-	#if defined SIF_OnPlayerLeaveDynamicArea
-		return SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
-	#else
-		return 0;
-	#endif
 }
-#if defined _ALS_OnPlayerLeaveDynamicArea
-	#undef OnPlayerLeaveDynamicArea
-#else
-	#define _ALS_OnPlayerLeaveDynamicArea
-#endif
-#define OnPlayerLeaveDynamicArea SIF_OnPlayerLeaveDynamicArea
-#if defined SIF_OnPlayerLeaveDynamicArea
-	forward SIF_OnPlayerLeaveDynamicArea(playerid, areaid);
-#endif
 
 stock IsPlayerInPlayerArea(playerid, targetid)
 {

@@ -256,8 +256,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
-#include <YSI\y_dialog>
+#include <YSI_4\y_hooks>
+#include <YSI_4\y_dialog>
 
 #define _SIF_CONTAINER_DIALOG_INCLUDED
 
@@ -502,7 +502,7 @@ DisplayContainerOptions(playerid, slotid)
 	return 1;
 }
 
-public OnPlayerViewInventoryOpt(playerid)
+hook OnPlayerViewInvOpt(playerid)
 {
 	if(cnt_CurrentContainer[playerid] != INVALID_CONTAINER_ID)
 	{
@@ -512,21 +512,10 @@ public OnPlayerViewInventoryOpt(playerid)
 		cnt_InventoryOptionID[playerid] = AddInventoryOption(playerid, str);
 	}
 
-	#if defined cnt_OnPlayerViewInventoryOpt
-		return cnt_OnPlayerViewInventoryOpt(playerid);
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerViewInventoryOpt
-	#undef OnPlayerViewInventoryOpt
-#else
-	#define _ALS_OnPlayerViewInventoryOpt
-#endif
-#define OnPlayerViewInventoryOpt cnt_OnPlayerViewInventoryOpt
-#if defined cnt_OnPlayerViewInventoryOpt
-	forward cnt_OnPlayerViewInventoryOpt(playerid);
-#endif
 
-public OnPlayerSelectInventoryOpt(playerid, option)
+hook OnPlayerSelectInvOpt(playerid, option)
 {
 	if(cnt_CurrentContainer[playerid] != INVALID_CONTAINER_ID)
 	{
@@ -559,23 +548,11 @@ public OnPlayerSelectInventoryOpt(playerid, option)
 		}
 	}
 
-	#if defined cnt_OnPlayerSelectInventoryOpt
-		return cnt_OnPlayerSelectInventoryOpt(playerid, option);
-	#else
-		return 1;
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerSelectInventoryOpt
-	#undef OnPlayerSelectInventoryOpt
-#else
-	#define _ALS_OnPlayerSelectInventoryOpt
-#endif
-#define OnPlayerSelectInventoryOpt cnt_OnPlayerSelectInventoryOpt
-#if defined cnt_OnPlayerSelectInventoryOpt
-	forward cnt_OnPlayerSelectInventoryOpt(playerid, option);
-#endif
 
-public OnPlayerOpenInventory(playerid)
+
+hook OnPlayerOpenInventory(playerid)
 {
 	if(IsValidContainer(cnt_CurrentContainer[playerid]))
 	{
@@ -585,21 +562,11 @@ public OnPlayerOpenInventory(playerid)
 		cnt_InventoryContainerItem[playerid] = AddInventoryListItem(playerid, str);
 	}
 
-	#if defined cnt_OnPlayerOpenInventory
-		return cnt_OnPlayerOpenInventory(playerid);
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerOpenInventory
-	#undef OnPlayerOpenInventory
-#else
-	#define _ALS_OnPlayerOpenInventory
-#endif
-#define OnPlayerOpenInventory cnt_OnPlayerOpenInventory
-#if defined cnt_OnPlayerOpenInventory
-	forward cnt_OnPlayerOpenInventory(playerid);
-#endif
 
-public OnPlayerSelectExtraItem(playerid, item)
+
+hook OnPlayerSelectExtraItem(playerid, item)
 {
 	if(IsValidContainer(cnt_CurrentContainer[playerid]))
 	{
@@ -609,19 +576,8 @@ public OnPlayerSelectExtraItem(playerid, item)
 		}
 	}
 
-	#if defined cnt_OnPlayerSelectExtraItem
-		return cnt_OnPlayerSelectExtraItem(playerid, item);
-	#endif
+	return 1;
 }
-#if defined _ALS_OnPlayerSelectExtraItem
-	#undef OnPlayerSelectExtraItem
-#else
-	#define _ALS_OnPlayerSelectExtraItem
-#endif
-#define OnPlayerSelectExtraItem cnt_OnPlayerSelectExtraItem
-#if defined cnt_OnPlayerSelectExtraItem
-	forward cnt_OnPlayerSelectExtraItem(playerid, item);
-#endif
 
 
 /*==============================================================================

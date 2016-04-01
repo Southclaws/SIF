@@ -64,9 +64,9 @@ GTA:SA spinning pickups for a few reasons:
 	#include <SIF\extensions\DebugLabels.inc>
 #endif
 
-#include <YSI\y_iterate>
-#include <YSI\y_timers>
-#include <YSI\y_hooks>
+#include <YSI_4\y_iterate>
+#include <YSI_4\y_timers>
+#include <YSI_4\y_hooks>
 #include <streamer>
 
 #define _SIF_BUTTON_INCLUDED
@@ -1121,7 +1121,7 @@ timer btn_Unfreeze[BTN_TELEPORT_FREEZE_TIME](playerid)
 	TogglePlayerControllable(playerid, true);
 }
 
-public OnPlayerEnterDynamicArea(playerid, areaid)
+hook OnPlayerEnterDynArea(playerid, areaid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerEnterDynamicArea]")<playerid>;
 	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_NearIndex[playerid]) < BTN_MAX_INRANGE)
@@ -1156,43 +1156,12 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 	}
 
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] end")<playerid>;
-
-	#if defined btn_OnPlayerEnterDynamicArea
-		return btn_OnPlayerEnterDynamicArea(playerid, areaid);
-	#else
-		return 0;
-	#endif
 }
-#if defined _ALS_OnPlayerEnterDynamicArea
-	#undef OnPlayerEnterDynamicArea
-#else
-	#define _ALS_OnPlayerEnterDynamicArea
-#endif
-#define OnPlayerEnterDynamicArea btn_OnPlayerEnterDynamicArea
-#if defined btn_OnPlayerEnterDynamicArea
-	forward btn_OnPlayerEnterDynamicArea(playerid, areaid);
-#endif
 
-
-public OnPlayerLeaveDynamicArea(playerid, areaid)
+hook OnPlayerLeaveDynArea(playerid, areaid)
 {
 	process_LeaveDynamicArea(playerid, areaid);
-
-	#if defined btn_OnPlayerLeaveDynamicArea
-		return btn_OnPlayerLeaveDynamicArea(playerid, areaid);
-	#else
-		return 0;
-	#endif
 }
-#if defined _ALS_OnPlayerLeaveDynamicArea
-	#undef OnPlayerLeaveDynamicArea
-#else
-	#define _ALS_OnPlayerLeaveDynamicArea
-#endif
-#define OnPlayerLeaveDynamicArea btn_OnPlayerLeaveDynamicArea
-#if defined btn_OnPlayerLeaveDynamicArea
-	forward btn_OnPlayerLeaveDynamicArea(playerid, areaid);
-#endif
 
 process_LeaveDynamicArea(playerid, areaid)
 {

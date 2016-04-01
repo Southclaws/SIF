@@ -61,9 +61,9 @@ to make swapping items or looting quick and easy.
 	#include <SIF\Inventory.pwn>
 #endif
 
-#include <YSI\y_iterate>
-#include <YSI\y_timers>
-#include <YSI\y_hooks>
+#include <YSI_4\y_iterate>
+#include <YSI_4\y_timers>
+#include <YSI_4\y_hooks>
 #include <streamer>
 
 #define _SIF_CONTAINER_INCLUDED
@@ -767,56 +767,25 @@ stock GetButtonContainer(buttonid)
 ==============================================================================*/
 
 
-public OnItemDestroy(itemid)
+hook OnItemDestroy(itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemDestroy] %d", itemid);
 	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
 	{
 		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
 	}
-
-	#if defined cnt_OnItemDestroy
-		return cnt_OnItemDestroy(itemid);
-	#else
-		return 0;
-	#endif
 }
-#if defined _ALS_OnItemDestroy
-	#undef OnItemDestroy
-#else
-	#define _ALS_OnItemDestroy
-#endif
-#define OnItemDestroy cnt_OnItemDestroy
-#if defined cnt_OnItemDestroy
-	forward cnt_OnItemDestroy(itemid);
-#endif
 
-public OnItemCreateInWorld(itemid)
+hook OnItemCreateInWorld(itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemCreateInWorld] %d", itemid);
 	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
 	{
 		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
 	}
-
-	#if defined cnt_OnItemCreateInWorld
-		return cnt_OnItemCreateInWorld(itemid);
-	#else
-		return 1;
-	#endif
 }
-#if defined _ALS_OnItemCreateInWorld
-	#undef OnItemCreateInWorld
-#else
-	#define _ALS_OnItemCreateInWorld
-#endif
- 
-#define OnItemCreateInWorld cnt_OnItemCreateInWorld
-#if defined cnt_OnItemCreateInWorld
-	forward cnt_OnItemCreateInWorld(itemid);
-#endif
 
-public OnButtonPress(playerid, buttonid)
+hook OnButtonPress(playerid, buttonid)
 {
 	new containerid = GetButtonContainer(buttonid);
 
@@ -825,22 +794,7 @@ public OnButtonPress(playerid, buttonid)
 		ClearAnimations(playerid, 1);
 		DisplayContainerInventory(playerid, containerid);
 	}
-
-	#if defined cnt_OnButtonPress
-		return cnt_OnButtonPress(playerid, buttonid);
-	#else
-		return 0;
-	#endif
 }
-#if defined _ALS_OnButtonPress
-	#undef OnButtonPress
-#else
-	#define _ALS_OnButtonPress
-#endif
-#define OnButtonPress cnt_OnButtonPress
-#if defined cnt_OnButtonPress
-	forward cnt_OnButtonPress(playerid, buttonid);
-#endif
 
 
 /*==============================================================================
