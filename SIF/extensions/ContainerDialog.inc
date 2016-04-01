@@ -512,7 +512,7 @@ hook OnPlayerViewInvOpt(playerid)
 		cnt_InventoryOptionID[playerid] = AddInventoryOption(playerid, str);
 	}
 
-	return 1;
+	return 0;
 }
 
 hook OnPlayerSelectInvOpt(playerid, option)
@@ -548,7 +548,7 @@ hook OnPlayerSelectInvOpt(playerid, option)
 		}
 	}
 
-	return 1;
+	return 0;
 }
 
 
@@ -562,7 +562,7 @@ hook OnPlayerOpenInventory(playerid)
 		cnt_InventoryContainerItem[playerid] = AddInventoryListItem(playerid, str);
 	}
 
-	return 1;
+	return 0;
 }
 
 
@@ -576,7 +576,7 @@ hook OnPlayerSelectExtraItem(playerid, item)
 		}
 	}
 
-	return 1;
+	return 0;
 }
 
 

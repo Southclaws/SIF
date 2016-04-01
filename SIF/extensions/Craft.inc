@@ -486,7 +486,7 @@ hook OnPlayerViewInvOpt(playerid)
 		cft_MenuOptionID[playerid] = AddInventoryOption(playerid, string);
 	}
 
-	return 1;
+	return 0;
 }
 
 hook OnPlayerSelectInvOpt(playerid, option)
@@ -502,7 +502,7 @@ hook OnPlayerSelectInvOpt(playerid, option)
 		DisplayPlayerInventory(playerid);
 	}
 
-	return 1;
+	return 0;
 }
 
 hook OnPlayerViewCntOpt(playerid, containerid)
@@ -533,7 +533,7 @@ hook OnPlayerViewCntOpt(playerid, containerid)
 		cft_MenuOptionID[playerid] = AddContainerOption(playerid, string);
 	}
 
-	return 1;
+	return 0;
 }
 
 hook OnPlayerSelectCntOpt(playerid, containerid, option)
@@ -549,21 +549,21 @@ hook OnPlayerSelectCntOpt(playerid, containerid, option)
 		DisplayContainerInventory(playerid, containerid);
 	}
 
-	return 1;
+	return 0;
 }
 
 hook OnPlayerCloseInventory(playerid)
 {
 	_cft_ClearCraftList(playerid);
 
-	return 1;
+	return 0;
 }
 
 hook OnPlayerCloseContainer(playerid, containerid)
 {
 	_cft_ClearCraftList(playerid);
 
-	return 1;
+	return 0;
 }
 
 _cft_AddItemToCraftList(playerid, itemid)
