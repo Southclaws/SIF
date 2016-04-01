@@ -477,10 +477,15 @@ DisplayContainerOptions(playerid, slotid)
 				new required = AddItemToInventory(playerid, itemid);
 
 				if(required > 0)
-					ShowActionText(playerid, sprintf("Extra %d slots required", required), 3000, 150);
-
+				{
+					new str[32];
+					format(str, sizeof(str), "Extra %d slots required", required);
+					ShowActionText(playerid, str, 3000, 150);
+				}
 				else if(required == 0)
+				{
 					RemoveItemFromContainer(cnt_CurrentContainer[playerid], GetItemContainerSlot(itemid), playerid);
+				}
 
 				DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 
