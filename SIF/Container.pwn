@@ -188,6 +188,12 @@ Sets a container's item capacity.
 Boolean to indicate success or failure.
 */
 
+forward GetContainerItemCount(containerid);
+/*
+# Description
+Returns the amount of items inside a container.
+*/
+
 forward GetContainerSlotItem(containerid, slotid);
 /*
 # Description
@@ -605,6 +611,26 @@ stock SetContainerSize(containerid, size)
 	cnt_Data[containerid][cnt_size] = size;
 
 	return 1;
+}
+
+stock GetContainerItemCount(containerid)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerItemCount] %d", containerid);
+
+	if(!Iter_Contains(cnt_Index, containerid))
+		return 0;
+
+	new size;
+
+	while(size < cnt_Data[containerid][cnt_size])
+	{
+		if(!IsValidItem(cnt_Items[containerid][size]))
+			break;
+
+		size++;
+	}
+
+	return size;
 }
 
 // cnt_Items
