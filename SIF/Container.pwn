@@ -313,7 +313,7 @@ enum E_CONTAINER_DATA
 new
 			cnt_Data					[CNT_MAX][E_CONTAINER_DATA],
 			cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
-Iterator:	cnt_Index<CNT_MAX>,
+   Iterator:cnt_Index<CNT_MAX>,
 			cnt_ItemContainer			[ITM_MAX] = {INVALID_CONTAINER_ID, ...},
 			cnt_ItemContainerSlot		[ITM_MAX] = {-1, ...},
 			cnt_ButtonContainer			[BTN_MAX] = {INVALID_CONTAINER_ID, ...};

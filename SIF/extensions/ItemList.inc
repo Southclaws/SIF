@@ -366,7 +366,7 @@ Float:		itm_lst_RotationZ[ITM_LST_MAX_LIST][ITM_LST_MAX_LIST_ITEMS],
 			itm_lst_Size[ITM_LST_MAX_LIST],
 
 			// For create/destroy functionality
-Iterator:	itm_lst_Index<ITM_LST_MAX_LIST>;
+   Iterator:itm_lst_Index<ITM_LST_MAX_LIST>;
 
 
 /*==============================================================================

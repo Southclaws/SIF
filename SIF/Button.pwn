@@ -415,7 +415,7 @@ Float:		btn_distance
 
 new
 			btn_Data[BTN_MAX][E_BTN_DATA],
-Iterator:	btn_Index<BTN_MAX>
+   Iterator:btn_Index<BTN_MAX>
 	#if defined DEBUG_LABELS_BUTTON
 		,
 			btn_DebugLabelType,
@@ -424,9 +424,9 @@ Iterator:	btn_Index<BTN_MAX>
 		;
 
 static
-			btn_CurrentlyNear[MAX_PLAYERS][BTN_MAX_INRANGE],
-Iterator:	btn_CurrentlyNearIndex[MAX_PLAYERS]<BTN_MAX_INRANGE>,
-			btn_CurrentlyPressing[MAX_PLAYERS];
+			btn_Near[MAX_PLAYERS][BTN_MAX_INRANGE],
+   Iterator:btn_NearIndex[MAX_PLAYERS]<BTN_MAX_INRANGE>,
+			btn_Pressing[MAX_PLAYERS];
 
 
 static BUTTON_DEBUG = -1;
@@ -444,11 +444,11 @@ hook OnScriptInit()
 	BUTTON_DEBUG = sif_debug_register_handler("SIF/Button");
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnScriptInit]");
 
-	Iter_Init(btn_CurrentlyNearIndex);
+	Iter_Init(btn_NearIndex);
 
 	for(new i; i < MAX_PLAYERS; i++)
 	{
-		btn_CurrentlyPressing[i] = INVALID_BUTTON_ID;
+		btn_Pressing[i] = INVALID_BUTTON_ID;
 	}
 
 	#if defined DEBUG_LABELS_BUTTON
@@ -459,8 +459,8 @@ hook OnScriptInit()
 hook OnPlayerConnect(playerid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerConnect]")<playerid>;
-	Iter_Clear(btn_CurrentlyNearIndex[playerid]);
-	btn_CurrentlyPressing[playerid] = INVALID_BUTTON_ID;
+	Iter_Clear(btn_NearIndex[playerid]);
+	btn_Pressing[playerid] = INVALID_BUTTON_ID;
 }
 
 
@@ -850,14 +850,14 @@ stock GetButtonExtraData(buttonid)
 	return btn_Data[buttonid][btn_exData];
 }
 
-// btn_CurrentlyPressing
+// btn_Pressing
 stock GetPlayerPressingButton(playerid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetPlayerPressingButton]")<playerid>;
 	if(!(0 <= playerid < MAX_PLAYERS))
 		return -1;
 
-	return btn_CurrentlyPressing[playerid];
+	return btn_Pressing[playerid];
 }
 
 stock GetPlayerButtonID(playerid)
@@ -867,7 +867,7 @@ stock GetPlayerButtonID(playerid)
 	if(!IsPlayerConnected(playerid))
 		return INVALID_BUTTON_ID;
 
-	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
+	if(Iter_Count(btn_NearIndex[playerid]) == 0)
 		return INVALID_BUTTON_ID;
 
 	new
@@ -881,9 +881,9 @@ stock GetPlayerButtonID(playerid)
 
 	GetPlayerPos(playerid, x, y, z);
 
-	foreach(new i : btn_CurrentlyNearIndex[playerid])
+	foreach(new i : btn_NearIndex[playerid])
 	{
-		curid = btn_CurrentlyNear[playerid][i];
+		curid = btn_Near[playerid][i];
 
 		curdistance = sif_Distance(x, y, z, btn_Data[curid][btn_posX], btn_Data[curid][btn_posY], btn_Data[curid][btn_posZ]);
 
@@ -902,29 +902,29 @@ stock GetPlayerButtonList(playerid, list[], &size, bool:validate = false)
 	if(!IsPlayerConnected(playerid))
 		return 0;
 
-	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
+	if(Iter_Count(btn_NearIndex[playerid]) == 0)
 		return 0;
 
 	// Validate whether or not the player is actually inside the areas.
 	// Caused by a bug that hasn't been found yet, this is the quick workaround.
 	if(validate)
 	{
-		foreach(new i : btn_CurrentlyNearIndex[playerid])
+		foreach(new i : btn_NearIndex[playerid])
 		{
-			if(!IsPlayerInDynamicArea(playerid, btn_Data[btn_CurrentlyNear[playerid][i]][btn_area]))
+			if(!IsPlayerInDynamicArea(playerid, btn_Data[btn_Near[playerid][i]][btn_area]))
 			{
-				printf("ERROR: Player %d incorrectly flagged as inside button %d area, removing.", playerid, btn_CurrentlyNear[playerid][i]);
-				Iter_SafeRemove(btn_CurrentlyNearIndex[playerid], i, i);
+				printf("ERROR: Player %d incorrectly flagged as inside button %d area, removing.", playerid, btn_Near[playerid][i]);
+				Iter_SafeRemove(btn_NearIndex[playerid], i, i);
 				continue;
 			}
 
-			list[size++] = btn_CurrentlyNear[playerid][i];
+			list[size++] = btn_Near[playerid][i];
 		}
 	}
 	else
 	{
-		foreach(new i : btn_CurrentlyNearIndex[playerid])
-			list[size++] = btn_CurrentlyNear[playerid][i];
+		foreach(new i : btn_NearIndex[playerid])
+			list[size++] = btn_Near[playerid][i];
 	}
 	return 1;
 }
@@ -980,12 +980,12 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerKeyStateChange]")<playerid>;
 	if(newkeys & 16)
 	{
-		if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) > 0)
+		if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_NearIndex[playerid]) > 0)
 		{
 			if(!IsPlayerInAnyDynamicArea(playerid))
 			{
 				printf("[WARNING] Player %d is not in areas but list isn't empty. Purging list.", playerid);
-				Iter_Clear(btn_CurrentlyNearIndex[playerid]);
+				Iter_Clear(btn_NearIndex[playerid]);
 			}
 
 			new
@@ -999,12 +999,12 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 			GetPlayerPos(playerid, x, y, z);
 
-			foreach(new i : btn_CurrentlyNearIndex[playerid])
+			foreach(new i : btn_NearIndex[playerid])
 			{
 				if(index >= BTN_MAX_INRANGE - 1)
 					break;
 
-				id = btn_CurrentlyNear[playerid][i];
+				id = btn_Near[playerid][i];
 
 				distance = sif_Distance(x, y, z, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
 
@@ -1032,10 +1032,10 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 
 		if(oldkeys & 16)
 		{
-			if(btn_CurrentlyPressing[playerid] != INVALID_BUTTON_ID)
+			if(btn_Pressing[playerid] != INVALID_BUTTON_ID)
 			{
-				CallLocalFunction("OnButtonRelease", "dd", playerid, btn_CurrentlyPressing[playerid]);
-				btn_CurrentlyPressing[playerid] = INVALID_BUTTON_ID;
+				CallLocalFunction("OnButtonRelease", "dd", playerid, btn_Pressing[playerid]);
+				btn_Pressing[playerid] = INVALID_BUTTON_ID;
 			}
 		}
 	}
@@ -1107,7 +1107,7 @@ Internal_OnButtonPress(playerid, buttonid)
 	}
 	else
 	{
-		btn_CurrentlyPressing[playerid] = buttonid;
+		btn_Pressing[playerid] = buttonid;
 
 		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
 			return 1;
@@ -1124,7 +1124,7 @@ timer btn_Unfreeze[BTN_TELEPORT_FREEZE_TIME](playerid)
 public OnPlayerEnterDynamicArea(playerid, areaid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:BUTTON_DEBUG("[OnPlayerEnterDynamicArea]")<playerid>;
-	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_CurrentlyNearIndex[playerid]) < BTN_MAX_INRANGE)
+	if(!IsPlayerInAnyVehicle(playerid) && Iter_Count(btn_NearIndex[playerid]) < BTN_MAX_INRANGE)
 	{
 		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] player is valid")<playerid>;
 		new data[2];
@@ -1144,10 +1144,10 @@ public OnPlayerEnterDynamicArea(playerid, areaid)
 			if(Iter_Contains(btn_Index, data[1]))
 			{
 				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] in index")<playerid>;
-				new cell = Iter_Free(btn_CurrentlyNearIndex[playerid]);
+				new cell = Iter_Free(btn_NearIndex[playerid]);
 
-				btn_CurrentlyNear[playerid][cell] = data[1];
-				Iter_Add(btn_CurrentlyNearIndex[playerid], cell);
+				btn_Near[playerid][cell] = data[1];
+				Iter_Add(btn_NearIndex[playerid], cell);
 
 				ShowActionText(playerid, btn_Data[data[1]][btn_text]);
 				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, data[1]);
@@ -1210,7 +1210,7 @@ process_LeaveDynamicArea(playerid, areaid)
 		return 1;
 	}
 
-	if(Iter_Count(btn_CurrentlyNearIndex[playerid]) == 0)
+	if(Iter_Count(btn_NearIndex[playerid]) == 0)
 	{
 		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] player nearindex is empty")<playerid>;
 		return 2;
@@ -1242,14 +1242,14 @@ process_LeaveDynamicArea(playerid, areaid)
 	HideActionText(playerid);
 	CallLocalFunction("OnPlayerLeaveButtonArea", "dd", playerid, data[1]);
 
-	foreach(new i : btn_CurrentlyNearIndex[playerid])
+	foreach(new i : btn_NearIndex[playerid])
 	{
 		sif_dp:SIF_DEBUG_LEVEL_LOOPS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] looping player list")<playerid>;
 
-		if(btn_CurrentlyNear[playerid][i] == data[1])
+		if(btn_Near[playerid][i] == data[1])
 		{
 			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] removing from player list")<playerid>;
-			Iter_Remove(btn_CurrentlyNearIndex[playerid], i);
+			Iter_Remove(btn_NearIndex[playerid], i);
 			break;
 		}
 	}

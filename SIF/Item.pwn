@@ -747,8 +747,8 @@ static
 			itm_Interactor		[ITM_MAX],
 			itm_Holder			[ITM_MAX];
 new
-Iterator:	itm_Index<ITM_MAX>,
-Iterator:	itm_WorldIndex<ITM_MAX>,
+   Iterator:itm_Index<ITM_MAX>,
+   Iterator:itm_WorldIndex<ITM_MAX>,
 			itm_ButtonIndex[BTN_MAX]
 	#if defined DEBUG_LABELS_ITEM
 		,

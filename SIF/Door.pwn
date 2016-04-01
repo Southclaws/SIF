@@ -369,7 +369,7 @@ Float:		dr_rotMoveZ
 static
 			dr_Data[DR_MAX][E_DOOR_DATA],
 			dr_State[DR_MAX char],
-Iterator:	dr_Index<DR_MAX>;
+   Iterator:dr_Index<DR_MAX>;
 
 
 /*==============================================================================

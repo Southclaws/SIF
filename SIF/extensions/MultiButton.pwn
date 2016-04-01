@@ -183,7 +183,7 @@ enum E_MULTI_BUTTON_TRIGGER_DATA
 
 static
 			mbt_Data[MBT_MAX][E_MULTI_BUTTON_TRIGGER_DATA],
-Iterator:	mbt_Index<MBT_MAX>,
+   Iterator:mbt_Index<MBT_MAX>,
 			mbt_ButtonMbTriggerID[BTN_MAX] = {INVALID_MBT_ID, ...};
 
 

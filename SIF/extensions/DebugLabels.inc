@@ -187,7 +187,7 @@ static
 			dbl_TypeData[MAX_DEBUG_LABEL_TYPES][E_DEBUG_LABEL_TYPE_DATA],
 			dbl_TypeCount,
 			dbl_Data[MAX_DEBUG_LABELS][E_DEBUG_LABEL_DATA],
-Iterator:	dbl_Index<MAX_DEBUG_LABELS>;
+   Iterator:dbl_Index<MAX_DEBUG_LABELS>;
 
 static
 			dbl_DebugLabelToggle[MAX_PLAYERS][MAX_DEBUG_LABEL_TYPES];

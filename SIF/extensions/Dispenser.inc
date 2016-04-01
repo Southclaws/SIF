@@ -37,11 +37,11 @@ ItemType:		dsp_itemType,
 
 new
 				dsp_Data[MAX_DISPENSER][E_DISPENSER_DATA],
-Iterator:		dsp_Index<MAX_DISPENSER>;
+       Iterator:dsp_Index<MAX_DISPENSER>;
 
 new
 				dsp_TypeData[MAX_DISPENSER_TYPE][E_DISPENSER_TYPE_DATA],
-Iterator:		dsp_TypeIndex<_:MAX_DISPENSER_TYPE>,
+   Iterator:	dsp_TypeIndex<_:MAX_DISPENSER_TYPE>,
 				dsp_ButtonDispenser[BTN_MAX],
 				dsp_ItemDispenser[ITM_MAX];
 
