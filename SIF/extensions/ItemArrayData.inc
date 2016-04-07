@@ -394,7 +394,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 	#include <SIF\Core.pwn>
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_4\y_hooks>
 
 #define _SIF_ITEMARRAYDATA_INCLUDED
 
@@ -454,7 +454,7 @@ hook OnScriptInit()
 	ITEM_ARRAY_DATA = sif_debug_register_handler("SIF/ItemArrayData");
 }
 
-public OnItemCreate(itemid)
+hook OnItemCreate(itemid)
 {
 	if(!itm_arr_NoResetOnCreate[itemid])
 	{
@@ -468,23 +468,8 @@ public OnItemCreate(itemid)
 		itm_arr_NoResetOnCreate[itemid] = 0;
 	}
 
-
-	#if defined itmarr_OnItemCreate
-		return itmarr_OnItemCreate(itemid);
-	#else
-		return 0;
-	#endif
+	return 1;
 }
-#if defined _ALS_OnItemCreate
-	#undef OnItemCreate
-#else
-	#define _ALS_OnItemCreate
-#endif
- 
-#define OnItemCreate itmarr_OnItemCreate
-#if defined itmarr_OnItemCreate
-	forward itmarr_OnItemCreate(itemid);
-#endif
 
 
 /*==============================================================================

@@ -50,9 +50,9 @@ over inventory actions by players.
 	#include <SIF\Item.pwn>
 #endif
 
-#include <YSI\y_iterate>
-#include <YSI\y_timers>
-#include <YSI\y_hooks>
+#include <YSI_4\y_iterate>
+#include <YSI_4\y_timers>
+#include <YSI_4\y_hooks>
 #include <streamer>
 
 #define _SIF_INVENTORY_INCLUDED
@@ -503,7 +503,7 @@ stock GetPlayerInventorySize(playerid)
 ==============================================================================*/
 
 
-public OnItemDestroy(itemid)
+hook OnItemDestroy(itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:INV_DEBUG("[OnItemDestroy] %d", itemid);
 	if(inv_ItemPlayer[itemid] != INVALID_PLAYER_ID)
@@ -511,19 +511,8 @@ public OnItemDestroy(itemid)
 		RemoveItemFromInventory(inv_ItemPlayer[itemid], inv_ItemPlayerSlot[itemid]);
 	}
 
-	#if defined inv_OnItemDestroy
-		return inv_OnItemDestroy(itemid);
-	#endif
+	return 1;
 }
-#if defined _ALS_OnItemDestroy
-	#undef OnItemDestroy
-#else
-	#define _ALS_OnItemDestroy
-#endif
-#define OnItemDestroy inv_OnItemDestroy
-#if defined inv_OnItemDestroy
-	forward inv_OnItemDestroy(itemid);
-#endif
 
 hook OnPlayerDisconnect(playerid)
 {
