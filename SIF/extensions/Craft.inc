@@ -81,7 +81,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 		native - SIF/Inventory/Callbacks
 		native -
 
-		native OnPlayerCraft(playerid, craftset)
+		native OnPlayerCraft(playerid, craftset, result)
 		{
 			Called:
 				When a player completes a crafting combination but before any
@@ -96,6 +96,8 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 				<craftset> (int, craftset ID)
 					The craftset the player completed. Can be used to get data.
 
+				<result>
+					The crafted itemid.
 			Returns:
 				1
 					To cancel the action. Prevents ingredients from being used
