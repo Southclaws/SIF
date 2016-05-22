@@ -1920,8 +1920,12 @@ internal_OnPlayerUseItem(playerid, itemid)
 
 	if(buttonid != -1)
 	{
+		sif_dp:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[internal_OnPlayerUseItem] Player at button")<playerid>;
 		if(CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, buttonid, itm_Holding[playerid]))
+		{
+			sif_dp:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[internal_OnPlayerUseItem] OnPlayerUseItemWithButton returned nonzero")<playerid>;
 			return 1;
+		}
 	}
 
 	return CallLocalFunction("OnPlayerUseItem", "dd", playerid, itemid);
