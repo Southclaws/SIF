@@ -169,7 +169,7 @@ Destroys an item.
 Boolean to indicate success or failure.
 */
 
-forward ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6);
+forward ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false);
 /*
 # Description
 Defines a new item type with the specified name and model. Item types are the
@@ -187,6 +187,7 @@ one item definition must exist or CreateItem will have no data to use.
 - usecarryanim: When true, player will use a two-handed carry animation.
 - colour: Item model texture colour.
 - boneid: The attachment bone to use, by default this is the right hand (6).
+- longpickup: When true, requires long press to pick up, tap results in using.
 
 # Returns
 Item Type ID handle of the newly defined item type. INVALID_ITEM_TYPE If the
@@ -738,7 +739,8 @@ Float:		itm_attachRotZ,
 			itm_useCarryAnim,
 
 			itm_colour,
-			itm_attachBone
+			itm_attachBone,
+			itm_longPickup
 }
 
 
@@ -765,8 +767,10 @@ static
 
 static
 			itm_Holding			[MAX_PLAYERS],
+			itm_LongPickupTick	[MAX_PLAYERS],
 			itm_Interacting		[MAX_PLAYERS],
-Timer:		itm_InteractTimer	[MAX_PLAYERS];
+Timer:		itm_InteractTimer	[MAX_PLAYERS],
+Timer:		itm_LongPickupTimer	[MAX_PLAYERS];
 
 
 static ITEM_DEBUG = -1;
@@ -781,7 +785,7 @@ static ITEM_DEBUG = -1;
 
 hook OnScriptInit()
 {
-	ITEM_DEBUG = sif_debug_register_handler("SIF/Item");
+	ITEM_DEBUG = sif_debug_register_handler("SIF/Item", 6);
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnScriptInit]");
 
 	for(new i; i < MAX_PLAYERS; i++)
@@ -810,8 +814,16 @@ hook OnScriptInit()
 hook OnPlayerConnect(playerid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerConnect]");
-	itm_Holding[playerid]		= INVALID_ITEM_ID;
-	itm_Interacting[playerid]	= INVALID_ITEM_ID;
+	itm_Holding[playerid] = INVALID_ITEM_ID;
+	itm_Interacting[playerid] = INVALID_ITEM_ID;
+	stop itm_InteractTimer[playerid];
+	stop itm_LongPickupTimer[playerid];
+}
+
+hook OnPlayerDisconnect(playerid, reason)
+{
+	stop itm_InteractTimer[playerid];
+	stop itm_LongPickupTimer[playerid];
 }
 
 
@@ -923,7 +935,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	return 1;
 }
 
-stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6)
+stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType]");
 	new ItemType:id = ItemType:itm_TypeTotal;
@@ -967,6 +979,7 @@ stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Fl
 
 	itm_TypeData[id][itm_colour]		= colour;
 	itm_TypeData[id][itm_attachBone]	= boneid;
+	itm_TypeData[id][itm_longPickup]	= longpickup;
 
 	CallLocalFunction("OnItemTypeDefined", "d", _:id);
 
@@ -1824,10 +1837,17 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 	{
 		_PlayerKeyHandle_Drop(playerid);
 	}
+
 	if(newkeys & 16)
 	{
 		_PlayerKeyHandle_Use(playerid);
 	}
+
+	if(oldkeys & 16 && !(newkeys & 16))
+	{
+		_PlayerKeyHandle_Release(playerid);
+	}
+
 	return 1;
 }
 
@@ -1890,6 +1910,32 @@ _PlayerKeyHandle_Use(playerid)
 	return PlayerUseItem(playerid);
 }
 
+_PlayerKeyHandle_Release(playerid)
+{
+	stop itm_LongPickupTimer[playerid];
+
+	if(itm_Interacting[playerid] == INVALID_ITEM_ID)
+		return 0;
+
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:ITEM_DEBUG("[OnPlayerKeyStateChange] Released key while interacting with item");
+	// If the item the player is interacting with is not a long-press pickup
+	// type, ignore the next part of code since it's not relavent.
+	if(!itm_TypeData[itm_Data[itm_Interacting[playerid]][itm_type]][itm_longPickup])
+		return 0;
+
+	// Time since player interact keydown event
+	new interval = sif_GetTickCountDiff(itm_LongPickupTick[playerid], GetTickCount());
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:ITEM_DEBUG("[OnPlayerKeyStateChange] %dms since keydown", interval);
+
+	// If the interval is below 200 it's a tap event, counts as using an item.
+	if(interval < 200)
+		CallLocalFunction("OnPlayerUseItem", "dd", playerid, itm_Interacting[playerid]);
+
+	itm_LongPickupTick[playerid] = 0;
+	itm_Interacting[playerid] = INVALID_ITEM_ID;
+
+	return 1;
+}
 
 hook OnPlayerEnterPlayerArea(playerid, targetid)
 {
@@ -1936,40 +1982,58 @@ hook OnButtonPress(playerid, buttonid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnButtonPress]")<playerid>;
 
-	if(_OnButtonPressHandler(playerid, buttonid))
-		return 1;
-
-	return 0;
-}
-
-_OnButtonPressHandler(playerid, buttonid)
-{
 	if(itm_Interacting[playerid] != INVALID_ITEM_ID)
-		return 0;
+		return Y_HOOKS_CONTINUE_RETURN_0;
 
 	if(itm_ButtonIndex[buttonid] == INVALID_ITEM_ID)
-		return 0;
+		return Y_HOOKS_CONTINUE_RETURN_0;
 
 	if(!Iter_Contains(itm_Index, itm_ButtonIndex[buttonid]))
-		return 0;
+		return Y_HOOKS_CONTINUE_RETURN_0;
 
 	new itemid = itm_ButtonIndex[buttonid];
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
-		return 0;
+		return Y_HOOKS_CONTINUE_RETURN_0;
 
 	if(itm_Interactor[itemid] != INVALID_PLAYER_ID)
-		return 0;
+		return Y_HOOKS_CONTINUE_RETURN_0;
 
 	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
 		return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid);
 
+	if(itm_TypeData[itm_Data[itemid][itm_type]][itm_longPickup])
+	{
+		_LongPickupItem(playerid, itemid);
+		return Y_HOOKS_BREAK_RETURN_1;
+	}
+
 	if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, itemid))
-		return 1;
+		return Y_HOOKS_BREAK_RETURN_0;
 
 	PlayerPickUpItem(playerid, itemid);
 
-	return 1;
+	return Y_HOOKS_BREAK_RETURN_1;
+}
+
+_LongPickupItem(playerid, itemid)
+{
+	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[_LongPickupItem]")<playerid>;
+	itm_LongPickupTick[playerid] = GetTickCount();
+	itm_Interacting[playerid] = itemid;
+
+	stop itm_LongPickupTimer[playerid];
+	itm_LongPickupTimer[playerid] = defer _LongPickupItemDelay(playerid, itemid);
+}
+
+timer _LongPickupItemDelay[500](playerid, itemid)
+{
+	if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, itemid))
+		return;
+
+	itm_LongPickupTick[playerid] = 0;
+	itm_Interacting[playerid] = INVALID_ITEM_ID;
+	PlayerPickUpItem(playerid, itemid);
 }
 
 timer PickUpItemDelay[400](playerid, id, animtype)
