@@ -1655,6 +1655,17 @@ stock GetItemTypeBone(ItemType:itemtype)
 	return itm_TypeData[itemtype][itm_attachBone];
 }
 
+// itm_longPickup
+stock GetItemTypeLongPickup(ItemType:itemtype)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeLongPickup]");
+
+	if(!IsValidItemType(itemtype))
+		return 0;
+
+	return itm_TypeData[itemtype][itm_longPickup];
+}
+
 // itm_Holder
 stock GetItemHolder(itemid)
 {
