@@ -46,9 +46,9 @@ A fundamental library with features used by SIF modules.
 	#include <SIF\Debug.pwn>
 #endif
 
-#include <YSI_4\y_iterate>
-#include <YSI_4\y_timers>
-#include <YSI_4\y_hooks>
+#include <YSI\y_iterate>
+#include <YSI\y_timers>
+#include <YSI\y_hooks>
 #include <streamer>
 
 #define _SIF_CORE_INCLUDED

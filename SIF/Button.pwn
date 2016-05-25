@@ -64,9 +64,9 @@ GTA:SA spinning pickups for a few reasons:
 	#include <SIF\extensions\DebugLabels.inc>
 #endif
 
-#include <YSI_4\y_iterate>
-#include <YSI_4\y_timers>
-#include <YSI_4\y_hooks>
+#include <YSI\y_iterate>
+#include <YSI\y_timers>
+#include <YSI\y_hooks>
 #include <streamer>
 
 #define _SIF_BUTTON_INCLUDED

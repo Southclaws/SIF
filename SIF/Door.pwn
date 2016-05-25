@@ -45,9 +45,9 @@ restrict the use of doors by returning 1.
 	#include <SIF\Button.pwn>
 #endif
 
-#include <YSI_4\y_iterate>
-#include <YSI_4\y_timers>
-#include <YSI_4\y_hooks>
+#include <YSI\y_iterate>
+#include <YSI\y_timers>
+#include <YSI\y_hooks>
 #include <streamer>
 
 #define _SIF_DOOR_INCLUDED

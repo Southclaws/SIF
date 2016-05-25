@@ -35,8 +35,8 @@ Basic debugging that can be activated/deactivated during runtime.
 	#endinput
 #endif
 
-#include <YSI_4\y_hooks>
-#include <YSI_4\y_va>
+#include <YSI\y_hooks>
+#include <YSI\y_va>
 
 #define _SIF_DEBUG_INCLUDED
 
