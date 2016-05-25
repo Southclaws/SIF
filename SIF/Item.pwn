@@ -785,7 +785,7 @@ static ITEM_DEBUG = -1;
 
 hook OnScriptInit()
 {
-	ITEM_DEBUG = sif_debug_register_handler("SIF/Item", 6);
+	ITEM_DEBUG = sif_debug_register_handler("SIF/Item");
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnScriptInit]");
 
 	for(new i; i < MAX_PLAYERS; i++)
