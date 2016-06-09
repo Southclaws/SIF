@@ -113,6 +113,9 @@ GTA:SA spinning pickups for a few reasons:
 #define INVALID_BUTTON_ID (-1)
 
 
+DEFINE_HOOK_REPLACEMENT(Button , Btn);
+
+
 // Functions
 
 
