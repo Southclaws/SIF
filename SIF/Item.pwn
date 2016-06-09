@@ -618,6 +618,12 @@ forward OnPlayerUseItemWithButton(playerid, buttonid, itemid);
 When a player uses an item while in the area of a button from an item that is in the game world.
 */
 
+forward OnPlayerRelButtonWithItem(playerid, buttonid, itemid);
+/*
+# Called
+When a player releases the interact key after calling OnPlayerUseItemWithButton.
+*/
+
 forward OnPlayerPickUpItem(playerid, itemid);
 /*
 # Called
@@ -769,6 +775,7 @@ static
 			itm_Holding			[MAX_PLAYERS],
 			itm_LongPickupTick	[MAX_PLAYERS],
 			itm_Interacting		[MAX_PLAYERS],
+			itm_CurrentButton	[MAX_PLAYERS],
 Timer:		itm_InteractTimer	[MAX_PLAYERS],
 Timer:		itm_LongPickupTimer	[MAX_PLAYERS];
 
@@ -816,6 +823,7 @@ hook OnPlayerConnect(playerid)
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerConnect]");
 	itm_Holding[playerid] = INVALID_ITEM_ID;
 	itm_Interacting[playerid] = INVALID_ITEM_ID;
+	itm_CurrentButton[playerid] = INVALID_BUTTON_ID;
 	stop itm_InteractTimer[playerid];
 	stop itm_LongPickupTimer[playerid];
 }
@@ -1926,7 +1934,15 @@ _PlayerKeyHandle_Release(playerid)
 	stop itm_LongPickupTimer[playerid];
 
 	if(itm_Interacting[playerid] == INVALID_ITEM_ID)
+	{
+		if(itm_CurrentButton[playerid] != INVALID_BUTTON_ID)
+		{
+			CallLocalFunction("OnPlayerRelButtonWithItem", "ddd", playerid, itm_CurrentButton[playerid], itm_Holding[playerid]);
+			itm_CurrentButton[playerid] = INVALID_BUTTON_ID;
+		}
+
 		return 0;
+	}
 
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:ITEM_DEBUG("[OnPlayerKeyStateChange] Released key while interacting with item");
 	// If the item the player is interacting with is not a long-press pickup
@@ -1978,6 +1994,8 @@ internal_OnPlayerUseItem(playerid, itemid)
 	if(buttonid != -1)
 	{
 		sif_dp:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[internal_OnPlayerUseItem] Player at button")<playerid>;
+		itm_CurrentButton[playerid] = buttonid;
+
 		if(CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, buttonid, itm_Holding[playerid]))
 		{
 			sif_dp:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[internal_OnPlayerUseItem] OnPlayerUseItemWithButton returned nonzero")<playerid>;
