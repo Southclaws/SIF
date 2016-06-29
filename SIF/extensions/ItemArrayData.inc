@@ -510,7 +510,7 @@ stock SetItemArrayData(itemid, data[], length, call = 1)
 
 	if(length > itm_arr_ItemTypeArrayMax[GetItemType(itemid)])
 	{
-		printf("ERROR: [SetItemArrayData] data length %d exceeds item type data size of %d.", length, itm_arr_ItemTypeArrayMax[GetItemType(itemid)]);
+		printf("ERROR: [SetItemArrayData] data length %d exceeds item type %d data size of %d.", length, _:GetItemType(itemid), itm_arr_ItemTypeArrayMax[GetItemType(itemid)]);
 		return -1;
 	}
 
