@@ -68,6 +68,10 @@ scriptable entities.
 	#include <SIF\Core.pwn>
 #endif
 
+#if !defined _SIF_GEID_INCLUDED
+	#include <SIF\GEID.pwn>
+#endif
+
 #if !defined _SIF_BUTTON_INCLUDED
 	#include <SIF\Button.pwn>
 #endif
@@ -81,6 +85,8 @@ scriptable entities.
 #include <YSI\y_hooks>
 #include <streamer>
 
+#define _SIF_ITEM_INCLUDED
+
 
 /*==============================================================================
 
@@ -90,7 +96,6 @@ scriptable entities.
 
 
 // Maximum amount of items that can be created.
-#define _SIF_ITEM_INCLUDED
 #if !defined ITM_MAX
 	#define ITM_MAX				(8192)
 #endif
@@ -137,7 +142,7 @@ scriptable entities.
 // Functions
 
 
-forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0);
+forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "");
 /*
 # Description
 Creates an item in the game world at the specified coordinates with the
@@ -154,6 +159,7 @@ display a 3D text label above the item.
 - label: True to show a label with the item name at the item.
 - applyrotoffsets: False to make rx, ry, rz rotation values absolute.
 - virtual: When true, the item doesn't have an in-world existence.
+- geid: Allows specific GEID to be set instead of generating one.
 
 # Returns
 Item ID handle of the newly created item or INVALID_ITEM_ID If the item index is
@@ -275,7 +281,7 @@ The allocated ID of the item or INVALID_ITEM_ID If there are no more free item
 slots or -2 If the specified type is invalid.
 */
 
-forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0);
+forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "");
 /*
 # Description
 Creates an item using an ID allocated from AllocNextItemID. This is the only
@@ -720,7 +726,8 @@ Float:		itm_rotZ,
 			itm_interior,
 
 			itm_exData,
-			itm_nameEx[ITM_MAX_TEXT]
+			itm_nameEx[ITM_MAX_TEXT],
+			itm_geid[GEID_LEN]
 }
 
 enum E_ITEM_TYPE_DATA
@@ -842,9 +849,9 @@ hook OnPlayerDisconnect(playerid, reason)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0)
+stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "")
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem]");
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem] %d %f %f %f");
 	new id = Iter_Free(itm_Index);
 
 	if(id == -1)
@@ -859,10 +866,19 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 		return INVALID_ITEM_ID;
 	}
 
+
 	Iter_Add(itm_Index, id);
+
+	if(geid[0] == EOS)
+		mkgeid(id, itm_Data[id][itm_geid]);
+
+	else
+		strcat(itm_Data[id][itm_geid], geid, GEID_LEN);
 
 	itm_Data[id][itm_type] = type;
 	itm_TypeCount[type]++;
+
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[CreateItem] GEID: '%s' Type: '%s' Pos: %f, %f, %f", itm_Data[id][itm_geid], itm_TypeData[itm_Data[id][itm_type]][itm_uname], x, y, z);
 
 	CallLocalFunction("OnItemCreate", "d", id);
 
@@ -945,7 +961,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 
 stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType]");
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType] '%s' '%s' %d %d", name, uname, model, size);
 	new ItemType:id = ItemType:itm_TypeTotal;
 
 	if(id == ITM_MAX_TYPES)
@@ -1550,6 +1566,20 @@ stock GetItemNameExtra(itemid, string[])
 
 	string[0] = EOS;
 	strcat(string, itm_Data[itemid][itm_nameEx], ITM_MAX_TEXT);
+
+	return 1;
+}
+
+// itm_geid
+stock GetItemGEID(itemid, string[])
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemGEID]");
+
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	string[0] = EOS;
+	strcat(string, itm_Data[itemid][itm_geid], GEID_LEN);
 
 	return 1;
 }
