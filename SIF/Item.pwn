@@ -570,7 +570,7 @@ what ID an item will have before calling CreateItem and thus OnItemCreated.
 // Events
 
 
-forward OnItemTypeDefined(ItemType:itemtype);
+forward OnItemTypeDefined(uname[]);
 /*
 # Called
 After an item type is defined.
@@ -1005,7 +1005,7 @@ stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Fl
 	itm_TypeData[id][itm_attachBone]	= boneid;
 	itm_TypeData[id][itm_longPickup]	= longpickup;
 
-	CallLocalFunction("OnItemTypeDefined", "d", _:id);
+	CallLocalFunction("OnItemTypeDefined", "s", uname);
 
 	return id;
 }
