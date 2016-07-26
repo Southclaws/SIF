@@ -431,6 +431,7 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 static
 	itm_arr_ItemTypeArrayMax[ITM_MAX_TYPES],
+	bool:itm_arr_ItemTypeArrayProtect[ITM_MAX_TYPES],
 	itm_arr_Data[ITM_MAX][ITM_ARR_MAX_ARRAY_DATA],
 	itm_arr_Length[ITM_MAX],
 	itm_arr_NoResetOnCreate[ITM_MAX];
@@ -479,9 +480,9 @@ hook OnItemCreate(itemid)
 ==============================================================================*/
 
 
-stock SetItemTypeMaxArrayData(ItemType:itemtype, size)
+stock SetItemTypeMaxArrayData(ItemType:itemtype, size, bool:protect = false)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemTypeMaxArrayData] %d %d", _:itemtype, size);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemTypeMaxArrayData] %d %d %d", _:itemtype, size, protect);
 	if(!IsValidItemType(itemtype))
 		return 0;
 
@@ -489,6 +490,7 @@ stock SetItemTypeMaxArrayData(ItemType:itemtype, size)
 		return -1;
 
 	itm_arr_ItemTypeArrayMax[itemtype] = size;
+	itm_arr_ItemTypeArrayProtect[itemtype] = protect;
 
 	return 1;
 }
@@ -502,16 +504,24 @@ stock GetItemTypeArrayDataSize(ItemType:itemtype)
 	return itm_arr_ItemTypeArrayMax[itemtype];
 }
 
-stock SetItemArrayData(itemid, data[], length, call = 1)
+stock SetItemArrayData(itemid, data[], length, call = 1, bool:force = false)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayData] %d %d", itemid, length);
 	if(!IsValidItem(itemid))
 		return 0;
 
-	if(length > itm_arr_ItemTypeArrayMax[GetItemType(itemid)])
+	new ItemType:itemtype = GetItemType(itemid);
+
+	if(length > itm_arr_ItemTypeArrayMax[itemtype])
 	{
 		printf("ERROR: [SetItemArrayData] data length %d exceeds item type %d data size of %d.", length, _:GetItemType(itemid), itm_arr_ItemTypeArrayMax[GetItemType(itemid)]);
 		return -1;
+	}
+
+	if(itm_arr_ItemTypeArrayProtect[itemtype] && !force)
+	{
+		printf("ERROR: [SetItemArrayData] itemtype (%d) uses data protection and force parameter is false.", _:itemtype);
+		return -2;
 	}
 
 	itm_arr_Length[itemid] = 0;
@@ -545,14 +555,22 @@ stock GetItemArrayData(itemid, data[])
 	return 1;
 }
 
-stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0, call = 1)
+stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0, call = 1, bool:force = false)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] %d %d", itemid, cell);
 	if(!IsValidItem(itemid))
 		return 0;
 
-	if(cell >= itm_arr_ItemTypeArrayMax[GetItemType(itemid)])
+	new ItemType:itemtype = GetItemType(itemid);
+
+	if(cell >= itm_arr_ItemTypeArrayMax[itemtype])
 		return -1;
+
+	if(itm_arr_ItemTypeArrayProtect[itemtype] && !force)
+	{
+		printf("ERROR: [SetItemArrayDataAtCell] itemtype (%d) uses data protection and force parameter is false.", _:itemtype);
+		return -2;
+	}
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] Item and cell valid. Checking cell %d >= length %d", cell, itm_arr_Length[itemid]);
 	if(cell >= itm_arr_Length[itemid])
@@ -615,11 +633,17 @@ stock GetItemArrayDataAtCell(itemid, cell)
 	return itm_arr_Data[itemid][cell];
 }
 
-stock SetItemArrayDataSize(itemid, size)
+stock SetItemArrayDataSize(itemid, size, bool:force = false)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataSize] %d %d", itemid, size);
 	if(!IsValidItem(itemid))
 		return 0;
+
+	if(itm_arr_ItemTypeArrayProtect[GetItemType(itemid)] && !force)
+	{
+		printf("ERROR: [SetItemArrayDataSize] itemtype (%d) uses data protection and force parameter is false.", _:GetItemType(itemid));
+		return -2;
+	}
 
 	itm_arr_Length[itemid] = size;
 
@@ -673,11 +697,17 @@ stock AppendItemArrayCell(itemid, data)
 	return 1;
 }
 
-stock SetItemArrayDataLength(itemid, length)
+stock SetItemArrayDataLength(itemid, length, bool:force = false)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataLength] %d %d", itemid, length);
 	if(!IsValidItem(itemid))
 		return 0;
+
+	if(itm_arr_ItemTypeArrayProtect[GetItemType(itemid)] && !force)
+	{
+		printf("ERROR: [SetItemArrayDataLength] itemtype (%d) uses data protection and force parameter is false.", _:GetItemType(itemid));
+		return -2;
+	}
 
 	itm_arr_Length[itemid] = length;
 
