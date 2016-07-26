@@ -411,10 +411,20 @@ stock CreateItemList(items[], maxitems = sizeof(items))
 
 		itm_lst_List[id][itm_lst_Size[id]++] = itm_lst_ArraySize[id][i];
 
-		memcpy(itm_lst_List[id], itm_lst_Array[id][i], itm_lst_Size[id] * 4, itm_lst_ArraySize[id][i] * 4);
-
-		itm_lst_Size[id] += itm_lst_ArraySize[id][i];
-
+		if(itm_lst_ArraySize[id][i] > 0)
+		{
+			memcpy(itm_lst_List[id], itm_lst_Array[id][i], itm_lst_Size[id] * 4, itm_lst_ArraySize[id][i] * 4);
+			itm_lst_Size[id] += itm_lst_ArraySize[id][i];
+		}
+/*
+		printf(" loop %d, id: %d, itm_lst_Count: %d, itemtype: %d, arrsize: %d, arr[0]: %d",
+			itm_lst_Size[id],
+			id,
+			itm_lst_Count[id],
+			itm_lst_Items[id][itm_lst_Count[id]],
+			itm_lst_ArraySize[id][itm_lst_Count[id]],
+			itm_lst_Array[id][itm_lst_Count[id]][0]);
+*/
 		itm_lst_Count[id]++;
 	}
 
@@ -450,9 +460,12 @@ stock ExtractItemList(list[], length = sizeof(list))
 
 		itm_lst_ArraySize[id][itm_lst_Count[id]]	= list[itm_lst_Size[id]++];
 
-		memcpy(itm_lst_Array[id][itm_lst_Count[id]], list[itm_lst_Size[id]], 0, itm_lst_ArraySize[id][itm_lst_Count[id]] * 4);
-
-		/*
+		if(itm_lst_ArraySize[id][itm_lst_Count[id]] > 0)
+		{
+			memcpy(itm_lst_Array[id][itm_lst_Count[id]], list[itm_lst_Size[id]], 0, itm_lst_ArraySize[id][itm_lst_Count[id]] * 4);
+			itm_lst_Size[id] += itm_lst_ArraySize[id][itm_lst_Count[id]];
+		}
+/*
 		printf(" loop %d / %d, id: %d, itm_lst_Count: %d, itemtype: %d, arrsize: %d, arr[0]: %d, list[%d]: %d",
 			itm_lst_Size[id],
 			length,
@@ -463,9 +476,7 @@ stock ExtractItemList(list[], length = sizeof(list))
 			itm_lst_Array[id][itm_lst_Count[id]][0],
 			itm_lst_Size[id],
 			list[itm_lst_Size[id]]);
-		*/
-
-		itm_lst_Size[id] += itm_lst_ArraySize[id][itm_lst_Count[id]];
+*/
 		itm_lst_Count[id]++;
 	}
 

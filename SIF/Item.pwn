@@ -1961,12 +1961,16 @@ _PlayerKeyHandle_Use(playerid)
 
 _PlayerKeyHandle_Release(playerid)
 {
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[_PlayerKeyHandle_Release]");
+
 	stop itm_LongPickupTimer[playerid];
 
 	if(itm_Interacting[playerid] == INVALID_ITEM_ID)
 	{
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[_PlayerKeyHandle_Release] itm_Interacting invalid");
 		if(itm_CurrentButton[playerid] != INVALID_BUTTON_ID)
 		{
+			sif_d:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[_PlayerKeyHandle_Release] itm_CurrentButton valid");
 			CallLocalFunction("OnPlayerRelButtonWithItem", "ddd", playerid, itm_CurrentButton[playerid], itm_Holding[playerid]);
 			itm_CurrentButton[playerid] = INVALID_BUTTON_ID;
 		}
@@ -1974,7 +1978,7 @@ _PlayerKeyHandle_Release(playerid)
 		return 0;
 	}
 
-	sif_d:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:ITEM_DEBUG("[OnPlayerKeyStateChange] Released key while interacting with item");
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[_PlayerKeyHandle_Release] Released key while interacting with item");
 	// If the item the player is interacting with is not a long-press pickup
 	// type, ignore the next part of code since it's not relavent.
 	if(!itm_TypeData[itm_Data[itm_Interacting[playerid]][itm_type]][itm_longPickup])
@@ -1982,7 +1986,7 @@ _PlayerKeyHandle_Release(playerid)
 
 	// Time since player interact keydown event
 	new interval = sif_GetTickCountDiff(itm_LongPickupTick[playerid], GetTickCount());
-	sif_d:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:ITEM_DEBUG("[OnPlayerKeyStateChange] %dms since keydown", interval);
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[_PlayerKeyHandle_Release] %dms since keydown", interval);
 
 	// If the interval is below 200 it's a tap event, counts as using an item.
 	if(interval < 200)
