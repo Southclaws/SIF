@@ -952,7 +952,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 
 	CallLocalFunction("OnItemDestroyed", "d", itemid);
 
-	#if defined DEBUG_LABELS_BUTTON
+	#if defined DEBUG_LABELS_ITEM
 		DestroyDebugLabel(itm_DebugLabelID[itemid]);
 	#endif
 
@@ -2218,14 +2218,19 @@ hook OnPlayerDeath(playerid, killerid, reason)
 }
 #endif
 
-#if defined DEBUG_LABELS_BUTTON
-	UpdateItemDebugLabel(buttonid)
+#if defined DEBUG_LABELS_ITEM
+	UpdateItemDebugLabel(itemid)
 	{
 		new string[64];
 
-		format(string, sizeof(string), "EXDATA: %d", itm_Data[buttonid][itm_exData]);
+		format(string, sizeof(string), "GEID:%s OBJ:%d BTN:%d TYPE:%d EXDATA:%d",
+			itm_Data[itemid][itm_geid],
+			itm_Data[itemid][itm_objId],
+			itm_Data[itemid][itm_button],
+			_:itm_Data[itemid][itm_type],
+			itm_Data[itemid][itm_exData]);
 
-		UpdateDebugLabelString(itm_DebugLabelID[buttonid], string);
+		UpdateDebugLabelString(itm_DebugLabelID[itemid], string);
 	}
 #endif
 
