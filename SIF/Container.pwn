@@ -485,6 +485,7 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[AddItemToContainer] Added item %d to container %d at slot %d", itemid, containerid, idx);
 
 	RemoveItemFromWorld(itemid);
+	RemoveCurrentItem(GetItemHolder(itemid));
 
 	CallLocalFunction("OnItemAddedToContainer", "ddd", containerid, itemid, playerid);
 	

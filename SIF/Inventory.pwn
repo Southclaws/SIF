@@ -313,6 +313,7 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 	sif_d:SIF_DEBUG_LEVEL_CORE:INV_DEBUG("[AddItemToInventory] Added item %d to player inventory %d at slot %d", itemid, playerid, idx);
 
 	RemoveItemFromWorld(itemid);
+	RemoveCurrentItem(GetItemHolder(itemid));
 
 	if(call)
 		CallLocalFunction("OnItemAddedToInventory", "ddd", playerid, itemid, idx);

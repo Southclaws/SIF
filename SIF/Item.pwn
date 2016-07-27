@@ -922,14 +922,11 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 		itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
 		stop itm_InteractTimer[itm_Holder[itemid]];
 	}
-	else
+	else if(Iter_Contains(itm_WorldIndex, itemid))
 	{
-		if(Iter_Contains(itm_WorldIndex, itemid))
-		{
-			DestroyDynamicObject(itm_Data[itemid][itm_objId]);
-			DestroyButton(itm_Data[itemid][itm_button]);
-			itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
-		}
+		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
+		DestroyButton(itm_Data[itemid][itm_button]);
+		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
 	}
 
 	itm_TypeCount[itm_Data[itemid][itm_type]]--;
@@ -1151,13 +1148,8 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
-	if(Iter_Contains(itm_WorldIndex, itemid))
-	{
-		if(itm_Holder[itemid] != INVALID_PLAYER_ID)
-			return 0;
-	}
-
 	RemoveItemFromWorld(itemid);
+	RemoveCurrentItem(GetItemHolder(itemid));
 
 	new
 		ItemType:type = itm_Data[itemid][itm_type];
