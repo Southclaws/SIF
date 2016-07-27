@@ -606,6 +606,12 @@ forward OnItemCreateInWorld(itemid);
 After an existing (already created with CreateItem) item is created in the game world (for instance, after a player drops the item, or directly after it is created with CreateItem)
 */
 
+forward OnItemRemoveFromWorld(itemid);
+/*
+# Called
+After an item is removed from the world either by being given to a player or by calling RemoveItemFromWorld
+*/
+
 forward OnPlayerUseItem(playerid, itemid);
 /*
 # Called
@@ -667,9 +673,6 @@ forward OnPlayerDroppedItem(playerid, itemid);
 /*
 # Called
 When a player finishes the animation for dropping an item.
-
-# Returns
-1 To cancel removing the item from the player.
 */
 
 forward OnPlayerGiveItem(playerid, targetid, itemid);
@@ -1154,6 +1157,8 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 			return 0;
 	}
 
+	RemoveItemFromWorld(itemid);
+
 	new
 		ItemType:type = itm_Data[itemid][itm_type];
 
@@ -1166,19 +1171,6 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 	itm_Interacting[playerid]		= INVALID_ITEM_ID;
 	itm_Interactor[itemid]			= INVALID_PLAYER_ID;
 
-	if(Iter_Contains(itm_WorldIndex, itemid))
-	{
-		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Item in world, destroying object")<playerid>;
-		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
-		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Destroying button")<playerid>;
-		DestroyButton(itm_Data[itemid][itm_button]);
-		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Resetting array data")<playerid>;
-		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
-
-		itm_Data[itemid][itm_objId] = -1;
-		itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
-	}
-
 	SetPlayerAttachedObject(
 		playerid, ITM_ATTACH_INDEX, itm_TypeData[type][itm_model], itm_TypeData[type][itm_attachBone],
 		itm_TypeData[type][itm_attachPosX], itm_TypeData[type][itm_attachPosY], itm_TypeData[type][itm_attachPosZ],
@@ -1187,9 +1179,6 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 
 	if(itm_TypeData[type][itm_useCarryAnim])
 		SetPlayerSpecialAction(playerid, SPECIAL_ACTION_CARRY);
-
-	sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Removing item from world index")<playerid>;
-	Iter_Remove(itm_WorldIndex, itemid);
 
 	if(call)
 	{
@@ -1240,24 +1229,30 @@ stock RemoveItemFromWorld(itemid)
 	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
+		return 0;
+
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
+		printf("[RemoveItemFromWorld] ERROR: Player %d was holding item %d that was in the world.", itm_Holder[itemid], itemid);
 		RemoveCurrentItem(itm_Holder[itemid]);
 	}
-	else
-	{
-		if(!Iter_Contains(itm_WorldIndex, _:itemid))
-			return 0;
 
-		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
-		DestroyButton(itm_Data[itemid][itm_button]);
-		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[RemoveItemFromWorld] Item in world, destroying object");
+	DestroyDynamicObject(itm_Data[itemid][itm_objId]);
 
-		itm_Data[itemid][itm_objId] = -1;
-		itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[RemoveItemFromWorld] Destroying button");
+	DestroyButton(itm_Data[itemid][itm_button]);
 
-		Iter_Remove(itm_WorldIndex, itemid);
-	}
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[RemoveItemFromWorld] Resetting array data");
+	itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
+	itm_Data[itemid][itm_objId] = -1;
+	itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
+
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[RemoveItemFromWorld] Removing item from world index");
+	Iter_Remove(itm_WorldIndex, itemid);
+
+	CallRemoteFunction("OnItemRemoveFromWorld", "d", itemid);
 
 	return 1;
 }
