@@ -129,9 +129,6 @@ scriptable entities.
 // Offset from player Z coordinate to floor Z coordinate
 #define FLOOR_OFFSET		(0.96)
 
-// Z offset for buttons when created on items
-#define ITEM_BUTTON_OFFSET	(0.7)
-
 // Item validity check constant
 #define INVALID_ITEM_ID		(-1)
 
@@ -142,7 +139,7 @@ scriptable entities.
 // Functions
 
 
-forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "");
+forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "");
 /*
 # Description
 Creates an item in the game world at the specified coordinates with the
@@ -153,7 +150,6 @@ display a 3D text label above the item.
 - type: An item type defined with DefineItemType.
 - x, y, z: The position to create the object and button of the item.
 - rx, ry, rz: The rotation value of the object, overrides item type data.
-- zoffset: How high from the object the button will be created.
 - world: The virtual world in which the object, button and label will appear.
 - interior: Interior world, same as above but for interior worlds.
 - label: True to show a label with the item name at the item.
@@ -175,7 +171,7 @@ Destroys an item.
 Boolean to indicate success or failure.
 */
 
-forward ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false);
+forward ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET);
 /*
 # Description
 Defines a new item type with the specified name and model. Item types are the
@@ -188,12 +184,13 @@ one item definition must exist or CreateItem will have no data to use.
 - model: The GTA:SA model id to use when the item is visible in the game world.
 - size: An arbitrary size value (has no effect in this module).
 - rotx, roty, rotz: The default rotation the item object will have when dropped.
-- zoffset: Z offset from the item world position to create item model.
+- modelz: Z offset from the item world position to create item model.
 - attx, atty, attz, attrx, attry, attrz: Player holding attachment coordinates.
 - usecarryanim: When true, player will use a two-handed carry animation.
 - colour: Item model texture colour.
 - boneid: The attachment bone to use, by default this is the right hand (6).
 - longpickup: When true, requires long press to pick up, tap results in using.
+- modelz: Z offset from the item world position to create item button.
 
 # Returns
 Item Type ID handle of the newly defined item type. INVALID_ITEM_TYPE If the
@@ -281,7 +278,7 @@ The allocated ID of the item or INVALID_ITEM_ID If there are no more free item
 slots or -2 If the specified type is invalid.
 */
 
-forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "");
+forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0);
 /*
 # Description
 Creates an item using an ID allocated from AllocNextItemID. This is the only
@@ -345,7 +342,7 @@ item being held by a player, it will return the last position of the item.
 Boolean to indicate success or failure.
 */
 
-forward SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0);
+forward SetItemPos(itemid, Float:x, Float:y, Float:z);
 /*
 # Description
 Changes the position of an item. This includes the associated object and button.
@@ -743,7 +740,8 @@ enum E_ITEM_TYPE_DATA
 Float:		itm_defaultRotX,
 Float:		itm_defaultRotY,
 Float:		itm_defaultRotZ,
-Float:		itm_offsetZ,
+Float:		itm_zModelOffset,
+Float:		itm_zButtonOffset,
 
 Float:		itm_attachPosX,
 Float:		itm_attachPosY,
@@ -852,7 +850,7 @@ hook OnPlayerDisconnect(playerid, reason)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "")
+stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "")
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem] %d %f %f %f");
 	new id = Iter_Free(itm_Index);
@@ -892,7 +890,7 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 		virtual = 1;
 
 	if(!virtual)
-		CreateItemInWorld(id, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
+		CreateItemInWorld(id, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets);
 
 	CallLocalFunction("OnItemCreated", "d", id);
 
@@ -959,7 +957,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	return 1;
 }
 
-stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:zoffset = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false)
+stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType] '%s' '%s' %d %d", name, uname, model, size);
 	new ItemType:id = ItemType:itm_TypeTotal;
@@ -990,7 +988,8 @@ stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Fl
 	itm_TypeData[id][itm_defaultRotX]	= rotx;
 	itm_TypeData[id][itm_defaultRotY]	= roty;
 	itm_TypeData[id][itm_defaultRotZ]	= rotz;
-	itm_TypeData[id][itm_offsetZ]		= zoffset;
+	itm_TypeData[id][itm_zModelOffset]	= modelz;
+	itm_TypeData[id][itm_zButtonOffset]	= buttonz;
 
 	itm_TypeData[id][itm_attachPosX]	= attx;
 	itm_TypeData[id][itm_attachPosY]	= atty;
@@ -1273,7 +1272,7 @@ stock AllocNextItemID(ItemType:type)
 	return id;
 }
 
-stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0)
+stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItem_ExplicitID]");
 	if(!Iter_Contains(itm_Index, itemid))
@@ -1290,7 +1289,7 @@ stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 		virtual = 1;
 
 	if(!virtual)
-		CreateItemInWorld(itemid, x, y, z, rx, ry, rz, zoffset, world, interior, label, applyrotoffsets);
+		CreateItemInWorld(itemid, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets);
 
 	CallLocalFunction("OnItemCreated", "d", itemid);
 
@@ -1388,7 +1387,7 @@ stock GetItemPos(itemid, &Float:x, &Float:y, &Float:z)
 
 	return 1;
 }
-stock SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0)
+stock SetItemPos(itemid, Float:x, Float:y, Float:z)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemPos]");
 
@@ -1399,8 +1398,8 @@ stock SetItemPos(itemid, Float:x, Float:y, Float:z, Float:zoffset = 0.0)
 	itm_Data[itemid][itm_posY] = y;
 	itm_Data[itemid][itm_posZ] = z;
 
-	SetButtonPos(itm_Data[itemid][itm_button], x, y, z + zoffset);
-	SetDynamicObjectPos(itm_Data[itemid][itm_objId], x, y, z);
+	SetButtonPos(itm_Data[itemid][itm_button], x, y, z + itm_TypeData[itm_Data[itemid][itm_type]][itm_zButtonOffset]);
+	SetDynamicObjectPos(itm_Data[itemid][itm_objId], x, y, z + itm_TypeData[itm_Data[itemid][itm_type]][itm_zModelOffset]);
 
 	return 1;
 }
@@ -1785,7 +1784,7 @@ stock GetNextItemID()
 CreateItemInWorld(itemid,
 	Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0,
-	Float:zoffset = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1)
+	world = 0, interior = 0, label = 1, applyrotoffsets = 1)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItemInWorld]");
 	if(!Iter_Contains(itm_Index, itemid))
@@ -1823,7 +1822,7 @@ CreateItemInWorld(itemid,
 	if(applyrotoffsets)
 	{
 		itm_Data[itemid][itm_objId]				= CreateDynamicObject(itm_TypeData[itemtype][itm_model],
-			x, y, z + itm_TypeData[itemtype][itm_offsetZ],
+			x, y, z + itm_TypeData[itemtype][itm_zModelOffset],
 			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx + itm_TypeData[itemtype][itm_defaultRotX]),
 			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry + itm_TypeData[itemtype][itm_defaultRotY]),
 			(rz == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotZ]) : (rz + itm_TypeData[itemtype][itm_defaultRotZ]),
@@ -1832,7 +1831,7 @@ CreateItemInWorld(itemid,
 	else
 	{
 		itm_Data[itemid][itm_objId]				= CreateDynamicObject(itm_TypeData[itemtype][itm_model],
-			x, y, z + itm_TypeData[itemtype][itm_offsetZ],
+			x, y, z + itm_TypeData[itemtype][itm_zModelOffset],
 			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx),
 			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry),
 			(rz == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotZ]) : (rz),
@@ -1840,7 +1839,7 @@ CreateItemInWorld(itemid,
 	}
 
 
-	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + zoffset, "Press F to pick up", world, interior, 1.0);
+	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + itm_TypeData[itemtype][itm_zButtonOffset], "Press F to pick up", world, interior, 1.0);
 
 	if(itm_Data[itemid][itm_button] == INVALID_BUTTON_ID)
 	{
@@ -2133,7 +2132,7 @@ timer DropItemDelay[400](playerid)
 		y + (0.5 * floatcos(-r, degrees)),
 		z - FLOOR_OFFSET,
 		0.0, 0.0, r,
-		ITEM_BUTTON_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
+		GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 	ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_2IDLE", 4.0, 0, 0, 0, 0, 0);
 
@@ -2209,7 +2208,7 @@ hook OnPlayerDeath(playerid, killerid, reason)
 			y + (0.5 * floatcos(-r, degrees)),
 			z - FLOOR_OFFSET,
 			0.0, 0.0, r,
-			FLOOR_OFFSET, GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
+			GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
 		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
 	}
