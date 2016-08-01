@@ -41,7 +41,7 @@ players to combine two items into one new item.
 
 /*==============================================================================
 
-	Setup
+	Constant Definitions, Function Declarations and Documentation
 
 ==============================================================================*/
 
@@ -54,14 +54,6 @@ players to combine two items into one new item.
 	#define CFT_MAX_CRAFT_SET_ITEMS (8)
 #endif
 
-
-enum
-{
-	CRAFT_ENVIRONMENT_NONE,
-	CRAFT_ENVIRONMENT_INVENTORY,
-	CRAFT_ENVIRONMENT_CONTAINER
-}
-
 enum e_craft_item_data
 {
 ItemType:	cft_itemType,
@@ -72,6 +64,119 @@ enum e_selected_item_data
 {
 ItemType:	cft_selectedItemType,
 			cft_selectedItemID
+}
+
+
+// Functions
+
+
+forward DefineItemCraftSet(ItemType:result, {ItemType, _}:...);
+/*
+# Description:
+-
+*/
+
+forward IsValidCraftSet(craftset);
+/*
+# Description:
+-
+*/
+
+forward GetCraftSetIngredients(craftset, ItemType:output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data]);
+/*
+# Description:
+-
+*/
+
+forward ItemType:GetCraftSetItemType(craftset, index);
+/*
+# Description:
+-
+*/
+
+forward GetCraftSetItemKeep(craftset, index);
+/*
+# Description:
+-
+*/
+
+forward GetCraftSetItemCount(craftset);
+/*
+# Description:
+-
+*/
+
+forward ItemType:GetCraftSetResult(craftset);
+/*
+# Description:
+-
+*/
+
+forward GetCraftSetTotal();
+/*
+# Description:
+-
+*/
+
+forward GetPlayerSelectedCraftItems(playerid, output[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data]);
+/*
+# Description:
+-
+*/
+
+forward ItemType:GetPlayerSelectedCraftItemType(playerid, index);
+/*
+# Description:
+-
+*/
+
+forward GetPlayerSelectedCraftItemID(playerid, index);
+/*
+# Description:
+-
+*/
+
+forward GetPlayerSelectedCraftItemCount(playerid);
+/*
+# Description:
+-
+*/
+
+forward GetPlayerCraftEnvironment(playerid);
+/*
+# Description:
+-
+*/
+
+
+// Events
+
+
+forward OnPlayerCraft(playerid, craftset);
+/*
+# Called:
+-
+*/
+
+forward OnPlayerCrafted(playerid, craftset, result);
+/*
+# Called:
+-
+*/
+
+
+/*==============================================================================
+
+	Setup
+
+==============================================================================*/
+
+
+enum
+{
+	CRAFT_ENVIRONMENT_NONE,
+	CRAFT_ENVIRONMENT_INVENTORY,
+	CRAFT_ENVIRONMENT_CONTAINER
 }
 
 
@@ -87,10 +192,6 @@ static
 			cft_SelectedSlot[MAX_PLAYERS],
 			cft_SelectionEnvironment[MAX_PLAYERS],
 			cft_MenuOptionID[MAX_PLAYERS];
-
-
-forward OnPlayerCraft(playerid, craftset);
-forward OnPlayerCrafted(playerid, craftset, result);
 
 
 static CRAFT_DEBUG = -1;
@@ -149,6 +250,125 @@ stock DefineItemCraftSet(ItemType:result, {ItemType, _}:...)
 	_btn_SortCraftSet(cft_Ingredients[cft_Total], 0, cft_ItemCount[cft_Total]);
 
 	return cft_Total++;
+}
+
+// cft_Total
+stock IsValidCraftSet(craftset)
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	return 1;
+}
+
+// cft_Ingredients
+stock GetCraftSetIngredients(craftset, ItemType:output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data])
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	output = cft_Ingredients[craftset];
+
+	return 1;
+}
+
+// cft_Ingredients/cft_itemType
+stock ItemType:GetCraftSetItemType(craftset, index)
+{
+	if(!(0 <= craftset < cft_Total))
+		return INVALID_ITEM_TYPE;
+
+	if(!(0 <= index < cft_ItemCount[craftset]))
+		return INVALID_ITEM_TYPE;
+
+	return cft_Ingredients[craftset][index][cft_itemType];
+}
+
+// cft_Ingredients/cft_keepItem
+stock GetCraftSetItemKeep(craftset, index)
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	if(!(0 <= index < cft_ItemCount[craftset]))
+		return 0;
+
+	return cft_Ingredients[craftset][index][cft_keepItem];
+}
+
+// cft_ItemCount
+stock GetCraftSetItemCount(craftset)
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	return cft_ItemCount[craftset];
+}
+
+// cft_Result
+stock ItemType:GetCraftSetResult(craftset)
+{
+	if(!(0 <= craftset < cft_Total))
+		return INVALID_ITEM_TYPE;
+
+	return cft_Result[craftset];
+}
+
+// cft_Total
+stock GetCraftSetTotal()
+	return cft_Total;
+
+// cft_SelectedItems
+stock GetPlayerSelectedCraftItems(playerid, output[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data])
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	output = cft_SelectedItems[playerid];
+
+	return 1;
+}
+
+// cft_SelectedItems/cft_selectedItemType
+stock ItemType:GetPlayerSelectedCraftItemType(playerid, index)
+{
+	if(!IsPlayerConnected(playerid))
+		return INVALID_ITEM_TYPE;
+
+	if(!(0 <= index < cft_ItemCount[playerid]))
+		return INVALID_ITEM_TYPE;
+
+	return cft_SelectedItems[playerid][index][cft_selectedItemType];
+}
+
+// cft_SelectedItems/cft_selectedItemID
+stock GetPlayerSelectedCraftItemID(playerid, index)
+{
+	if(!IsPlayerConnected(playerid))
+		return INVALID_ITEM_ID;
+
+	if(!(0 <= index < cft_ItemCount[playerid]))
+		return INVALID_ITEM_ID;
+
+	return cft_SelectedItems[playerid][index][cft_selectedItemID];
+}
+
+// cft_SelectedItemCount
+stock GetPlayerSelectedCraftItemCount(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return cft_SelectedItemCount[playerid];
+}
+
+// cft_SelectionEnvironment
+stock GetPlayerCraftEnvironment(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return cft_SelectionEnvironment[playerid];
 }
 
 
@@ -506,131 +726,4 @@ _btn_SortSelectedItems(array[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data], lef
 
 	if(tmp_left < right)
 		_btn_SortSelectedItems(array, tmp_left, right);
-}
-
-
-/*==============================================================================
-
-	Interface
-
-==============================================================================*/
-
-
-// cft_Total
-stock IsValidCraftSet(craftset)
-{
-	if(!(0 <= craftset < cft_Total))
-		return 0;
-
-	return 1;
-}
-
-// cft_Ingredients
-stock GetCraftSetIngredients(craftset, ItemType:output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data])
-{
-	if(!(0 <= craftset < cft_Total))
-		return 0;
-
-	output = cft_Ingredients[craftset];
-
-	return 1;
-}
-
-// cft_Ingredients/cft_itemType
-stock ItemType:GetCraftSetItemType(craftset, index)
-{
-	if(!(0 <= craftset < cft_Total))
-		return INVALID_ITEM_TYPE;
-
-	if(!(0 <= index < cft_ItemCount[craftset]))
-		return INVALID_ITEM_TYPE;
-
-	return cft_Ingredients[craftset][index][cft_itemType];
-}
-
-// cft_Ingredients/cft_keepItem
-stock GetCraftSetItemKeep(craftset, index)
-{
-	if(!(0 <= craftset < cft_Total))
-		return 0;
-
-	if(!(0 <= index < cft_ItemCount[craftset]))
-		return 0;
-
-	return cft_Ingredients[craftset][index][cft_keepItem];
-}
-
-// cft_ItemCount
-stock GetCraftSetItemCount(craftset)
-{
-	if(!(0 <= craftset < cft_Total))
-		return 0;
-
-	return cft_ItemCount[craftset];
-}
-
-// cft_Result
-stock ItemType:GetCraftSetResult(craftset)
-{
-	if(!(0 <= craftset < cft_Total))
-		return INVALID_ITEM_TYPE;
-
-	return cft_Result[craftset];
-}
-
-// cft_Total
-stock GetCraftSetTotal()
-	return cft_Total;
-
-// cft_SelectedItems
-stock GetPlayerSelectedCraftItems(playerid, output[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data])
-{
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	output = cft_SelectedItems[playerid];
-
-	return 1;
-}
-
-// cft_SelectedItems/cft_selectedItemType
-stock ItemType:GetPlayerSelectedCraftItemType(playerid, index)
-{
-	if(!IsPlayerConnected(playerid))
-		return INVALID_ITEM_TYPE;
-
-	if(!(0 <= index < cft_ItemCount[playerid]))
-		return INVALID_ITEM_TYPE;
-
-	return cft_SelectedItems[playerid][index][cft_selectedItemType];
-}
-
-// cft_SelectedItems/cft_selectedItemID
-stock GetPlayerSelectedCraftItemID(playerid, index)
-{
-	if(!IsPlayerConnected(playerid))
-		return INVALID_ITEM_ID;
-
-	if(!(0 <= index < cft_ItemCount[playerid]))
-		return INVALID_ITEM_ID;
-
-	return cft_SelectedItems[playerid][index][cft_selectedItemID];
-}
-
-// cft_SelectedItemCount
-stock GetPlayerSelectedCraftItemCount(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	return cft_SelectedItemCount[playerid];
-}
-
-// cft_SelectionEnvironment
-stock GetPlayerCraftEnvironment(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	return cft_SelectionEnvironment[playerid];
 }
