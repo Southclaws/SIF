@@ -1,148 +1,24 @@
 /*==============================================================================
 
-Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
+# Southclaw's Interactivity Framework (SIF)
 
-	SIF Version: 1.4.0
-	Module Version: 1.1.4
+## Overview
 
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
 
-	SIF/Overview
-	{
-		SIF is a collection of high-level include scripts to make the
-		development of interactive features easy for the developer while
-		maintaining quality front-end gameplay for players.
-	}
+## Description
 
-	SIF/FILENAME/Description
-	{
-		An extension script for SIF/Inventory that allows players to interact
-		with their inventory using key presses.
-	}
+An extension script for SIF/Inventory that allows players to interact with their
+inventory using key presses.
 
-	SIF/FILENAME/Dependencies
-	{
-		SIF/Inventory
-	}
+## Credits
 
-	SIF/FILENAME/Credits
-	{
-		SA:MP Team						- Amazing mod!
-		SA:MP Community					- Inspiration and support
-		Incognito						- Very useful streamer plugin
-		Y_Less							- YSI framework
-	}
-
-	SIF/FILENAME/Core Functions
-	{
-		The functions that control the core features of this script.
-
-		native -
-		native - SIF/FILENAME/Core
-		native -
-
-		native Func(params)
-		{
-			Description:
-				-
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/FILENAME/Events
-	{
-		Events called by player actions done by using features from this script.
-
-		native -
-		native - SIF/FILENAME/Callbacks
-		native -
-
-		native OnPlayerAddToInventory(playerid, itemid);
-		{
-			Called:
-				When a player adds an item to his inventory by pressing Y.
-
-			Parameters:
-				<playerid> (int)
-					The player who added an item to his inventory.
-
-				<itemid> (int, itemid)
-					The ID handle of the item that was added.
-
-			Returns:
-				1
-					To cancel the action and disallow the player to add the
-					item to his inventory.
-		}
-
-		native OnPlayerAddedToInventory(playerid, itemid);
-		{
-			Called:
-				After a player has added an item to their inventory and the
-				inventory index has been updated with the new item.
-
-			Parameters:
-				<playerid> (int)
-					The player who added an item to his inventory.
-
-				<itemid> (int, itemid)
-					The ID handle of the item that was added.
-
-			Returns:
-				(none)
-		}
-
-	}
-
-	SIF/FILENAME/Interface Functions
-	{
-		Functions to get or set data values in this script without editing
-		the data directly. These include automatic ID validation checks.
-
-		native -
-		native - SIF/FILENAME/Interface
-		native -
-
-		native Func(params)
-		{
-			Description:
-				-
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/FILENAME/Internal Functions
-	{
-		Internal events called by player actions done by using features from
-		this script.
-	
-		Func(params)
-		{
-			Description:
-				-
-		}
-	}
-
-	SIF/FILENAME/Hooks
-	{
-		Hooked functions or callbacks, either SA:MP natives or from other
-		scripts or plugins.
-
-		SAMP/OnPlayerSomething
-		{
-			Reason:
-				-
-		}
-	}
+- SA:MP Team: Amazing mod!
+- SA:MP Community: Inspiration and support
+- Incognito: Very useful streamer plugin
+- Y_Less: YSI framework
 
 ==============================================================================*/
 

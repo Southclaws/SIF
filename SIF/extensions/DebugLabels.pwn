@@ -1,125 +1,23 @@
 /*==============================================================================
 
-Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
+# Southclaw's Interactivity Framework (SIF)
 
-	SIF Version: 1.4.0
-	Module Version: 0.8.0
+## Overview
 
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
 
-	SIF/Overview
-	{
-		SIF is a collection of high-level include scripts to make the
-		development of interactive features easy for the developer while
-		maintaining quality front-end gameplay for players.
-	}
+## Description
 
-	SIF/DebugLabels/Description
-	{
-	}
+Generic debug label module that allows adding debug labels to any entity.
 
-	SIF/DebugLabels/Dependencies
-	{
-		SIF/Button
-		Streamer Plugin
-		YSI\y_hooks
-		YSI\y_timers
-	}
+## Credits
 
-	SIF/DebugLabels/Credits
-	{
-		SA:MP Team						- Amazing mod!
-		SA:MP Community					- Inspiration and support
-		Incognito						- Very useful streamer plugin
-		Y_Less							- YSI framework
-	}
-
-	SIF/DebugLabels/Core Functions
-	{
-		The functions that control the core features of this script.
-
-		native -
-		native - SIF/DebugLabels/Core
-		native -
-
-		native Func(params)
-		{
-			Description:
-				-
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/DebugLabels/Events
-	{
-		Events called by player actions done by using features from this script.
-
-		native -
-		native - SIF/DebugLabels/Callbacks
-		native -
-
-		native Func(params)
-		{
-			Called:
-				-
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/DebugLabels/Interface Functions
-	{
-		Functions to get or set data values in this script without editing
-		the data directly. These include automatic ID validation checks.
-
-		native -
-		native - SIF/DebugLabels/Interface
-		native -
-
-		native Func(params)
-		{
-			Description:
-				-
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/DebugLabels/Internal Functions
-	{
-		Internal events called by player actions done by using features from
-		this script.
-	
-		Func(params)
-		{
-			Description:
-				-
-		}
-	}
-
-	SIF/DebugLabels/Hooks
-	{
-		Hooked functions or callbacks, either SA:MP natives or from other
-		scripts or plugins.
-
-		SAMP/OnPlayerSomething
-		{
-			Reason:
-				-
-		}
-	}
+- SA:MP Team: Amazing mod!
+- SA:MP Community: Inspiration and support
+- Incognito: Very useful streamer plugin
+- Y_Less: YSI framework
 
 ==============================================================================*/
 

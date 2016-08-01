@@ -1,5 +1,49 @@
 /*==============================================================================
 
+# Southclaw's Interactivity Framework (SIF)
+
+## Overview
+
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
+
+## Description
+
+Generates arrays of items that include extra-data arrays from ItemArrayData.
+Useful for storing BLOBs of items that include their array data too for
+"compressing" and writing to files.
+
+An "itemlist" object is a creatable/destroyable entity that contains the list of
+items and their array data in separate arrays for fast lookup as well as the
+full raw data string for returning. When an itemlist is destroyed, it's handle
+becomes free for use by CreateItemList again.
+
+An itemlist can be created from two sources: a list of item IDs or a raw item
+list (one that was output from GetItemList).
+
+A basic example of using this script would be:
+
+- Create an item list of a player's inventory items when they quit.
+- Get the raw list and store it to an array.
+- Store the array in a binary file (using modio or fblockwrite).
+- Load the array next time the player logs in.
+- Use ExtractItemList on the loaded data to extract items.
+- Loop through the items and create them with their array data.
+- Add the items to the player's inventory.
+
+## Credits
+
+- SA:MP Team: Amazing mod!
+- SA:MP Community: Inspiration and support
+- Incognito: Very useful streamer plugin
+- Y_Less: YSI framework
+
+==============================================================================*/
+
+
+/*==============================================================================
+
 Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF Version: 1.4.0
@@ -15,27 +59,6 @@ Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
 
 	SIF/ItemList/Description
 	{
-		Generates arrays of items that include extra-data arrays from
-		ItemArrayData. Useful for storing BLOBs of items that include their
-		array data too for "compressing" and writing to files.
-
-		An "itemlist" object is a creatable/destroyable entity that contains the
-		list of items and their array data in separate arrays for fast lookup as
-		well as the full raw data string for returning. When an itemlist is
-		destroyed, it's handle becomes free for use by CreateItemList again.
-
-		An itemlist can be created from two sources: a list of item IDs or a raw
-		item list (one that was output from GetItemList).
-
-		A basic example of using this script would be:
-
-			- Create an item list of a player's inventory items when they quit.
-			- Get the raw list and store it to an array.
-			- Store the array in a binary file (using modio or fblockwrite).
-			- Load the array next time the player logs in.
-			- Use ExtractItemList on the loaded data to extract items.
-			- Loop through the items and create them with their array data.
-			- Add the items to the player's inventory.
 	}
 
 	SIF/ItemList/Dependencies

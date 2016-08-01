@@ -1,253 +1,33 @@
 /*==============================================================================
 
-Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
+# Southclaw's Interactivity Framework (SIF)
 
-	SIF Version: 1.4.0
-	Module Version: 2.0.0
+## Overview
 
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
 
-	SIF/Overview
-	{
-		SIF is a collection of high-level include scripts to make the
-		development of interactive features easy for the developer while
-		maintaining quality front-end gameplay for players.
-	}
+## Description
 
-	SIF/ContainerDialog/Description
-	{
-		An extension script for SIF/Container that adds SA:MP dialogs for player
-		interaction with containers. Also allows containers and inventories to
-		work together.
-	}
+An extension script for SIF/Container that adds SA:MP dialogs for player
+interaction with containers. Also allows containers and inventories to
+work together.
 
-	SIF/ContainerDialog/Dependencies
-	{
-		SIF/Container
-		Streamer Plugin
-		YSI\y_hooks
-		YSI\y_timers
-	}
+## Hooks
 
-	SIF/ContainerDialog/Credits
-	{
-		SA:MP Team						- Amazing mod!
-		SA:MP Community					- Inspiration and support
-		Incognito						- Very useful streamer plugin
-		Y_Less							- YSI framework
-	}
+- OnPlayerConnect: Zero initialised array cells.
+- OnPlayerViewInvOpt: Insert an option to move inventory item to container.
+- OnPlayerSelectInvOpt: To trigger moving an item from inventory to container.
+- OnPlayerOpenInventory: Insert a link to the container inventory.
+- OnPlayerSelectExtraItem: To open the container inventory from inventory.
 
-	SIF/Container/Constants
-	{
-		DIALOG_CONTAINER_LIST
-			Dialog ID for container inventory list.
+## Credits
 
-		DIALOG_CONTAINER_OPTIONS
-			Dialog ID for container inventory item options menu.
-	}
-
-	SIF/ContainerDialog/Core Functions
-	{
-		The functions that control the core features of this script.
-
-		native -
-		native - SIF/ContainerDialog/Core
-		native -
-
-		native DisplayContainerInventory(playerid, containerid)
-		{
-			Description:
-				Displays the contents of a container with a SA:MP dialog.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native ClosePlayerContainer(playerid)
-		{
-			Description:
-				Closes a container dialog for a player. It's important that this
-				function is used rather than just a dialog close function as
-				this clears the current dialog ID from the player.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/ContainerDialog/Events
-	{
-		Events called by player actions done by using features from this script.
-
-		native -
-		native - SIF/ContainerDialog/Callbacks
-		native -
-
-		native OnPlayerOpenContainer(playerid, containerid);
-		{
-			Called:
-				When a container dialog is displayed for a player.
-
-			Parameters:
-				-
-
-			Returns:
-				1
-					To cancel the dialog being shown.
-		}
-
-		native OnPlayerCloseContainer(playerid, containerid);
-		{
-			Called:
-				When a container dialog menu is closed for a player.
-
-			Parameters:
-				-
-
-			Returns:
-				1
-					To cancel and keep the dialog open.
-		}
-
-		native OnPlayerViewContainerOpt(playerid, containerid);
-		{
-			Called:
-				When a player opens the options for an item in a container.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native OnPlayerSelectContainerOpt(playerid, containerid, option);
-		{
-			Called:
-				When a player selects an option for an item in a container.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native OnMoveItemToContainer(playerid, itemid, containerid);
-		{
-			Called:
-				When a player moves an item from their inventory to a container
-				using the inventory options dialog.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-
-		native OnMoveItemToInventory(playerid, itemid, containerid);
-		{
-			Called:
-				When a player moves an item from a container to their inventory
-				using the container options dialog.
-
-			Parameters:
-				-
-
-			Returns:
-				-
-		}
-	}
-
-	SIF/ContainerDialog/Interface Functions
-	{
-		Functions to get or set data values in this script without editing
-		the data directly. These include automatic ID validation checks.
-
-		native -
-		native - SIF/ContainerDialog/Interface
-		native -
-
-		native GetPlayerCurrentContainer(playerid)
-		{
-			Description:
-				Returns the container that <playerid> is currently viewing.
-
-			Parameters:
-				-
-
-			Returns:
-				(int, containerid)
-		}
-
-		native GetPlayerContainerSlot(playerid)
-		{
-			Description:
-				Returns the slot that a player selected in the container dialog.
-
-			Parameters:
-				-
-
-			Returns:
-				-1
-					If the specified player is invalid.
-		}
-
-		native AddContainerOption(playerid, option[])
-		{
-			Description:
-				Adds an option to a player's container dialog option list.
-
-			Parameters:
-				-
-
-			Returns:
-				0
-					If the input string won't fit in the options string.
-		}
-	}
-
-	SIF/ContainerDialog/Internal Functions
-	{
-		Internal events called by player actions done by using features from
-		this script.
-	
-		DisplayContainerOptions(playerid, slotid)
-		{
-			Description:
-				-
-		}
-	}
-
-	SIF/ContainerDialog/Hooks
-	{
-		Hooked functions or callbacks, either SA:MP natives or from other
-		scripts or plugins.
-
-		SIF/OnPlayerViewInventoryOpt
-		{
-			Reason:
-				To add an inventory option for interacting with containers.
-		}
-
-		SIF/OnPlayerOpenInventory
-		{
-			Reason:
-				To add an extra inventory item shortcut to current container.
-		}
-
-		SIF/OnPlayerSelectExtraItem
-		{
-			Reason:
-				For handling the current container shortcut.
-		}
-	}
+- SA:MP Team: Amazing mod!
+- SA:MP Community: Inspiration and support
+- Incognito: Very useful streamer plugin
+- Y_Less: YSI framework
 
 ==============================================================================*/
 
