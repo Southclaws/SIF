@@ -44,6 +44,84 @@ work together.
 
 /*==============================================================================
 
+	Constant Definitions, Function Declarations and Documentation
+
+==============================================================================*/
+
+
+forward DisplayContainerInventory(playerid, containerid);
+/*
+# Description:
+-
+*/
+
+forward ClosePlayerContainer(playerid, call = false);
+/*
+# Description:
+-
+*/
+
+forward GetPlayerCurrentContainer(playerid);
+/*
+# Description:
+-
+*/
+
+forward GetPlayerContainerSlot(playerid);
+/*
+# Description:
+-
+*/
+
+forward AddContainerOption(playerid, option[]);
+/*
+# Description:
+-
+*/
+
+
+// Events
+
+
+forward OnPlayerOpenContainer(playerid, containerid);
+/*
+# Description:
+-
+*/
+
+forward OnPlayerCloseContainer(playerid, containerid);
+/*
+# Description:
+-
+*/
+
+forward OnPlayerViewContainerOpt(playerid, containerid);
+/*
+# Description:
+-
+*/
+
+forward OnPlayerSelectContainerOpt(playerid, containerid, option);
+/*
+# Description:
+-
+*/
+
+forward OnMoveItemToContainer(playerid, itemid, containerid);
+/*
+# Description:
+-
+*/
+
+forward OnMoveItemToInventory(playerid, itemid, containerid);
+/*
+# Description:
+-
+*/
+
+
+/*==============================================================================
+
 	Setup
 
 ==============================================================================*/
@@ -57,14 +135,6 @@ static
 			cnt_OptionsCount			[MAX_PLAYERS],
 			cnt_InventoryContainerItem	[MAX_PLAYERS],
 			cnt_InventoryOptionID		[MAX_PLAYERS];
-
-
-forward OnPlayerOpenContainer(playerid, containerid);
-forward OnPlayerCloseContainer(playerid, containerid);
-forward OnPlayerViewContainerOpt(playerid, containerid);
-forward OnPlayerSelectContainerOpt(playerid, containerid, option);
-forward OnMoveItemToContainer(playerid, itemid, containerid);
-forward OnMoveItemToInventory(playerid, itemid, containerid);
 
 
 /*==============================================================================
@@ -191,6 +261,33 @@ stock ClosePlayerContainer(playerid, call = false)
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
 
 	return 1;
+}
+
+stock GetPlayerCurrentContainer(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return INVALID_CONTAINER_ID;
+
+	return cnt_CurrentContainer[playerid];
+}
+
+stock GetPlayerContainerSlot(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return -1;
+
+	return cnt_SelectedSlot[playerid];
+}
+
+stock AddContainerOption(playerid, option[])
+{
+	if(strlen(cnt_OptionsList[playerid]) + strlen(option) > sizeof(cnt_OptionsList[]))
+		return 0;
+
+	strcat(cnt_OptionsList[playerid], option);
+	strcat(cnt_OptionsList[playerid], "\n");
+
+	return cnt_OptionsCount[playerid]++;
 }
 
 
@@ -357,39 +454,4 @@ hook OnPlayerSelectExtraItem(playerid, item)
 	}
 
 	return 0;
-}
-
-
-/*==============================================================================
-
-	Interface
-
-==============================================================================*/
-
-
-stock GetPlayerCurrentContainer(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return INVALID_CONTAINER_ID;
-
-	return cnt_CurrentContainer[playerid];
-}
-
-stock GetPlayerContainerSlot(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return -1;
-
-	return cnt_SelectedSlot[playerid];
-}
-
-stock AddContainerOption(playerid, option[])
-{
-	if(strlen(cnt_OptionsList[playerid]) + strlen(option) > sizeof(cnt_OptionsList[]))
-		return 0;
-
-	strcat(cnt_OptionsList[playerid], option);
-	strcat(cnt_OptionsList[playerid], "\n");
-
-	return cnt_OptionsCount[playerid]++;
 }

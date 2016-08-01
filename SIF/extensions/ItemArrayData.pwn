@@ -46,7 +46,7 @@ functions for setting, appending and getting array data.
 
 /*==============================================================================
 
-	Setup
+	Constant Definitions, Function Declarations and Documentation
 
 ==============================================================================*/
 
@@ -73,6 +73,110 @@ functions for setting, appending and getting array data.
 #endif
 
 
+// Functions
+
+
+forward SetItemTypeMaxArrayData(ItemType:itemtype, size, bool:protect = false);
+/*
+# Description:
+-
+*/
+
+forward GetItemTypeArrayDataSize(ItemType:itemtype);
+/*
+# Description:
+-
+*/
+
+forward SetItemArrayData(itemid, data[], length, call = 1, bool:force = false);
+/*
+# Description:
+-
+*/
+
+forward GetItemArrayData(itemid, data[]);
+/*
+# Description:
+-
+*/
+
+forward SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0, call = 1, bool:force = false);
+/*
+# Description:
+-
+*/
+
+forward GetItemArrayDataAtCell(itemid, cell);
+/*
+# Description:
+-
+*/
+
+forward SetItemArrayDataSize(itemid, size, bool:force = false);
+/*
+# Description:
+-
+*/
+
+forward GetItemArrayDataSize(itemid);
+/*
+# Description:
+-
+*/
+
+forward GetItemTypeArrayDataMax(ItemType:itemtype);
+/*
+# Description:
+-
+*/
+
+forward AppendItemArray(itemid, data[], length);
+/*
+# Description:
+-
+*/
+
+forward AppendItemArrayCell(itemid, data);
+/*
+# Description:
+-
+*/
+
+forward SetItemArrayDataLength(itemid, length, bool:force = false);
+/*
+# Description:
+-
+*/
+
+forward RemoveItemArrayData(itemid);
+/*
+# Description:
+-
+*/
+
+forward SetItemNoResetArrayData(itemid, bool:toggle);
+/*
+# Description:
+-
+*/
+
+
+// Events
+
+
+forward OnItemArrayDataChanged(itemid);
+/*
+# Called:
+-
+*/
+
+
+/*==============================================================================
+
+	Setup
+
+==============================================================================*/
+
 
 static
 	itm_arr_ItemTypeArrayMax[ITM_MAX_TYPES],
@@ -83,9 +187,6 @@ static
 
 static
 	ITEM_ARRAY_DATA = -1;
-
-
-forward OnItemArrayDataChanged(itemid);
 
 
 /*==============================================================================

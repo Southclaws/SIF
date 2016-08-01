@@ -35,6 +35,123 @@ interaction with their inventory items.
 
 /*==============================================================================
 
+	Constant Definitions, Function Declarations and Documentation
+
+==============================================================================*/
+
+
+// Functions
+
+
+forward DisplayPlayerInventory(playerid);
+/*
+# Description:
+-
+*/
+
+forward ClosePlayerInventory(playerid, call = false);
+/*
+# Description:
+-
+*/
+
+forward GetPlayerSelectedInventorySlot(playerid);
+/*
+# Description:
+-
+*/
+
+forward AddInventoryListItem(playerid, itemname[]);
+/*
+# Description:
+-
+*/
+
+forward AddInventoryOption(playerid, option[]);
+/*
+# Description:
+-
+*/
+
+forward GetInventoryListItems(playerid);
+/*
+# Description:
+-
+*/
+
+forward GetInventoryOptions(playerid);
+/*
+# Description:
+-
+*/
+
+forward GetInventoryListItemCount(playerid);
+/*
+# Description:
+-
+*/
+
+forward GetInventoryOptionCount(playerid);
+/*
+# Description:
+-
+*/
+
+forward IsPlayerViewingInventory(playerid);
+/*
+# Description:
+-
+*/
+
+
+// Events
+
+
+forward OnPlayerOpenInventory(playerid);
+/*
+# Called:
+-
+*/
+
+forward OnPlayerCloseInventory(playerid);
+/*
+# Called:
+-
+*/
+
+forward OnPlayerSelectExtraItem(playerid, item);
+/*
+# Called:
+-
+*/
+
+forward OnPlayerRemoveFromInventory(playerid, slotid); // TODO
+/*
+# Called:
+-
+*/
+
+forward OnPlayerRemovedFromInventory(playerid, slotid); // TODO
+/*
+# Called:
+-
+*/
+
+forward OnPlayerViewInventoryOpt(playerid);
+/*
+# Called:
+-
+*/
+
+forward OnPlayerSelectInventoryOpt(playerid, option);
+/*
+# Called:
+-
+*/
+
+
+/*==============================================================================
+
 	Setup
 
 ==============================================================================*/
@@ -48,15 +165,6 @@ static
 		inv_ExtraItemCount			[MAX_PLAYERS],
 		inv_OptionsList				[MAX_PLAYERS][128],
 		inv_OptionsCount			[MAX_PLAYERS];
-
-
-forward OnPlayerOpenInventory(playerid);
-forward OnPlayerCloseInventory(playerid);
-forward OnPlayerSelectExtraItem(playerid, item);
-forward OnPlayerRemoveFromInventory(playerid, slotid); // TODO
-forward OnPlayerRemovedFromInventory(playerid, slotid); // TODO
-forward OnPlayerViewInventoryOpt(playerid);
-forward OnPlayerSelectInventoryOpt(playerid, option);
 
 
 /*==============================================================================
@@ -193,6 +301,76 @@ stock ClosePlayerInventory(playerid, call = false)
 	return 1;
 }
 
+stock GetPlayerSelectedInventorySlot(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return -1;
+
+	return inv_SelectedSlot[playerid];
+}
+
+stock AddInventoryListItem(playerid, itemname[])
+{
+	if(strlen(inv_ExtraItemList[playerid]) + strlen(itemname) > sizeof(inv_ExtraItemList[]))
+		return 0;
+
+	strcat(inv_ExtraItemList[playerid], itemname);
+	strcat(inv_ExtraItemList[playerid], "\n");
+
+	return inv_ExtraItemCount[playerid]++;
+}
+
+stock AddInventoryOption(playerid, option[])
+{
+	if(strlen(inv_OptionsList[playerid]) + strlen(option) > sizeof(inv_OptionsList[]))
+		return 0;
+
+	strcat(inv_OptionsList[playerid], option);
+	strcat(inv_OptionsList[playerid], "\n");
+
+	return inv_OptionsCount[playerid]++;
+}
+
+stock GetInventoryListItems(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_ExtraItemList[playerid];
+}
+
+stock GetInventoryOptions(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_OptionsList[playerid];
+}
+
+stock GetInventoryListItemCount(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_ExtraItemCount[playerid];
+}
+
+stock GetInventoryOptionCount(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_OptionsCount[playerid];
+}
+
+stock IsPlayerViewingInventory(playerid)
+{
+	if(!IsPlayerConnected(playerid))
+		return 0;
+
+	return inv_ViewingInventory[playerid];
+}
+
 
 /*==============================================================================
 
@@ -287,82 +465,4 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 	Dialog_ShowCallback(playerid, using inline Response, DIALOG_STYLE_LIST, name, inv_OptionsList[playerid], "Accept", "Back");
 
 	return 1;
-}
-
-
-/*==============================================================================
-
-	Interface
-
-==============================================================================*/
-
-
-stock GetPlayerSelectedInventorySlot(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return -1;
-
-	return inv_SelectedSlot[playerid];
-}
-
-stock AddInventoryListItem(playerid, itemname[])
-{
-	if(strlen(inv_ExtraItemList[playerid]) + strlen(itemname) > sizeof(inv_ExtraItemList[]))
-		return 0;
-
-	strcat(inv_ExtraItemList[playerid], itemname);
-	strcat(inv_ExtraItemList[playerid], "\n");
-
-	return inv_ExtraItemCount[playerid]++;
-}
-
-stock AddInventoryOption(playerid, option[])
-{
-	if(strlen(inv_OptionsList[playerid]) + strlen(option) > sizeof(inv_OptionsList[]))
-		return 0;
-
-	strcat(inv_OptionsList[playerid], option);
-	strcat(inv_OptionsList[playerid], "\n");
-
-	return inv_OptionsCount[playerid]++;
-}
-
-stock GetInventoryListItems(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	return inv_ExtraItemList[playerid];
-}
-
-stock GetInventoryOptions(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	return inv_OptionsList[playerid];
-}
-
-stock GetInventoryListItemCount(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	return inv_ExtraItemCount[playerid];
-}
-
-stock GetInventoryOptionCount(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	return inv_OptionsCount[playerid];
-}
-
-stock IsPlayerViewingInventory(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return 0;
-
-	return inv_ViewingInventory[playerid];
 }

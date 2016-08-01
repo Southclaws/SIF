@@ -46,7 +46,7 @@ Multi-button trigger system for puzzles and the like.
 
 /*==============================================================================
 
-	Setup
+	Constant Definitions, Function Declarations and Documentation
 
 ==============================================================================*/
 
@@ -61,6 +61,39 @@ Multi-button trigger system for puzzles and the like.
 
 
 #define INVALID_MBT_ID (-1)
+
+
+// Functions
+
+
+forward CreateMultiButtonTrigger(type, timewindow, list[], count = sizeof(list));
+/*
+# Description:
+-
+*/
+
+forward DestroyMultiButtonTrigger(triggerid);
+/*
+# Description:
+-
+*/
+
+
+// Events
+
+
+forward OnMultiButtonTrigger(triggerid, success);
+/*
+# Called:
+-
+*/
+
+
+/*==============================================================================
+
+	Setup
+
+==============================================================================*/
 
 
 enum
@@ -84,9 +117,6 @@ static
 			mbt_Data[MBT_MAX][E_MULTI_BUTTON_TRIGGER_DATA],
    Iterator:mbt_Index<MBT_MAX>,
 			mbt_ButtonMbTriggerID[BTN_MAX] = {INVALID_MBT_ID, ...};
-
-
-forward OnMultiButtonTrigger(triggerid, success);
 
 
 static MBT_DEBUG = -1;

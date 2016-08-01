@@ -77,7 +77,7 @@ scriptable entities.
 #endif
 
 #if defined DEBUG_LABELS_ITEM
-	#include <SIF\extensions\DebugLabels.inc>
+	#include <SIF\extensions\DebugLabels.pwn>
 #endif
 
 #include <YSI\y_iterate>

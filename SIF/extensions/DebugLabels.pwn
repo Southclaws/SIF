@@ -38,7 +38,7 @@ Generic debug label module that allows adding debug labels to any entity.
 
 /*==============================================================================
 
-	Setup
+	Constant Definitions, Function Declarations and Documentation
 
 ==============================================================================*/
 
@@ -61,6 +61,89 @@ Generic debug label module that allows adding debug labels to any entity.
 
 #define INVALID_DEBUG_LABEL_TYPE		(-1)
 #define INVALID_DEBUG_LABEL_ID			(-2)
+
+
+// Functions
+
+
+forward DefineDebugLabelType(name[], colour = 0xFFFFFFFF);
+/*
+# Description:
+-
+*/
+
+forward CreateDebugLabel(type, entityid, Float:x, Float:y, Float:z, string[] = "", worldid = -1, interiorid = -1);
+/*
+# Description:
+-
+*/
+
+forward DestroyDebugLabel(labelid);
+/*
+# Description:
+-
+*/
+
+forward ShowDebugLabelsForPlayer(playerid, type);
+/*
+# Description:
+-
+*/
+
+forward ShowAllDebugLabelsForPlayer(playerid);
+/*
+# Description:
+-
+*/
+
+forward HideDebugLabelsForPlayer(playerid, type);
+/*
+# Description:
+-
+*/
+
+forward HideAllDebugLabelsForPlayer(playerid);
+/*
+# Description:
+-
+*/
+
+forward UpdateDebugLabelString(labelid, string[]);
+/*
+# Description:
+-
+*/
+
+forward IsValidDebugLabel(labelid);
+/*
+# Description:
+-
+*/
+
+forward SetDebugLabelPos(labelid, Float:x, Float:y, Float:z);
+/*
+# Description:
+-
+*/
+
+forward IsPlayerToggledDebugLabels(playerid, type);
+/*
+# Description:
+-
+*/
+
+forward IsPlayerToggledAllDebugLabels(playerid);
+/*
+# Description:
+-
+*/
+
+
+/*==============================================================================
+
+	Setup
+
+==============================================================================*/
 
 
 enum E_DEBUG_LABEL_TYPE_DATA
@@ -248,21 +331,6 @@ stock UpdateDebugLabelString(labelid, string[])
 
 	return 1;
 }
-
-
-/*==============================================================================
-
-	Internal Functions and Hooks
-
-==============================================================================*/
-
-
-/*==============================================================================
-
-	Interface
-
-==============================================================================*/
-
 
 stock IsValidDebugLabel(labelid)
 {

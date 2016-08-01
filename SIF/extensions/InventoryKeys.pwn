@@ -34,6 +34,28 @@ inventory using key presses.
 
 /*==============================================================================
 
+	Constant Definitions, Function Declarations and Documentation
+
+==============================================================================*/
+
+
+// Events
+
+forward OnPlayerAddToInventory(playerid, itemid);
+/*
+# Called:
+When a player adds an item to their inventory using a key.
+*/
+
+forward OnPlayerAddedToInventory(playerid, itemid);
+/*
+# Called:
+After a player has added an item to their inventory.
+*/
+
+
+/*==============================================================================
+
 	Setup
 
 ==============================================================================*/
@@ -42,24 +64,6 @@ inventory using key presses.
 static
 		inv_PutAwayTick				[MAX_PLAYERS],
 Timer:	inv_PutAwayTimer			[MAX_PLAYERS];
-
-
-forward OnPlayerAddToInventory(playerid, itemid);
-forward OnPlayerAddedToInventory(playerid, itemid);
-
-
-/*==============================================================================
-
-	Zeroing
-
-==============================================================================*/
-
-
-/*==============================================================================
-
-	Core Functions
-
-==============================================================================*/
 
 
 /*==============================================================================
@@ -126,12 +130,3 @@ timer PlayerPutItemInInventory[300](playerid, itemid)
 	AddItemToInventory(playerid, itemid);
 	CallLocalFunction("OnPlayerAddedToInventory", "dd", playerid, itemid);
 }
-
-
-/*==============================================================================
-
-	Interface
-
-==============================================================================*/
-
-
