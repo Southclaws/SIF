@@ -265,7 +265,7 @@ it doesn't exist physically in the game world.
 Boolean to indicate success or failure.
 */
 
-forward AllocNextItemID(ItemType:type);
+forward AllocNextItemID(ItemType:type, geid[] = "");
 /*
 # Description
 Preallocates an item ID for a specific item type. This doesn't actually create
@@ -1254,7 +1254,7 @@ stock RemoveItemFromWorld(itemid)
 	return 1;
 }
 
-stock AllocNextItemID(ItemType:type)
+stock AllocNextItemID(ItemType:type, geid[] = "")
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[AllocNextItemID]");
 	new id = Iter_Free(itm_Index);
@@ -1274,6 +1274,12 @@ stock AllocNextItemID(ItemType:type)
 	itm_Data[id][itm_type] = type;
 
 	Iter_Add(itm_Index, id);
+
+	if(geid[0] == EOS)
+		mkgeid(id, itm_Data[id][itm_geid]);
+
+	else
+		strcat(itm_Data[id][itm_geid], geid, GEID_LEN);
 
 	return id;
 }
