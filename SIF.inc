@@ -1,19 +1,19 @@
 /*==============================================================================
 
-Southclaw's Interactivity Framework (SIF) (Formerly: Adventure API)
+# Southclaw's Interactivity Framework (SIF)
 
-	Version: 1.0.0
+## Overview
 
+SIF is a collection of high-level include scripts to make the
+development of interactive features easy for the developer while
+maintaining quality front-end gameplay for players.
 
-	SIF/Overview
-	{
-		SIF is a collection of high-level include scripts to make the
-		development of interactive features easy for the developer while
-		maintaining quality front-end gameplay for players.
-	}
+## License
 
+- GPLv3
 
 ==============================================================================*/
+
 
 // Dependencies
 
