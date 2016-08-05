@@ -139,7 +139,7 @@ scriptable entities.
 // Functions
 
 
-forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "");
+forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1);
 /*
 # Description
 Creates an item in the game world at the specified coordinates with the
@@ -156,6 +156,7 @@ display a 3D text label above the item.
 - applyrotoffsets: False to make rx, ry, rz rotation values absolute.
 - virtual: When true, the item doesn't have an in-world existence.
 - geid: Allows specific GEID to be set instead of generating one.
+- hitpoints: -1 by default, if -1 then item type maxhitpoints value is used.
 
 # Returns
 Item ID handle of the newly created item or INVALID_ITEM_ID If the item index is
@@ -171,7 +172,7 @@ Destroys an item.
 Boolean to indicate success or failure.
 */
 
-forward ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET);
+forward ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET, maxhitpoints = 5);
 /*
 # Description
 Defines a new item type with the specified name and model. Item types are the
@@ -190,7 +191,8 @@ one item definition must exist or CreateItem will have no data to use.
 - colour: Item model texture colour.
 - boneid: The attachment bone to use, by default this is the right hand (6).
 - longpickup: When true, requires long press to pick up, tap results in using.
-- modelz: Z offset from the item world position to create item button.
+- buttonz: Z offset from the item world position to create item button.
+- maxhitpoints: maximum and default hitpoints for items of this type.
 
 # Returns
 Item Type ID handle of the newly defined item type. INVALID_ITEM_TYPE If the
@@ -278,7 +280,7 @@ The allocated ID of the item or INVALID_ITEM_ID If there are no more free item
 slots or -2 If the specified type is invalid.
 */
 
-forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0);
+forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1);
 /*
 # Description
 Creates an item using an ID allocated from AllocNextItemID. This is the only
@@ -402,6 +404,18 @@ forward GetItemInterior(itemid);
 Returns an item's interior ID.
 */
 
+forward SetItemHitPoints(itemid, hitpoints);
+/*
+# Description
+Sets an item's hitpoint value, destroys the item if 0.
+*/
+
+forward GetItemHitPoints(itemid);
+/*
+# Description
+Returns an item's hitpoint value.
+*/
+
 forward SetItemExtraData(itemid, data);
 /*
 # Description
@@ -502,6 +516,12 @@ forward GetItemTypeBone(ItemType:itemtype);
 /*
 # Description
 Returns the bone that an item type will attach the mesh to.
+*/
+
+forward bool:IsItemDestroying(itemid);
+/*
+# Description
+Returns true in OnItemDestroy calls, use to prevent unwanted recursion.
 */
 
 forward GetItemHolder(itemid);
@@ -730,10 +750,11 @@ Float:		itm_rotY,
 Float:		itm_rotZ,
 			itm_world,
 			itm_interior,
+			itm_hitPoints,
 
 			itm_exData,
-			itm_nameEx[ITM_MAX_TEXT],
-			itm_geid[GEID_LEN]
+			itm_nameEx			[ITM_MAX_TEXT],
+			itm_geid			[GEID_LEN]
 }
 
 enum E_ITEM_TYPE_DATA
@@ -760,12 +781,14 @@ Float:		itm_attachRotZ,
 
 			itm_colour,
 			itm_attachBone,
-			itm_longPickup
+			itm_longPickup,
+			itm_maxHitPoints
 }
 
 
 static
 			itm_Data			[ITM_MAX][E_ITEM_DATA],
+bool:		itm_Destroying		[ITM_MAX],
 			itm_Interactor		[ITM_MAX],
 			itm_Holder			[ITM_MAX];
 new
@@ -856,7 +879,7 @@ hook OnPlayerDisconnect(playerid, reason)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "")
+stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem] %d %f %f %f");
 	new id = Iter_Free(itm_Index);
@@ -883,6 +906,7 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 		strcat(itm_Data[id][itm_geid], geid, GEID_LEN);
 
 	itm_Data[id][itm_type] = type;
+	itm_Data[id][itm_hitPoints] = hitpoints == -1 ? itm_TypeData[itm_Data[id][itm_type]][itm_maxHitPoints] : hitpoints;
 	itm_TypeCount[type]++;
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[CreateItem] GEID: '%s' Type: '%s' Pos: %f, %f, %f", itm_Data[id][itm_geid], itm_TypeData[itm_Data[id][itm_type]][itm_uname], x, y, z);
@@ -895,13 +919,16 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	if(x == 0.0 && y == 0.0 && z == 0.0)
 		virtual = 1;
 
+	#if defined DEBUG_LABELS_ITEM
+		itm_DebugLabelID[id] = CreateDebugLabel(itm_DebugLabelType, id, x, y, z);
+	#endif
+
 	if(!virtual)
-		CreateItemInWorld(id, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets);
+		CreateItemInWorld(id, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets, hitpoints);
 
 	CallLocalFunction("OnItemCreated", "d", id);
 
 	#if defined DEBUG_LABELS_ITEM
-		itm_DebugLabelID[id] = CreateDebugLabel(itm_DebugLabelType, id, x, y, z);
 		UpdateItemDebugLabel(id);
 	#endif
 
@@ -913,6 +940,11 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DestroyItem]");
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
+
+	if(itm_Destroying[itemid])
+		return 0;
+
+	itm_Destroying[itemid] = true;
 
 	CallLocalFunction("OnItemDestroy", "d", itemid);
 
@@ -937,19 +969,8 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 
 	itm_Data[itemid][itm_objId] = -1;
 	itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
-
-	itm_Data[itemid][itm_type] = INVALID_ITEM_TYPE;
-	itm_Data[itemid][itm_posX] = 0.0;
-	itm_Data[itemid][itm_posY] = 0.0;
-	itm_Data[itemid][itm_posZ] = 0.0;
-	itm_Data[itemid][itm_rotX] = 0.0;
-	itm_Data[itemid][itm_rotY] = 0.0;
-	itm_Data[itemid][itm_rotZ] = 0.0;
-	itm_Data[itemid][itm_exData] = 0;
-	itm_Data[itemid][itm_nameEx][0] = EOS;
-
-	itm_Holder[itemid]			= INVALID_PLAYER_ID;
-	itm_Interactor[itemid]		= INVALID_PLAYER_ID;
+	itm_Holder[itemid] = INVALID_PLAYER_ID;
+	itm_Interactor[itemid] = INVALID_PLAYER_ID;
 
 	Iter_SafeRemove(itm_Index, itemid, indexid);
 	Iter_SafeRemove(itm_WorldIndex, itemid, worldindexid);
@@ -957,13 +978,15 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	CallLocalFunction("OnItemDestroyed", "d", itemid);
 
 	#if defined DEBUG_LABELS_ITEM
-		DestroyDebugLabel(itm_DebugLabelID[itemid]);
+		UpdateItemDebugLabel(itemid);
 	#endif
+
+	itm_Destroying[itemid] = false;
 
 	return 1;
 }
 
-stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET)
+stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET, maxhitpoints = 5)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType] '%s' '%s' %d %d", name, uname, model, size);
 	new ItemType:id = ItemType:itm_TypeTotal;
@@ -1009,6 +1032,7 @@ stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Fl
 	itm_TypeData[id][itm_colour]		= colour;
 	itm_TypeData[id][itm_attachBone]	= boneid;
 	itm_TypeData[id][itm_longPickup]	= longpickup;
+	itm_TypeData[id][itm_maxHitPoints]	= maxhitpoints;
 
 	CallLocalFunction("OnItemTypeDefined", "s", uname);
 
@@ -1251,6 +1275,10 @@ stock RemoveItemFromWorld(itemid)
 
 	CallRemoteFunction("OnItemRemoveFromWorld", "d", itemid);
 
+	#if defined DEBUG_LABELS_ITEM
+		UpdateItemDebugLabel(itemid);
+	#endif
+
 	return 1;
 }
 
@@ -1284,7 +1312,7 @@ stock AllocNextItemID(ItemType:type, geid[] = "")
 	return id;
 }
 
-stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0)
+stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItem_ExplicitID]");
 	if(!Iter_Contains(itm_Index, itemid))
@@ -1300,8 +1328,10 @@ stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	if(x == 0.0 && y == 0.0 && z == 0.0)
 		virtual = 1;
 
+	itm_Data[itemid][itm_hitPoints] = hitpoints == -1 ? itm_TypeData[itm_Data[itemid][itm_type]][itm_maxHitPoints] : hitpoints;
+
 	if(!virtual)
-		CreateItemInWorld(itemid, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets);
+		CreateItemInWorld(itemid, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets, hitpoints);
 
 	CallLocalFunction("OnItemCreated", "d", itemid);
 
@@ -1413,6 +1443,10 @@ stock SetItemPos(itemid, Float:x, Float:y, Float:z)
 	SetButtonPos(itm_Data[itemid][itm_button], x, y, z + itm_TypeData[itm_Data[itemid][itm_type]][itm_zButtonOffset]);
 	SetDynamicObjectPos(itm_Data[itemid][itm_objId], x, y, z + itm_TypeData[itm_Data[itemid][itm_type]][itm_zModelOffset]);
 
+	#if defined DEBUG_LABELS_ITEM
+		UpdateItemDebugLabel(itemid);
+	#endif
+
 	return 1;
 }
 stock GetItemRot(itemid, &Float:rx, &Float:ry, &Float:rz)
@@ -1519,6 +1553,35 @@ stock GetItemInterior(itemid)
 	return itm_Data[itemid][itm_interior];
 }
 
+// itm_hitPoints
+stock SetItemHitPoints(itemid, hitpoints)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemHitPoints]");
+
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	itm_Data[itemid][itm_hitPoints] = hitpoints;
+
+	#if defined DEBUG_LABELS_ITEM
+		UpdateItemDebugLabel(itemid);
+	#endif
+
+	if(itm_Data[itemid][itm_hitPoints] <= 0)
+		DestroyItem(itemid);
+
+	return 1;
+}
+stock GetItemHitPoints(itemid)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemHitPoints]");
+
+	if(!Iter_Contains(itm_Index, itemid))
+		return 0;
+
+	return itm_Data[itemid][itm_hitPoints];
+}
+
 // itm_exData
 stock SetItemExtraData(itemid, data)
 {
@@ -1526,6 +1589,10 @@ stock SetItemExtraData(itemid, data)
 
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
+
+	#if defined DEBUG_LABELS_ITEM
+		UpdateItemDebugLabel(itemid);
+	#endif
 
 	itm_Data[itemid][itm_exData] = data;
 
@@ -1702,6 +1769,18 @@ stock GetItemTypeLongPickup(ItemType:itemtype)
 	return itm_TypeData[itemtype][itm_longPickup];
 }
 
+// itm_Destroying
+stock bool:IsItemDestroying(itemid)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsItemDestroying]");
+
+	if(!Iter_Contains(itm_Index, itemid))
+		return false;
+
+
+	return itm_Destroying[itemid];
+}
+
 // itm_Holder
 stock GetItemHolder(itemid)
 {
@@ -1814,7 +1893,7 @@ stock GetNextItemID()
 CreateItemInWorld(itemid,
 	Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0,
-	world = 0, interior = 0, label = 1, applyrotoffsets = 1)
+	world = 0, interior = 0, label = 1, applyrotoffsets = 1, hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItemInWorld]");
 	if(!Iter_Contains(itm_Index, itemid))
@@ -1836,6 +1915,7 @@ CreateItemInWorld(itemid,
 	itm_Data[itemid][itm_rotZ]					= rz;
 	itm_Data[itemid][itm_world]					= world;
 	itm_Data[itemid][itm_interior]				= interior;
+	itm_Data[itemid][itm_hitPoints]				= hitpoints == -1 ? itm_TypeData[itm_Data[itemid][itm_type]][itm_maxHitPoints] : hitpoints;
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
@@ -1888,6 +1968,10 @@ CreateItemInWorld(itemid,
 	Iter_Add(itm_WorldIndex, itemid);
 
 	CallLocalFunction("OnItemCreateInWorld", "d", itemid);
+
+	#if defined DEBUG_LABELS_ITEM
+		UpdateItemDebugLabel(itemid);
+	#endif
 
 	return 1;
 }
@@ -2250,16 +2334,31 @@ hook OnPlayerDeath(playerid, killerid, reason)
 #if defined DEBUG_LABELS_ITEM
 	UpdateItemDebugLabel(itemid)
 	{
-		new string[64];
+		if(Iter_Contains(itm_WorldIndex, itemid))
+		{
+			new
+				Float:x,
+				Float:y,
+				Float:z,
+				string[64];
 
-		format(string, sizeof(string), "GEID:%s OBJ:%d BTN:%d TYPE:%d EXDATA:%d",
-			itm_Data[itemid][itm_geid],
-			itm_Data[itemid][itm_objId],
-			itm_Data[itemid][itm_button],
-			_:itm_Data[itemid][itm_type],
-			itm_Data[itemid][itm_exData]);
+			GetItemPos(itemid, x, y, z);
+			SetDebugLabelPos(itm_DebugLabelID[itemid], x, y, z);
 
-		UpdateDebugLabelString(itm_DebugLabelID[itemid], string);
+			format(string, sizeof(string), "GEID:%s OBJ:%d BTN:%d TYPE:%d EXDATA:%d HP:%d",
+				itm_Data[itemid][itm_geid],
+				itm_Data[itemid][itm_objId],
+				itm_Data[itemid][itm_button],
+				_:itm_Data[itemid][itm_type],
+				itm_Data[itemid][itm_exData],
+				itm_Data[itemid][itm_hitPoints]);
+
+			UpdateDebugLabelString(itm_DebugLabelID[itemid], string);
+		}
+		else
+		{
+			DestroyDebugLabel(itm_DebugLabelID[itemid]);
+		}
 	}
 #endif
 
