@@ -82,7 +82,7 @@ forward IsValidCraftSet(craftset);
 -
 */
 
-forward GetCraftSetIngredients(craftset, ItemType:output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data]);
+forward GetCraftSetIngredients(craftset, output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data]);
 /*
 # Description:
 -
@@ -184,7 +184,8 @@ static
 			cft_Ingredients[CFT_MAX_CRAFT_SET][CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data],
 			cft_ItemCount[CFT_MAX_CRAFT_SET],
 ItemType:	cft_Result[CFT_MAX_CRAFT_SET],
-			cft_Total;
+			cft_Total,
+			cft_ItemTypeResultFor[ITM_MAX_TYPES] = {-1, ...};
 
 static
 			cft_SelectedItems[MAX_PLAYERS][CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data],
@@ -239,6 +240,7 @@ stock DefineItemCraftSet(ItemType:result, {ItemType, _}:...)
 	}
 
 	cft_Result[cft_Total] = result;
+	cft_ItemTypeResultFor[result] = cft_Total;
 
 	for(new i, j = 1; j < args; i++)
 	{
@@ -262,14 +264,18 @@ stock IsValidCraftSet(craftset)
 }
 
 // cft_Ingredients
-stock GetCraftSetIngredients(craftset, ItemType:output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data])
+stock GetCraftSetIngredients(craftset, output[CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data])
 {
 	if(!(0 <= craftset < cft_Total))
 		return 0;
 
-	output = cft_Ingredients[craftset];
+	for(new i; i < cft_ItemCount[craftset]; i++)
+	{
+		output[i][cft_itemType] = cft_Ingredients[craftset][i][cft_itemType];
+		output[i][cft_keepItem] = cft_Ingredients[craftset][i][cft_keepItem];
+	}
 
-	return 1;
+	return cft_ItemCount[craftset];
 }
 
 // cft_Ingredients/cft_itemType
@@ -369,6 +375,15 @@ stock GetPlayerCraftEnvironment(playerid)
 		return 0;
 
 	return cft_SelectionEnvironment[playerid];
+}
+
+// cft_ItemTypeResultFor
+stock ItemTypeResultForCraftingSet(ItemType:itemtype)
+{
+	if(!IsValidItemType(itemtype))
+		return -1;
+
+	return cft_ItemTypeResultFor[itemtype];
 }
 
 
