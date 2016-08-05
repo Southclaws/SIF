@@ -506,15 +506,3 @@ stock SetItemArrayDataFromStored(itemid, index)
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[SetItemArrayDataFromStored] itemid:%d index:%d", itemid, index);
 	return SetItemArrayData(itemid, itm_list_Array[index], itm_list_ArraySize[index]);
 }
-
-
-/*==============================================================================
-
-	Testing
-
-==============================================================================*/
-
-
-#if defined RUN_TESTS
-	#include <SIF\testing\ItemSerializer.pwn>
-#endif
