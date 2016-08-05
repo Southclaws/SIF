@@ -584,9 +584,16 @@ Stores a list of items the player is within interaction range of into <list>.
 
 forward GetNextItemID();
 /*
-# Description
+# Description:
 Returns the next item ID in the index that is unused. Useful for determining
 what ID an item will have before calling CreateItem and thus OnItemCreated.
+*/
+
+forward GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, items[], maxitems = sizeof(items));
+/*
+# Description:
+Returns a list of items in range of the specified point. Uses streamer cells so
+the range is limited and will only list items in the surrounding cells.
 */
 
 
@@ -1880,6 +1887,33 @@ stock GetNextItemID()
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetNextItemID]");
 
 	return Iter_Free(itm_Index);
+}
+
+stock GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, items[], maxitems = sizeof(items))
+{
+	new
+		streamer_items[256],
+		streamer_count,
+		data[2],
+		itemid,
+		count;
+
+	streamer_count = Streamer_GetNearbyItems(x, y, z, STREAMER_TYPE_AREA, streamer_items, .range = size);
+
+	for(new i; i < streamer_count && count < maxitems; ++i)
+	{
+		Streamer_GetArrayData(STREAMER_TYPE_AREA, streamer_items[i], E_STREAMER_EXTRA_ID, data);
+
+		if(data[0] != BTN_STREAMER_AREA_IDENTIFIER)
+			continue;
+
+		itemid = GetItemFromButtonID(data[1]);
+
+		if(IsValidItem(itemid))
+			items[count++] = itemid;
+	}
+
+	return count;
 }
 
 
