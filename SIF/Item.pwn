@@ -1776,6 +1776,17 @@ stock GetItemTypeLongPickup(ItemType:itemtype)
 	return itm_TypeData[itemtype][itm_longPickup];
 }
 
+// itm_maxHitPoints
+stock GetItemTypeMaxHitPoints(ItemType:itemtype)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeMaxHitPoints]");
+
+	if(!IsValidItemType(itemtype))
+		return 0;
+
+	return itm_TypeData[itemtype][itm_maxHitPoints];
+}
+
 // itm_Destroying
 stock bool:IsItemDestroying(itemid)
 {
@@ -1898,7 +1909,7 @@ stock GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, items[], m
 		itemid,
 		count;
 
-	streamer_count = Streamer_GetNearbyItems(x, y, z, STREAMER_TYPE_AREA, streamer_items, .range = size);
+	streamer_count = Streamer_GetNearbyItems(x, y, z, STREAMER_TYPE_AREA, streamer_items, .range = range);
 
 	for(new i; i < streamer_count && count < maxitems; ++i)
 	{
@@ -1941,31 +1952,31 @@ CreateItemInWorld(itemid,
 	if(!IsValidItemType(itemtype))
 		return -2;
 
-	itm_Data[itemid][itm_posX]					= x;
-	itm_Data[itemid][itm_posY]					= y;
-	itm_Data[itemid][itm_posZ]					= z;
-	itm_Data[itemid][itm_rotX]					= rx;
-	itm_Data[itemid][itm_rotY]					= ry;
-	itm_Data[itemid][itm_rotZ]					= rz;
-	itm_Data[itemid][itm_world]					= world;
-	itm_Data[itemid][itm_interior]				= interior;
-	itm_Data[itemid][itm_hitPoints]				= hitpoints == -1 ? itm_TypeData[itm_Data[itemid][itm_type]][itm_maxHitPoints] : hitpoints;
+	itm_Data[itemid][itm_posX] = x;
+	itm_Data[itemid][itm_posY] = y;
+	itm_Data[itemid][itm_posZ] = z;
+	itm_Data[itemid][itm_rotX] = rx;
+	itm_Data[itemid][itm_rotY] = ry;
+	itm_Data[itemid][itm_rotZ] = rz;
+	itm_Data[itemid][itm_world] = world;
+	itm_Data[itemid][itm_interior] = interior;
+	itm_Data[itemid][itm_hitPoints] = hitpoints == -1 ? itm_TypeData[itm_Data[itemid][itm_type]][itm_maxHitPoints] : hitpoints;
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
 		RemovePlayerAttachedObject(itm_Holder[itemid], ITM_ATTACH_INDEX);
 		SetPlayerSpecialAction(itm_Holder[itemid], SPECIAL_ACTION_NONE);
 
-		itm_Holding[itm_Holder[itemid]]			= INVALID_ITEM_ID;
-		itm_Interacting[itm_Holder[itemid]]		= INVALID_ITEM_ID;
+		itm_Holding[itm_Holder[itemid]] = INVALID_ITEM_ID;
+		itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
 	}
 
-	itm_Interactor[itemid]						= INVALID_PLAYER_ID;
-	itm_Holder[itemid]							= INVALID_PLAYER_ID;
+	itm_Interactor[itemid] = INVALID_PLAYER_ID;
+	itm_Holder[itemid] = INVALID_PLAYER_ID;
 
 	if(applyrotoffsets)
 	{
-		itm_Data[itemid][itm_objId]				= CreateDynamicObject(itm_TypeData[itemtype][itm_model],
+		itm_Data[itemid][itm_objId] = CreateDynamicObject(itm_TypeData[itemtype][itm_model],
 			x, y, z + itm_TypeData[itemtype][itm_zModelOffset],
 			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx + itm_TypeData[itemtype][itm_defaultRotX]),
 			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry + itm_TypeData[itemtype][itm_defaultRotY]),
@@ -1974,7 +1985,7 @@ CreateItemInWorld(itemid,
 	}
 	else
 	{
-		itm_Data[itemid][itm_objId]				= CreateDynamicObject(itm_TypeData[itemtype][itm_model],
+		itm_Data[itemid][itm_objId] = CreateDynamicObject(itm_TypeData[itemtype][itm_model],
 			x, y, z + itm_TypeData[itemtype][itm_zModelOffset],
 			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx),
 			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry),
@@ -1982,8 +1993,7 @@ CreateItemInWorld(itemid,
 			world, interior, .streamdistance = 100.0);
 	}
 
-
-	itm_Data[itemid][itm_button]				= CreateButton(x, y, z + itm_TypeData[itemtype][itm_zButtonOffset], "Press F to pick up", world, interior, 1.0);
+	itm_Data[itemid][itm_button] = CreateButton(x, y, z + itm_TypeData[itemtype][itm_zButtonOffset], "Press ~k~~VEHICLE_ENTER_EXIT~ to pick up", world, interior, 1.0, .testlos = false);
 
 	if(itm_Data[itemid][itm_button] == INVALID_BUTTON_ID)
 	{
@@ -1997,7 +2007,7 @@ CreateItemInWorld(itemid,
 		SetDynamicObjectMaterial(itm_Data[itemid][itm_objId], 0, itm_TypeData[itemtype][itm_model], "invalid", "invalid", itm_TypeData[itemtype][itm_colour]);
 
 	if(label)
-		SetButtonLabel(itm_Data[itemid][itm_button], itm_TypeData[itemtype][itm_name], .range = 2.0);
+		SetButtonLabel(itm_Data[itemid][itm_button], itm_TypeData[itemtype][itm_name], .range = 2.0, .testlos = false);
 
 	Iter_Add(itm_WorldIndex, itemid);
 

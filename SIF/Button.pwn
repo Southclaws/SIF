@@ -119,7 +119,7 @@ DEFINE_HOOK_REPLACEMENT(Button , Btn);
 // Functions
 
 
-forward CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST);
+forward CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true);
 /*
 # Description
 Creates an interactive button players can activate by pressing F.
@@ -134,6 +134,7 @@ Creates an interactive button players can activate by pressing F.
 - labeltext: The text that the label should show.
 - labelcolour: The colour of the label.
 - streamdist: Stream distance of the label.
+- testlos: test line of sight for the label.
 
 # Returns
 Button ID handle of the newly created button or INVALID_BUTTON_ID if another
@@ -190,7 +191,7 @@ area from memory.
 Boolean to indicate success or failure.
 */
 
-forward SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST);
+forward SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true);
 /*
 # Description
 Creates a 3D Text Label at the specified button ID handle, if a label already
@@ -474,7 +475,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST)
+stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[CreateButton]");
 	new id = Iter_Free(btn_Index);
@@ -497,7 +498,7 @@ stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, F
 	btn_Data[id][btn_link]				= INVALID_BUTTON_ID;
 
 	if(label)
-		btn_Data[id][btn_label] = CreateDynamic3DTextLabel(labeltext, labelcolour, x, y, z, streamdist, _, _, 0, world, interior, _, streamdist);
+		btn_Data[id][btn_label] = CreateDynamic3DTextLabel(labeltext, labelcolour, x, y, z, streamdist, .testlos = testlos, .worldid = world, .interiorid = interior, .streamdistance = streamdist);
 
 	else
 		btn_Data[id][btn_label] = Text3D:INVALID_3DTEXT_ID;
@@ -634,7 +635,7 @@ stock SetButtonArea(buttonid, areaid)
 
 
 // btn_label
-stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST)
+stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonLabel]");
 	if(!Iter_Contains(btn_Index, buttonid))
@@ -650,7 +651,7 @@ stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DE
 		btn_Data[buttonid][btn_posX],
 		btn_Data[buttonid][btn_posY],
 		btn_Data[buttonid][btn_posZ],
-		range, _, _, 1,
+		range, _, _, testlos,
 		btn_Data[buttonid][btn_world], btn_Data[buttonid][btn_interior], _, range);
 
 	return 1;
