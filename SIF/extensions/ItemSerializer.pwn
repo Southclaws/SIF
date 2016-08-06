@@ -247,7 +247,7 @@ static ITEM_SERIALIZER_DEBUG = -1;
 
 hook OnScriptInit()
 {
-	ITEM_SERIALIZER_DEBUG = sif_debug_register_handler("SIF/ItemSerializer", 10);
+	ITEM_SERIALIZER_DEBUG = sif_debug_register_handler("SIF/ItemSerializer");
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_SERIALIZER_DEBUG("[OnScriptInit]");
 }
 
@@ -263,6 +263,8 @@ stock SerialiseItems(items[], maxitems = sizeof(items))
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[SerialiseItems] maxitems:%d", maxitems);
 	itm_arr_Size = 0;
+	itm_list_Count = 0;
+
 	itm_arr_Serialized[itm_arr_Size++] = 0;
 	itm_arr_Serialized[itm_arr_Size++] = maxitems;
 
