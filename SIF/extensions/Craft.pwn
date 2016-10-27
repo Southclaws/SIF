@@ -34,6 +34,26 @@ players to combine two items into one new item.
 	#endinput
 #endif
 
+#if !defined _SIF_GEID_INCLUDED
+	#include <SIF\GEID.pwn>
+#endif
+
+#if !defined _SIF_INVENTORY_INCLUDED
+	#include <SIF\Inventory.pwn>
+#endif
+
+#if !defined _SIF_CONTAINER_INCLUDED
+	#include <SIF\Container.pwn>
+#endif
+
+#if !defined _SIF_INVENTORY_DIALOG_INCLUDED
+	#include <SIF\extensions\InventoryDialog.pwn>
+#endif
+
+#if !defined _SIF_CONTAINER_DIALOG_INCLUDED
+	#include <SIF\extensions\ContainerDialog.pwn>
+#endif
+
 #include <YSI\y_hooks>
 
 #define _SIF_CRAFT_INCLUDED
@@ -71,6 +91,12 @@ ItemType:	cft_selectedItemType,
 
 
 forward DefineItemCraftSet(ItemType:result, {ItemType, _}:...);
+/*
+# Description:
+-
+*/
+
+forward GetCraftSetUniqueID(craftset, id[], maxlength = sizeof(id));
 /*
 # Description:
 -
@@ -148,6 +174,12 @@ forward GetPlayerCraftEnvironment(playerid);
 -
 */
 
+forward ItemTypeResultForCraftingSet(ItemType:itemtype);
+/*
+# Description:
+-
+*/
+
 
 // Events
 
@@ -184,6 +216,7 @@ static
 			cft_Ingredients[CFT_MAX_CRAFT_SET][CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data],
 			cft_ItemCount[CFT_MAX_CRAFT_SET],
 ItemType:	cft_Result[CFT_MAX_CRAFT_SET],
+			cft_UniqueID[CFT_MAX_CRAFT_SET][11],
 			cft_Total,
 			cft_ItemTypeResultFor[ITM_MAX_TYPES] = {-1, ...};
 
@@ -211,12 +244,6 @@ hook OnScriptInit()
 	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CRAFT_DEBUG("[OnScriptInit]");
 }
 
-hook OnPlayerConnect(playerid)
-{
-	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CRAFT_DEBUG("[OnPlayerConnect]");
-	// TODO: Zero player data
-}
-
 
 /*==============================================================================
 
@@ -239,6 +266,10 @@ stock DefineItemCraftSet(ItemType:result, {ItemType, _}:...)
 		return -1;
 	}
 
+	new
+		component,
+		hash[12];
+
 	cft_Result[cft_Total] = result;
 	cft_ItemTypeResultFor[result] = cft_Total;
 
@@ -247,11 +278,28 @@ stock DefineItemCraftSet(ItemType:result, {ItemType, _}:...)
 		cft_Ingredients[cft_Total][i][cft_itemType] = ItemType:getarg(j++);
 		cft_Ingredients[cft_Total][i][cft_keepItem] = bool:getarg(j++);
 		cft_ItemCount[cft_Total]++;
+
+		component += (_:cft_Ingredients[cft_Total][i][cft_itemType] * 0x5f3759df) % 999999;
 	}
 
 	_btn_SortCraftSet(cft_Ingredients[cft_Total], 0, cft_ItemCount[cft_Total]);
 
+	new rlen;
+	format(hash, 12, "%07d", 9999999 - component);
+	b64_encode(hash, strlen(hash), cft_UniqueID[cft_Total], rlen);
+
 	return cft_Total++;
+}
+
+stock GetCraftSetUniqueID(craftset, id[], maxlength = sizeof(id))
+{
+	if(!(0 <= craftset < cft_Total))
+		return 0;
+
+	id[0] = EOS;
+	strcat(id, cft_UniqueID[craftset], maxlength);
+
+	return 1;
 }
 
 // cft_Total
