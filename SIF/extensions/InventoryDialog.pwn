@@ -27,8 +27,8 @@ interaction with their inventory items.
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
 #include <YSI\y_dialog>
+#include <YSI\y_hooks>
 
 #define _SIF_INVENTORY_DIALOG_INCLUDED
 
@@ -191,8 +191,6 @@ hook OnPlayerConnect(playerid)
 	{
 		inv_SelectedSlot[playerid] = -1;
 	}
-
-	return;
 }
 
 
