@@ -139,7 +139,7 @@ scriptable entities.
 // Functions
 
 
-forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1);
+forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1);
 /*
 # Description
 Creates an item in the game world at the specified coordinates with the
@@ -280,7 +280,7 @@ The allocated ID of the item or INVALID_ITEM_ID If there are no more free item
 slots or -2 If the specified type is invalid.
 */
 
-forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1);
+forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1);
 /*
 # Description
 Creates an item using an ID allocated from AllocNextItemID. This is the only
@@ -771,9 +771,9 @@ enum E_ITEM_TYPE_DATA
 			itm_model,
 			itm_size,
 
-Float:		itm_defaultRotX,
-Float:		itm_defaultRotY,
-Float:		itm_defaultRotZ,
+Float:		itm_offsetRotX,
+Float:		itm_offsetRotY,
+Float:		itm_offsetRotZ,
 Float:		itm_zModelOffset,
 Float:		itm_zButtonOffset,
 
@@ -886,7 +886,7 @@ hook OnPlayerDisconnect(playerid, reason)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1)
+stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem] %d %f %f %f");
 	new id = Iter_Free(itm_Index);
@@ -1021,9 +1021,9 @@ stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Fl
 	itm_TypeData[id][itm_model]			= model;
 	itm_TypeData[id][itm_size]			= size;
 
-	itm_TypeData[id][itm_defaultRotX]	= rotx;
-	itm_TypeData[id][itm_defaultRotY]	= roty;
-	itm_TypeData[id][itm_defaultRotZ]	= rotz;
+	itm_TypeData[id][itm_offsetRotX]	= rotx;
+	itm_TypeData[id][itm_offsetRotY]	= roty;
+	itm_TypeData[id][itm_offsetRotZ]	= rotz;
 	itm_TypeData[id][itm_zModelOffset]	= modelz;
 	itm_TypeData[id][itm_zButtonOffset]	= buttonz;
 
@@ -1319,7 +1319,7 @@ stock AllocNextItemID(ItemType:type, geid[] = "")
 	return id;
 }
 
-stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1)
+stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItem_ExplicitID]");
 	if(!Iter_Contains(itm_Index, itemid))
@@ -1482,22 +1482,18 @@ stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults =
 	if(offsetfromdefaults)
 	{
 		SetDynamicObjectRot(itm_Data[itemid][itm_objId],
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX] + rx,
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY] + ry,
-			itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + rz);
-
-		itm_Data[itemid][itm_rotX] = itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotX] + rx;
-		itm_Data[itemid][itm_rotY] = itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotY] + ry;
-		itm_Data[itemid][itm_rotZ] = itm_TypeData[itm_Data[itemid][itm_type]][itm_defaultRotZ] + rz;
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_offsetRotX] + rx,
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_offsetRotY] + ry,
+			itm_TypeData[itm_Data[itemid][itm_type]][itm_offsetRotZ] + rz);
 	}
 	else
 	{
 		SetDynamicObjectRot(itm_Data[itemid][itm_objId], rx, ry, rz);
-
-		itm_Data[itemid][itm_rotX] = rx;
-		itm_Data[itemid][itm_rotY] = ry;
-		itm_Data[itemid][itm_rotZ] = rz;
 	}
+
+	itm_Data[itemid][itm_rotX] = rx;
+	itm_Data[itemid][itm_rotY] = ry;
+	itm_Data[itemid][itm_rotZ] = rz;
 
 	return 1;	
 }
@@ -1937,7 +1933,7 @@ stock GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, items[], m
 
 CreateItemInWorld(itemid,
 	Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
-	Float:rx = 1000.0, Float:ry = 1000.0, Float:rz = 1000.0,
+	Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0,
 	world = 0, interior = 0, label = 1, applyrotoffsets = 1, hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItemInWorld]");
@@ -1978,18 +1974,15 @@ CreateItemInWorld(itemid,
 	{
 		itm_Data[itemid][itm_objId] = CreateDynamicObject(itm_TypeData[itemtype][itm_model],
 			x, y, z + itm_TypeData[itemtype][itm_zModelOffset],
-			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx + itm_TypeData[itemtype][itm_defaultRotX]),
-			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry + itm_TypeData[itemtype][itm_defaultRotY]),
-			(rz == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotZ]) : (rz + itm_TypeData[itemtype][itm_defaultRotZ]),
+			rx + itm_TypeData[itemtype][itm_offsetRotX],
+			ry + itm_TypeData[itemtype][itm_offsetRotY],
+			rz + itm_TypeData[itemtype][itm_offsetRotZ],
 			world, interior, .streamdistance = 100.0);
 	}
 	else
 	{
 		itm_Data[itemid][itm_objId] = CreateDynamicObject(itm_TypeData[itemtype][itm_model],
-			x, y, z + itm_TypeData[itemtype][itm_zModelOffset],
-			(rx == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotX]) : (rx),
-			(ry == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotY]) : (ry),
-			(rz == 1000.0) ? (itm_TypeData[itemtype][itm_defaultRotZ]) : (rz),
+			x, y, z + itm_TypeData[itemtype][itm_zModelOffset], rx, ry, rz,
 			world, interior, .streamdistance = 100.0);
 	}
 
