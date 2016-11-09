@@ -499,6 +499,15 @@ Returns the defined size of an item type.
 0 if itemtype is invalid.
 */
 
+forward GetItemTypeRotation(ItemType:itemtype, &Float:rx, &Float:ry, &Float:rz);
+/*
+# Description
+Returns the rotation offsets defined in DefineItemType for an item type.
+
+# Returns
+0 if itemtype is invalid.
+*/
+
 forward IsItemTypeCarry(ItemType:itemtype);
 /*
 # Description
@@ -1726,6 +1735,23 @@ stock GetItemTypeSize(ItemType:itemtype)
 		return 0;
 
 	return itm_TypeData[itemtype][itm_size];
+}
+
+// itm_offsetRotX
+// itm_offsetRotY
+// itm_offsetRotZ
+stock GetItemTypeRotation(ItemType:itemtype, &Float:rx, &Float:ry, &Float:rz)
+{
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeRotation]");
+
+	if(!IsValidItemType(itemtype))
+		return 0;
+
+	rx = itm_TypeData[itemtype][itm_offsetRotX];
+	ry = itm_TypeData[itemtype][itm_offsetRotY];
+	rz = itm_TypeData[itemtype][itm_offsetRotZ];
+
+	return 1;
 }
 
 // itm_useCarryAnim

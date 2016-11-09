@@ -384,13 +384,13 @@ stock ClearSerializer()
 
 stock GetSerialisedSize()
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[GetSerialisedSize]");
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[GetSerialisedSize] -> %d", itm_arr_Size);
 	return itm_arr_Size;
 }
 
 stock GetStoredItemCount()
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[GetStoredItemCount]");
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[GetStoredItemCount] -> %d", itm_list_Count);
 	return itm_list_Count;
 }
 
@@ -399,10 +399,11 @@ stock ItemType:GetStoredItemType(index)
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[GetStoredItemType] index:%d", index);
 	if(!(0 <= index < itm_list_Count))
 	{
-		printf("[GetStoredItemType] ERROR: index (%d) out of bounds", index);
+		printf("[GetStoredItemType] ERROR: index (%d) out of bounds 0..%d", index, itm_list_Count);
 		return INVALID_ITEM_TYPE;
 	}
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[GetStoredItemType] -> %d", _:itm_list_Items[index]);
 	return ItemType:itm_list_Items[index];
 }
 
@@ -418,6 +419,7 @@ stock GetStoredItemPos(index, &Float:x, &Float:y, &Float:z)
 	x = itm_list_WorldX[index];
 	y = itm_list_WorldY[index];
 	z = itm_list_WorldZ[index];
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[GetStoredItemType] -> %f, %f, %f", x, y, z);
 
 	return 1;
 }
@@ -434,6 +436,7 @@ stock GetStoredItemRot(index, &Float:x, &Float:y, &Float:z)
 	x = itm_list_RotationX[index];
 	y = itm_list_RotationY[index];
 	z = itm_list_RotationZ[index];
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[GetStoredItemRot] -> %f, %f, %f", x, y, z);
 
 	return 1;
 }
@@ -447,6 +450,7 @@ stock GetStoredItemWorld(index)
 		return 0;
 	}
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[GetStoredItemWorld] -> %d", itm_list_VirtualWorld[index]);
 	return itm_list_VirtualWorld[index];
 }
 
@@ -459,6 +463,7 @@ stock GetStoredItemInterior(index)
 		return 0;
 	}
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[GetStoredItemInterior] -> %d", itm_list_Interior[index]);
 	return itm_list_Interior[index];
 }
 
@@ -473,6 +478,7 @@ stock GetStoredItemArrayData(index, output[])
 
 	memcpy(output, itm_list_Array[index], 0, itm_list_ArraySize[index] * 4, itm_arr_Size);
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[GetStoredItemArrayData] -> %d", itm_list_ArraySize[index]);
 	return itm_list_ArraySize[index];
 }
 
@@ -485,6 +491,7 @@ stock GetStoredItemArrayDataSize(index)
 		return 0;
 	}
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[GetStoredItemArrayDataSize] -> %d", itm_list_ArraySize[index]);
 	return itm_list_ArraySize[index];
 }
 
@@ -500,6 +507,7 @@ stock CreateItemFromStored(index)
 	new itemid = CreateItem(itm_list_Items[index]);
 	SetItemArrayData(itemid, itm_list_Array[index], itm_list_ArraySize[index]);
 
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[CreateItemFromStored] -> %d", itemid);
 	return itemid;
 }
 
