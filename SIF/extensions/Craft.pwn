@@ -96,18 +96,6 @@ forward DefineItemCraftSet(ItemType:result, {ItemType, _}:...);
 -
 */
 
-forward GetCraftSetUniqueID(craftset, id[], maxlength = sizeof(id));
-/*
-# Description:
--
-*/
-
-forward GetCraftSetFromUniqueID(id[]);
-/*
-# Description:
--
-*/
-
 forward IsValidCraftSet(craftset);
 /*
 # Description:
@@ -222,7 +210,6 @@ static
 			cft_Ingredients[CFT_MAX_CRAFT_SET][CFT_MAX_CRAFT_SET_ITEMS][e_craft_item_data],
 			cft_ItemCount[CFT_MAX_CRAFT_SET],
 ItemType:	cft_Result[CFT_MAX_CRAFT_SET],
-			cft_UniqueID[CFT_MAX_CRAFT_SET][11],
 			cft_Total,
 			cft_ItemTypeResultFor[ITM_MAX_TYPES] = {-1, ...};
 
@@ -272,51 +259,19 @@ stock DefineItemCraftSet(ItemType:result, {ItemType, _}:...)
 		return -1;
 	}
 
-	new
-		component,
-		hash[12];
-
 	cft_Result[cft_Total] = result;
 	cft_ItemTypeResultFor[result] = cft_Total;
-
-	_btn_SortCraftSet(cft_Ingredients[cft_Total], 0, cft_ItemCount[cft_Total]);
 
 	for(new i, j = 1; j < args; i++)
 	{
 		cft_Ingredients[cft_Total][i][cft_itemType] = ItemType:getarg(j++);
 		cft_Ingredients[cft_Total][i][cft_keepItem] = bool:getarg(j++);
 		cft_ItemCount[cft_Total]++;
-
-		component += (_:cft_Ingredients[cft_Total][i][cft_itemType] * 0x5f3759df) % 999999;
 	}
 
-	new rlen;
-	format(hash, 12, "%07d", 9999999 - component);
-	b64_encode(hash, strlen(hash), cft_UniqueID[cft_Total], rlen);
+	_btn_SortCraftSet(cft_Ingredients[cft_Total], 0, cft_ItemCount[cft_Total]);
 
 	return cft_Total++;
-}
-
-stock GetCraftSetUniqueID(craftset, id[], maxlength = sizeof(id))
-{
-	if(!(0 <= craftset < cft_Total))
-		return 0;
-
-	id[0] = EOS;
-	strcat(id, cft_UniqueID[craftset], maxlength);
-
-	return 1;
-}
-
-stock GetCraftSetFromUniqueID(id[])
-{
-	for(new i; i < cft_Total; i++)
-	{
-		if(!strcmp(cft_UniqueID[i], id))
-			return i;
-	}
-
-	return -1;
 }
 
 // cft_Total
