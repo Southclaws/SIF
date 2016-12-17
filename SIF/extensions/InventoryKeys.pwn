@@ -41,7 +41,7 @@ inventory using key presses.
 
 // Events
 
-forward OnPlayerAddToInventory(playerid, itemid);
+forward OnPlayerAddToInventory(playerid, itemid, success);
 /*
 # Called:
 When a player adds an item to their inventory using a key.
@@ -107,13 +107,11 @@ _HandlePutItemAway(playerid)
 
 	if(itemsize > freeslots)
 	{
-		new message[37];
-		format(message, sizeof(message), "Extra %d slots required", itemsize - freeslots);
-		ShowActionText(playerid, message, 3000, 150);
+		CallLocalFunction("OnPlayerAddToInventory", "ddd", playerid, itemid, 0);
 		return;
 	}
 
-	if(CallLocalFunction("OnPlayerAddToInventory", "dd", playerid, itemid))
+	if(CallLocalFunction("OnPlayerAddToInventory", "ddd", playerid, itemid, 1))
 		return;
 
 	inv_PutAwayTick[playerid] = GetTickCount();
