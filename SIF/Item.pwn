@@ -744,6 +744,12 @@ forward OnItemNameRender(itemid, ItemType:itemtype);
 When the function GetItemName is called, so an additional piece of text can be added to items giving more information unique to that specific item.
 */
 
+forward OnItemHitPointsUpdate(itemid, oldvalue, newvalue);
+/*
+# Called
+When an item's hitpoints value is changed.
+*/
+
 
 /*==============================================================================
 
@@ -1573,7 +1579,11 @@ stock SetItemHitPoints(itemid, hitpoints)
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
+	new old = itm_Data[itemid][itm_hitPoints];
+
 	itm_Data[itemid][itm_hitPoints] = hitpoints;
+
+	CallLocalFunction("OnItemHitPointsUpdate", "ddd", itemid, old, hitpoints);
 
 	#if defined DEBUG_LABELS_ITEM
 		UpdateItemDebugLabel(itemid);
