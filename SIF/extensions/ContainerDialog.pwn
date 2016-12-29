@@ -185,7 +185,7 @@ stock DisplayContainerInventory(playerid, containerid)
 	for(new i; i < GetContainerFreeSlots(containerid); i++)
 		strcat(cnt_InventoryString[playerid], "<Empty>\n");
 
-	strcat(cnt_InventoryString[playerid], "My Inventory >");
+	strcat(cnt_InventoryString[playerid], "Open Inventory");
 
 	cnt_CurrentContainer[playerid] = containerid;
 
@@ -205,7 +205,7 @@ stock DisplayContainerInventory(playerid, containerid)
 			if(!IsValidContainer(cnt_CurrentContainer[playerid]))
 				return 0;
 
-			if(listitem == cnt_Data[cnt_CurrentContainer[playerid]][cnt_size])
+			if(listitem == GetContainerItemCount(containerid) + 1)
 			{
 				DisplayPlayerInventory(playerid);
 			}
