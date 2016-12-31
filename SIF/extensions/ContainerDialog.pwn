@@ -128,6 +128,7 @@ forward OnMoveItemToInventory(playerid, itemid, containerid);
 
 
 static
+			cnt_ItemListTotal			[MAX_PLAYERS],
 			cnt_CurrentContainer		[MAX_PLAYERS],
 			cnt_SelectedSlot			[MAX_PLAYERS],
 			cnt_InventoryString			[MAX_PLAYERS][CNT_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)],
@@ -169,6 +170,7 @@ stock DisplayContainerInventory(playerid, containerid)
 		tmp[ITM_MAX_NAME + ITM_MAX_TEXT];
 
 	cnt_InventoryString[playerid][0] = EOS;
+	cnt_ItemListTotal[playerid] = 0;
 
 	for(new i; i < GetContainerSize(containerid); i++)
 	{
@@ -180,10 +182,14 @@ stock DisplayContainerInventory(playerid, containerid)
 		GetItemName(itemid, tmp);
 
 		format(cnt_InventoryString[playerid], sizeof(cnt_InventoryString[]), "%s[%02d]%s\n", cnt_InventoryString[playerid], GetItemTypeSize(GetItemType(itemid)), tmp);
+		cnt_ItemListTotal[playerid]++;
 	}
 
 	for(new i; i < GetContainerFreeSlots(containerid); i++)
+	{
 		strcat(cnt_InventoryString[playerid], "<Empty>\n");
+		cnt_ItemListTotal[playerid]++;
+	}
 
 	strcat(cnt_InventoryString[playerid], "Open Inventory");
 
@@ -205,7 +211,9 @@ stock DisplayContainerInventory(playerid, containerid)
 			if(!IsValidContainer(cnt_CurrentContainer[playerid]))
 				return 0;
 
-			if(listitem == GetContainerItemCount(containerid) + 1)
+			printf("listitem %d total %d itemcount %d freeslots %d", listitem, cnt_ItemListTotal[playerid], GetContainerItemCount(containerid), GetContainerFreeSlots(containerid));
+
+			if(listitem >= cnt_ItemListTotal[playerid])
 			{
 				DisplayPlayerInventory(playerid);
 			}
