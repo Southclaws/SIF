@@ -169,6 +169,9 @@ forward SetItemArrayDataFromStored(itemid, index);
 
 
 static
+			// Locks the item data to block interspersing read/write ops.
+bool:		itm_list_Lock,
+
 			// Contains a simple list of item types for lookups.
 			itm_list_Items[ITEM_SERIALIZER_MAX_ITEMS],
 
@@ -262,6 +265,12 @@ hook OnScriptInit()
 stock SerialiseItems(items[], maxitems = sizeof(items))
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[SerialiseItems] maxitems:%d", maxitems);
+	if(itm_list_Lock)
+	{
+		printf("[SerialiseItems] ERROR: serialiser is locked, DeserialiseItems operation not finished with ClearSerializer");
+		return 1;
+	}
+
 	itm_arr_Size = 0;
 	itm_list_Count = 0;
 
@@ -322,6 +331,14 @@ stock SerialiseItems(items[], maxitems = sizeof(items))
 stock DeserialiseItems(list[], length = sizeof(list), store = true)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[DeserialiseItems] length:%d store:%d", length, store);
+	if(itm_list_Lock)
+	{
+		printf("[SerialiseItems] ERROR: serialiser is locked, DeserialiseItems operation not finished with ClearSerializer");
+		return 1;
+	}
+
+	itm_list_Lock = true;
+
 	if(store)
 		memcpy(itm_arr_Serialized, list, 0, length * 4);
 
@@ -380,6 +397,7 @@ stock ClearSerializer()
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[ClearSerializer]");
 	itm_list_Count = 0;
+	itm_list_Lock = false;
 }
 
 stock GetSerialisedSize()
