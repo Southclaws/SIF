@@ -216,7 +216,7 @@ Dialog:SIF_Container(playerid, response, listitem, inputtext[])
 		if(!IsValidContainer(cnt_CurrentContainer[playerid]))
 			return 0;
 
-		printf("listitem %d total %d itemcount %d freeslots %d", listitem, cnt_ItemListTotal[playerid], GetContainerItemCount(containerid), GetContainerFreeSlots(containerid));
+		printf("listitem %d total %d itemcount %d freeslots %d", listitem, cnt_ItemListTotal[playerid], GetContainerItemCount(cnt_CurrentContainer[playerid]), GetContainerFreeSlots(cnt_CurrentContainer[playerid]));
 
 		if(listitem >= cnt_ItemListTotal[playerid])
 		{
@@ -245,6 +245,8 @@ Dialog:SIF_Container(playerid, response, listitem, inputtext[])
 	{
 		ClosePlayerContainer(playerid, true);
 	}
+
+	return 1;
 }
 
 stock ClosePlayerContainer(playerid, call = false)
@@ -383,6 +385,8 @@ Dialog:SIF_ContainerOptions(playerid, response, listitem, inputtext[])
 			CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
 		}
 	}
+
+	return 1;
 }
 
 hook OnPlayerViewInvOpt(playerid)
