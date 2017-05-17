@@ -276,6 +276,8 @@ Dialog:SIF_PlayerInventory(playerid, response, listitem, inputtext[])
 	{
 		ClosePlayerInventory(playerid, true);
 	}
+
+	return 1;
 }
 
 stock ClosePlayerInventory(playerid, call = false)
@@ -387,12 +389,12 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 
 	CallLocalFunction("OnPlayerViewInventoryOpt", "d", playerid);
 
-	Dialog_Show(playerid, SIF_PlayerInventoryOptions, DIALOG_STYLE_LIST, name, inv_OptionsList[playerid], "Accept", "Back");
+	Dialog_Show(playerid, SIF_PlayerInvOptions, DIALOG_STYLE_LIST, name, inv_OptionsList[playerid], "Accept", "Back");
 
 	return 1;
 }
 
-Dialog:SIF_PlayerInventoryOptions(pid, dialogid, response, listitem, string:inputtext[])
+Dialog:SIF_PlayerInvOptions(playerid, dialogid, response, listitem, string:inputtext[])
 {
 	if(!response)
 	{
@@ -461,4 +463,6 @@ Dialog:SIF_PlayerInventoryOptions(pid, dialogid, response, listitem, string:inpu
 			CallLocalFunction("OnPlayerSelectInventoryOpt", "dd", playerid, listitem - 3);
 		}
 	}
+
+	return 1;
 }
