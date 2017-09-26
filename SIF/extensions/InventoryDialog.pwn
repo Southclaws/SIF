@@ -294,7 +294,7 @@ stock ClosePlayerInventory(playerid, call = false)
 		}
 	}
 
-	Dialog_Hide(playerid);
+	ShowPlayerDialog(playerid, -1, 0, NULL, NULL, NULL, NULL);
 	inv_ViewingInventory[playerid] = false;
 
 	return 1;

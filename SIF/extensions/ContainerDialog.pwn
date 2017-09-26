@@ -266,7 +266,7 @@ stock ClosePlayerContainer(playerid, call = false)
 		}
 	}
 
-	Dialog_Hide(playerid);
+	ShowPlayerDialog(playerid, -1, 0, NULL, NULL, NULL, NULL);
 	cnt_CurrentContainer[playerid] = INVALID_CONTAINER_ID;
 
 	return 1;
