@@ -15,13 +15,13 @@ maintaining quality front-end gameplay for players.
 ==============================================================================*/
 
 
-#include "debug.inc"
-#include "core.inc"
-#include "button.inc"
-#include "door.inc"
-#include "item.inc"
-#include "inventory.inc"
-#include "container.inc"
+#include "SIF/debug"
+#include "SIF/core"
+#include "SIF/button"
+#include "SIF/door"
+#include "SIF/item"
+#include "SIF/inventory"
+#include "SIF/container"
 
 
 // Tests

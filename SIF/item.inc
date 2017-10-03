@@ -61,19 +61,19 @@ scriptable entities.
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include "debug.inc"
+	#include "SIF/debug.inc"
 #endif
 
 #if !defined _SIF_CORE_INCLUDED
-	#include "core.inc"
+	#include "SIF/core.inc"
 #endif
 
 #if !defined _SIF_GEID_INCLUDED
-	#include "geid.inc"
+	#include "SIF/geid.inc"
 #endif
 
 #if !defined _SIF_BUTTON_INCLUDED
-	#include "button.inc"
+	#include "SIF/button.inc"
 #endif
 
 #if defined DEBUG_LABELS_ITEM
