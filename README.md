@@ -126,8 +126,8 @@ and array data as well as other pieces of information. Used mainly for storage.
 Or you can include individual scripts:
 
 ```c
-#include <SIF\item>
-#include <SIF\extensions\item-array0data>
+#include <SIF/item>
+#include <SIF/extensions/item-array0data>
 ```
 
 You are welcome to fork, submit issues and improve the code any way you like!
