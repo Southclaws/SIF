@@ -60,25 +60,11 @@ scriptable entities.
 	#endinput
 #endif
 
-#if !defined _SIF_DEBUG_INCLUDED
-	#include "SIF/debug.inc"
-#endif
-
-#if !defined _SIF_CORE_INCLUDED
-	#include "SIF/core.inc"
-#endif
-
-#if !defined _SIF_GEID_INCLUDED
-	#include "SIF/geid.inc"
-#endif
-
-#if !defined _SIF_BUTTON_INCLUDED
-	#include "SIF/button.inc"
-#endif
-
-#if defined DEBUG_LABELS_ITEM
-	#include "extensions/debug-labels.inc"
-#endif
+#include "SIF/debug.inc"
+#include "SIF/core.inc"
+#include "SIF/geid.inc"
+#include "SIF/button.inc"
+#include "SIF/extensions/debug-labels.inc"
 
 #include <YSI\y_iterate>
 #include <YSI\y_timers>

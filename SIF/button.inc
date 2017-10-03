@@ -52,17 +52,9 @@ GTA:SA spinning pickups for a few reasons:
 	#endinput
 #endif
 
-#if !defined _SIF_DEBUG_INCLUDED
-	#include "debug.inc"
-#endif
-
-#if !defined _SIF_CORE_INCLUDED
-	#include "core.inc"
-#endif
-
-#if defined DEBUG_LABELS_BUTTON
-	#include "extensions\DebugLabels.inc"
-#endif
+#include "SIF/debug.inc"
+#include "SIF/core.inc"
+#include "SIF/extensions/debug-labels.inc"
 
 #include <YSI\y_iterate>
 #include <YSI\y_timers>

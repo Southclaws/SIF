@@ -42,13 +42,8 @@ over inventory actions by players.
 	#endinput
 #endif
 
-#if !defined _SIF_DEBUG_INCLUDED
-	#include "debug.inc"
-#endif
-
-#if !defined _SIF_ITEM_INCLUDED
-	#include "item.inc"
-#endif
+#include "SIF/debug.inc"
+#include "SIF/item.inc"
 
 #include <YSI\y_iterate>
 #include <YSI\y_timers>

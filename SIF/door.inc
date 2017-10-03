@@ -37,13 +37,8 @@ restrict the use of doors by returning 1.
 	#endinput
 #endif
 
-#if !defined _SIF_DEBUG_INCLUDED
-	#include "debug.inc"
-#endif
-
-#if !defined _SIF_BUTTON_INCLUDED
-	#include "button.inc"
-#endif
+#include "SIF/debug.inc"
+#include "SIF/button.inc"
 
 #include <YSI\y_iterate>
 #include <YSI\y_timers>

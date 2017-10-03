@@ -42,9 +42,7 @@ A fundamental library with features used by SIF modules.
 	#endinput
 #endif
 
-#if !defined _SIF_DEBUG_INCLUDED
-	#include "debug.inc"
-#endif
+#include "SIF/debug.inc"
 
 #include <YSI\y_iterate>
 #include <YSI\y_timers>
