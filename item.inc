@@ -30,8 +30,8 @@ scriptable entities.
 
 - SIF\Button
 - Streamer Plugin
-- YSI\y_hooks
-- YSI\y_timers
+- YSI/y_hooks
+- YSI/y_timers
 
 ## Hooks
 
@@ -61,23 +61,23 @@ scriptable entities.
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #if !defined _SIF_CORE_INCLUDED
-	#include <SIF\Core.pwn>
+	#include "core.inc"
 #endif
 
 #if !defined _SIF_GEID_INCLUDED
-	#include <SIF\GEID.pwn>
+	#include "geid.inc"
 #endif
 
 #if !defined _SIF_BUTTON_INCLUDED
-	#include <SIF\Button.pwn>
+	#include "button.inc"
 #endif
 
 #if defined DEBUG_LABELS_ITEM
-	#include <SIF\extensions\DebugLabels.pwn>
+	#include "extensions/debug-labels.inc"
 #endif
 
 #include <YSI\y_iterate>
@@ -904,9 +904,9 @@ hook OnPlayerDisconnect(playerid, reason)
 stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem] %d %f %f %f");
-	new id = Iter_Free(itm_Index);
+	new itemid = Iter_Free(itm_Index);
 
-	if(id == -1)
+	if(itemid == -1)
 	{
 		print("ERROR: ITM_MAX reached, please increase this constant!");
 		return INVALID_ITEM_ID;
@@ -919,42 +919,42 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	}
 
 
-	Iter_Add(itm_Index, id);
+	Iter_Add(itm_Index, itemid);
 
 	if(geid[0] == EOS)
-		mkgeid(id, itm_Data[id][itm_geid]);
+		mkgeid(itemid, itm_Data[itemid][itm_geid]);
 
 	else
-		strcat(itm_Data[id][itm_geid], geid, GEID_LEN);
+		strcat(itm_Data[itemid][itm_geid], geid, GEID_LEN);
 
-	itm_Data[id][itm_type] = type;
-	itm_Data[id][itm_hitPoints] = hitpoints == -1 ? itm_TypeData[itm_Data[id][itm_type]][itm_maxHitPoints] : hitpoints;
+	itm_Data[itemid][itm_type] = type;
+	itm_Data[itemid][itm_hitPoints] = hitpoints == -1 ? itm_TypeData[itm_Data[itemid][itm_type]][itm_maxHitPoints] : hitpoints;
 	itm_TypeCount[type]++;
 
-	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[CreateItem] GEID: '%s' Type: '%s' Pos: %f, %f, %f", itm_Data[id][itm_geid], itm_TypeData[itm_Data[id][itm_type]][itm_uname], x, y, z);
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[CreateItem] GEID: '%s' Type: '%s' Pos: %f, %f, %f", itm_Data[itemid][itm_geid], itm_TypeData[itm_Data[itemid][itm_type]][itm_uname], x, y, z);
 
-	CallLocalFunction("OnItemCreate", "d", id);
+	CallLocalFunction("OnItemCreate", "d", itemid);
 
-	if(!Iter_Contains(itm_Index, id))
+	if(!Iter_Contains(itm_Index, itemid))
 		return INVALID_ITEM_ID;
 
 	if(x == 0.0 && y == 0.0 && z == 0.0)
 		virtual = 1;
 
 	#if defined DEBUG_LABELS_ITEM
-		itm_DebugLabelID[id] = CreateDebugLabel(itm_DebugLabelType, id, x, y, z);
+		itm_DebugLabelID[itemid] = CreateDebugLabel(itm_DebugLabelType, itemid, x, y, z);
 	#endif
 
 	if(!virtual)
-		CreateItemInWorld(id, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets, hitpoints);
+		CreateItemInWorld(itemid, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets, hitpoints);
 
-	CallLocalFunction("OnItemCreated", "d", id);
+	CallLocalFunction("OnItemCreated", "d", itemid);
 
 	#if defined DEBUG_LABELS_ITEM
-		UpdateItemDebugLabel(id);
+		UpdateItemDebugLabel(itemid);
 	#endif
 
-	return id;
+	return itemid;
 }
 
 stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
@@ -2340,15 +2340,15 @@ timer GiveItemDelay[500](playerid, targetid)
 		return;
 
 	new
-		id,
+		itemid,
 		ItemType:type;
 
-	id = itm_Holding[playerid];
+	itemid = itm_Holding[playerid];
 
-	if(id == -1)
+	if(itemid == -1)
 		return;
 
-	type = itm_Data[id][itm_type];
+	type = itm_Data[itemid][itm_type];
 
 	itm_Holding[playerid] = INVALID_ITEM_ID;
 	itm_Interacting[playerid] = INVALID_ITEM_ID;
@@ -2363,11 +2363,11 @@ timer GiveItemDelay[500](playerid, targetid)
 
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_NONE);
 
-	itm_Holding[targetid] = id;
-	itm_Holder[id] = targetid;
+	itm_Holding[targetid] = itemid;
+	itm_Holder[itemid] = targetid;
 
-	CallLocalFunction("OnPlayerGivenItem", "ddd", playerid, targetid, id);
-	CallLocalFunction("OnItemRemovedFromPlayer", "dd", playerid, id);
+	CallLocalFunction("OnPlayerGivenItem", "ddd", playerid, targetid, itemid);
+	CallLocalFunction("OnItemRemovedFromPlayer", "dd", playerid, itemid);
 
 	return;
 }
@@ -2433,16 +2433,4 @@ hook OnPlayerDeath(playerid, killerid, reason)
 			DestroyDebugLabel(itm_DebugLabelID[itemid]);
 		}
 	}
-#endif
-
-
-/*==============================================================================
-
-	Testing
-
-==============================================================================*/
-
-
-#if defined RUN_TESTS
-	#include <SIF\testing\Item.pwn>
 #endif

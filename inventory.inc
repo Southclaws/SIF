@@ -19,7 +19,7 @@ over inventory actions by players.
 
 - SIF/Item
 - Streamer Plugin
-- YSI\y_hooks
+- YSI/y_hooks
 
 ## Hooks
 
@@ -43,11 +43,11 @@ over inventory actions by players.
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #if !defined _SIF_ITEM_INCLUDED
-	#include <SIF\Item.pwn>
+	#include "item.inc"
 #endif
 
 #include <YSI\y_iterate>
@@ -529,15 +529,3 @@ timer DestroyPlayerInventoryItems[1](playerid)
 		RemoveItemFromInventory(playerid, 0);
 	}	
 }
-
-
-/*==============================================================================
-
-	Testing
-
-==============================================================================*/
-
-
-#if defined RUN_TESTS
-	#include <SIF\testing\Inventory.pwn>
-#endif

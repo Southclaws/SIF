@@ -32,11 +32,11 @@ functions for setting, appending and getting array data.
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #if !defined _SIF_CORE_INCLUDED
-	#include <SIF\Core.pwn>
+	#include "core.inc"
 #endif
 
 #include <YSI\y_hooks>

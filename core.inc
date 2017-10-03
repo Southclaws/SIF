@@ -15,8 +15,8 @@ A fundamental library with features used by SIF modules.
 ## Dependencies
 
 - Streamer Plugin
-- YSI\y_hooks
-- YSI\y_timers
+- YSI/y_hooks
+- YSI/y_timers
 
 ## Hooks
 
@@ -43,7 +43,7 @@ A fundamental library with features used by SIF modules.
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #include <YSI\y_iterate>

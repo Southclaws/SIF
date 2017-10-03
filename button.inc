@@ -27,8 +27,8 @@ GTA:SA spinning pickups for a few reasons:
 ## Dependencies
 
 - Streamer Plugin
-- YSI\y_hooks
-- YSI\y_timers
+- YSI/y_hooks
+- YSI/y_timers
 
 ## Hooks
 
@@ -53,15 +53,15 @@ GTA:SA spinning pickups for a few reasons:
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #if !defined _SIF_CORE_INCLUDED
-	#include <SIF\Core.pwn>
+	#include "core.inc"
 #endif
 
 #if defined DEBUG_LABELS_BUTTON
-	#include <SIF\extensions\DebugLabels.pwn>
+	#include "extensions\DebugLabels.inc"
 #endif
 
 #include <YSI\y_iterate>
@@ -169,7 +169,7 @@ Un-links two linked buttons
 -1 if buttons are not linked at all. -2 if either is linked to another button.
 */
 
-forward IsValidButton(buttonid);
+forward bool:IsValidButton(buttonid);
 /*
 # Description
 Checks if buttonid is a valid button ID handle.
@@ -475,49 +475,49 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true)
-{
-	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[CreateButton]");
-	new id = Iter_Free(btn_Index);
+stock CreateButton(Float:x, Float:y, Float:z, text[],
+	world = 0, interior = 0, Float:areasize = 1.0, label = 0,
+	labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true) {
 
-	if(id == -1)
-	{
+	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[CreateButton]");
+	new buttonid = Iter_Free(btn_Index);
+
+	if(buttonid == -1) {
 		print("ERROR: BTN_MAX reached, please increase this constant!");
 		return INVALID_BUTTON_ID;
 	}
 
-	btn_Data[id][btn_area]				= CreateDynamicSphere(x, y, z, areasize, world, interior);
+	btn_Data[buttonid][btn_area] = CreateDynamicSphere(x, y, z, areasize, world, interior);
+	strcpy(btn_Data[buttonid][btn_text], text, BTN_MAX_TEXT);
+	btn_Data[buttonid][btn_posX] = x;
+	btn_Data[buttonid][btn_posY] = y;
+	btn_Data[buttonid][btn_posZ] = z;
+	btn_Data[buttonid][btn_size] = areasize;
+	btn_Data[buttonid][btn_world] = world;
+	btn_Data[buttonid][btn_interior] = interior;
+	btn_Data[buttonid][btn_link] = INVALID_BUTTON_ID;
 
-	strcpy(btn_Data[id][btn_text], text, BTN_MAX_TEXT);
-	btn_Data[id][btn_posX]				= x;
-	btn_Data[id][btn_posY]				= y;
-	btn_Data[id][btn_posZ]				= z;
-	btn_Data[id][btn_size]				= areasize;
-	btn_Data[id][btn_world]				= world;
-	btn_Data[id][btn_interior]			= interior;
-	btn_Data[id][btn_link]				= INVALID_BUTTON_ID;
-
-	if(label)
-		btn_Data[id][btn_label] = CreateDynamic3DTextLabel(labeltext, labelcolour, x, y, z, streamdist, .testlos = testlos, .worldid = world, .interiorid = interior, .streamdistance = streamdist);
-
-	else
-		btn_Data[id][btn_label] = Text3D:INVALID_3DTEXT_ID;
+	if (label) {
+		btn_Data[buttonid][btn_label] = CreateDynamic3DTextLabel(labeltext, labelcolour, x, y, z, streamdist, .testlos = testlos, .worldid = world, .interiorid = interior, .streamdistance = streamdist);
+	} else {
+		btn_Data[buttonid][btn_label] = Text3D:INVALID_3DTEXT_ID;
+	}
 
 	new data[2];
 
 	data[0] = BTN_STREAMER_AREA_IDENTIFIER;
-	data[1] = id;
+	data[1] = buttonid;
 
-	Streamer_SetArrayData(STREAMER_TYPE_AREA, btn_Data[id][btn_area], E_STREAMER_EXTRA_ID, data, 2);
+	Streamer_SetArrayData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_EXTRA_ID, data, 2);
 
-	Iter_Add(btn_Index, id);
+	Iter_Add(btn_Index, buttonid);
 
 	#if defined DEBUG_LABELS_BUTTON
-		btn_DebugLabelID[id] = CreateDebugLabel(btn_DebugLabelType, id, x, y, z);
-		UpdateButtonDebugLabel(id);
+		btn_DebugLabelID[buttonid] = CreateDebugLabel(btn_DebugLabelType, buttonid, x, y, z);
+		UpdateButtonDebugLabel(buttonid);
 	#endif
 
-	return id;
+	return buttonid;
 }
 
 stock DestroyButton(buttonid)
@@ -605,13 +605,13 @@ stock UnLinkTP(buttonid1, buttonid2)
 	return 1;
 }
 
-stock IsValidButton(buttonid)
+stock bool:IsValidButton(buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[IsValidButton]");
 	if(!Iter_Contains(btn_Index, buttonid))
-		return 0;
+		return false;
 
-	return 1;
+	return true;
 }
 // btn_area
 stock GetButtonArea(buttonid)
@@ -993,7 +993,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			}
 
 			new
-				id,
+				buttonid,
 				Float:x,
 				Float:y,
 				Float:z,
@@ -1008,18 +1008,18 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				if(index >= BTN_MAX_INRANGE - 1)
 					break;
 
-				id = btn_Near[playerid][i];
+				buttonid = btn_Near[playerid][i];
 
-				distance = sif_Distance(x, y, z, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
+				distance = sif_Distance(x, y, z, btn_Data[buttonid][btn_posX], btn_Data[buttonid][btn_posY], btn_Data[buttonid][btn_posZ]);
 
-				if(distance > btn_Data[id][btn_size])
+				if(distance > btn_Data[buttonid][btn_size])
 					continue;
 
-				if(!(btn_Data[id][btn_posZ] - btn_Data[id][btn_size] <= z <= btn_Data[id][btn_posZ] + btn_Data[id][btn_size]))
+				if(!(btn_Data[buttonid][btn_posZ] - btn_Data[buttonid][btn_size] <= z <= btn_Data[buttonid][btn_posZ] + btn_Data[buttonid][btn_size]))
 					continue;
 
 
-				list[index][btn_buttonId] = id;
+				list[index][btn_buttonId] = buttonid;
 				list[index][btn_distance] = distance;
 
 				index++;
@@ -1091,9 +1091,9 @@ Internal_OnButtonPress(playerid, buttonid)
 	if(!Iter_Contains(btn_Index, buttonid))
 		return 0;
 
-	new id = btn_Data[buttonid][btn_link];
+	new linked = btn_Data[buttonid][btn_link];
 
-	if(Iter_Contains(btn_Index, id))
+	if(Iter_Contains(btn_Index, linked))
 	{
 		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
 			return 1;
@@ -1102,12 +1102,12 @@ Internal_OnButtonPress(playerid, buttonid)
 		defer btn_Unfreeze(playerid);
 
 		Streamer_UpdateEx(playerid,
-			btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ],
-			btn_Data[id][btn_world], btn_Data[id][btn_interior]);
+			btn_Data[linked][btn_posX], btn_Data[linked][btn_posY], btn_Data[linked][btn_posZ],
+			btn_Data[linked][btn_world], btn_Data[linked][btn_interior]);
 
-		SetPlayerVirtualWorld(playerid, btn_Data[id][btn_world]);
-		SetPlayerInterior(playerid, btn_Data[id][btn_interior]);
-		SetPlayerPos(playerid, btn_Data[id][btn_posX], btn_Data[id][btn_posY], btn_Data[id][btn_posZ]);
+		SetPlayerVirtualWorld(playerid, btn_Data[linked][btn_world]);
+		SetPlayerInterior(playerid, btn_Data[linked][btn_interior]);
+		SetPlayerPos(playerid, btn_Data[linked][btn_posX], btn_Data[linked][btn_posY], btn_Data[linked][btn_posZ]);
 	}
 	else
 	{
@@ -1239,16 +1239,4 @@ process_LeaveDynamicArea(playerid, areaid)
 
 		UpdateDebugLabelString(btn_DebugLabelID[buttonid], string);
 	}
-#endif
-
-
-/*==============================================================================
-
-	Testing
-
-==============================================================================*/
-
-
-#if defined RUN_TESTS
-	#include <SIF\testing/Button.pwn>
 #endif

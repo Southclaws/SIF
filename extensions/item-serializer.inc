@@ -39,19 +39,19 @@ A basic example of using this module would be:
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #if !defined _SIF_CORE_INCLUDED
-	#include <SIF\Core.pwn>
+	#include "core.inc"
 #endif
 
 #if !defined _SIF_ITEMARRAYDATA_INCLUDED
-	#include <SIF\extensions\ItemArrayData.pwn>
+	#include "extensions/item-array-data.inc"
 #endif
 
 #if !defined _SIF_GEID_INCLUDED
-	#include <SIF\GEID.pwn>
+	#include "geid.inc"
 #endif
 
 #include <YSI\y_hooks>

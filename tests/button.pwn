@@ -1,5 +1,5 @@
-#include <YSI\y_testing>
 #include <YSI\y_hooks>
+#include <YSI\y_testing>
 
 
 hook OnScriptInit()
@@ -42,49 +42,49 @@ Test:Button_Core()
 {
 	new tmp;
 
-	ASSERT(IsValidDynamicArea(GetButtonArea(gButton)));
+	ASSERT(bool:IsValidDynamicArea(GetButtonArea(gButton)));
 	tmp = CreateDynamicCircle(20.0, 20.0, 4.0);
-	ASSERT(SetButtonArea(gButton, tmp));
+	ASSERT(bool:SetButtonArea(gButton, tmp));
 	ASSERT(GetButtonArea(gButton) == tmp);
 
-	ASSERT(SetButtonLabel(gButton, "New text", -1, 42.0));
-	ASSERT(DestroyButtonLabel(gButton));
+	ASSERT(bool:SetButtonLabel(gButton, "New text", -1, 42.0));
+	ASSERT(bool:DestroyButtonLabel(gButton));
 
 	new Float:x, Float:y, Float:z;
-	ASSERT(GetButtonPos(gButton, x, y, z));
+	ASSERT(bool:GetButtonPos(gButton, x, y, z));
 	ASSERT(x == 1.0 && y == 2.0 && z == 3.0);
-	ASSERT(SetButtonPos(gButton, 3.0, 5.0, 1.0));
-	ASSERT(GetButtonPos(gButton, x, y, z));
+	ASSERT(bool:SetButtonPos(gButton, 3.0, 5.0, 1.0));
+	ASSERT(bool:GetButtonPos(gButton, x, y, z));
 	ASSERT(x == 3.0 && y == 5.0 && z == 1.0);
 
 	ASSERT(GetButtonSize(gButton) == 2.5);
-	ASSERT(SetButtonSize(gButton, 4.4));
+	ASSERT(bool:SetButtonSize(gButton, 4.4));
 	ASSERT(GetButtonSize(gButton) == 4.4);
 
 	ASSERT(GetButtonWorld(gButton) == 4);
-	ASSERT(SetButtonWorld(gButton, 6));
+	ASSERT(bool:SetButtonWorld(gButton, 6));
 	ASSERT(GetButtonWorld(gButton) == 6);
 
 	ASSERT(GetButtonInterior(gButton) == 8);
-	ASSERT(SetButtonInterior(gButton, 10));
+	ASSERT(bool:SetButtonInterior(gButton, 10));
 	ASSERT(GetButtonInterior(gButton) == 10);
 
 	tmp = CreateButton(10.0, 0.0, 0.0, "Linked");
-	ASSERT(LinkTP(gButton, tmp));
+	ASSERT(bool:LinkTP(gButton, tmp));
 	ASSERT(GetButtonLinkedID(gButton) == tmp);
 	ASSERT(GetButtonLinkedID(tmp) == gButton);
-	ASSERT(UnLinkTP(gButton, tmp));
+	ASSERT(bool:UnLinkTP(gButton, tmp));
 	ASSERT(GetButtonLinkedID(gButton) == INVALID_BUTTON_ID);
 	ASSERT(GetButtonLinkedID(tmp) == INVALID_BUTTON_ID);
 
 	new string[128];
-	ASSERT(GetButtonText(gButton, string));
+	ASSERT(bool:GetButtonText(gButton, string));
 	ASSERT(!strcmp(string, "Button"));
-	ASSERT(SetButtonText(gButton, "New Button Text Long String"));
-	ASSERT(GetButtonText(gButton, string));
+	ASSERT(bool:SetButtonText(gButton, "New Button Text Long String"));
+	ASSERT(bool:GetButtonText(gButton, string));
 	ASSERT(!strcmp(string, "New Button Text Long String"));
 
-	ASSERT(SetButtonExtraData(gButton, 50));
+	ASSERT(bool:SetButtonExtraData(gButton, 50));
 	ASSERT(GetButtonExtraData(gButton) == 50);
 }
 

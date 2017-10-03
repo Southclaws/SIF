@@ -11,29 +11,23 @@ maintaining quality front-end gameplay for players.
 ## Description
 
 A complex script that allows 'virtual inventories' to be created in order to
-store items in. Containers can be interacted with just like anything else with a
-button or a virtual container can be created without a way of interacting in the
-game world so the contents of if can be shown from a script function instead.
-
-This script hooks a lot of Inventory functions and uses the interface functions
-to allow players to switch between a container item list and their own inventory
-to make swapping items or looting quick and easy.
+store items in. Containers are created with a static size and can have items
+added to and removed at any time. Player interactions are to be handled via
+external calls to the API.
 
 ## Dependencies
 	
-- SIF\Button
-- SIF\Item
-- SIF\Inventory
+- item
+- inventory
 - Streamer Plugin
-- YSI\y_hooks
-- YSI\y_timers
+- y_hooks
+- y_timers
 
 ## Hooks
 
 - OnScriptInit: Zero initialised array cells.
 - OnItemDestroy: To remove destroyed items from containers.
 - OnItemCreateInWorld: To clean item container IDs that may be left over.
-- OnButtonPress: Allowing container entities to be interacted with.
 
 ## Credits
 
@@ -50,15 +44,15 @@ to make swapping items or looting quick and easy.
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #if !defined _SIF_ITEM_INCLUDED
-	#include <SIF\Item.pwn>
+	#include "item.inc"
 #endif
 
 #if !defined _SIF_INVENTORY_INCLUDED
-	#include <SIF\Inventory.pwn>
+	#include "inventory.inc"
 #endif
 
 #include <YSI\y_iterate>
@@ -98,31 +92,27 @@ to make swapping items or looting quick and easy.
 // Functions
 
 
-forward CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID);
+forward CreateContainer(name[], size);
 /*
 # Description
-Creates a container to store items in, can be specified as virtual to not create
-a button or label so the container is only accessible via the script.
+Creates a container to store items in with a static size.
 
 # Parameters
 - name: A name given to the container, for menus etc.
 - size: The maximum capacity of items the container can store.
-- buttonid: If specified, the container is associated with a button which, when
-  pressed, opens the container UI for a player.
 
 # Returns
 ID of the newly created container or INVALID_CONTAINER_ID if the function failed
 due to CNT_MAX limit being reached.
 */
 
-forward DestroyContainer(containerid, destroyitems = true, destroybutton = true);
+forward DestroyContainer(containerid, destroyitems = true);
 /*
 # Description
 Removes a container from memory and frees the ID.
 
 # Parameters
 - destroyitems: If true, items inside will also be deleted.
-- destroybutton: If true, and if a button is associated, button will be deleted.
 */
 
 forward AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID);
@@ -156,12 +146,6 @@ forward IsValidContainer(containerid);
 /*
 # Description
 Checks if a container ID is valid.
-*/
-
-forward GetContainerButton(containerid);
-/*
-# Description
-Returns the button ID used by a container (if not virtual).
 */
 
 forward GetContainerName(containerid, name[]);
@@ -242,12 +226,6 @@ forward GetItemContainerSlot(itemid);
 Returns the container slot that the item is stored in if inside a container.
 */
 
-forward GetButtonContainer(buttonid);
-/*
-# Description
-Returns the ID of the container that buttonid is created for.
-*/
-
 
 // Events
 
@@ -305,8 +283,7 @@ After an item has been removed from a container.
 enum E_CONTAINER_DATA
 {
 			cnt_name[CNT_MAX_NAME],
-			cnt_size,
-			cnt_buttonId
+			cnt_size
 }
 
 
@@ -315,8 +292,7 @@ new
 			cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
    Iterator:cnt_Index<CNT_MAX>,
 			cnt_ItemContainer			[ITM_MAX] = {INVALID_CONTAINER_ID, ...},
-			cnt_ItemContainerSlot		[ITM_MAX] = {-1, ...},
-			cnt_ButtonContainer			[BTN_MAX] = {INVALID_CONTAINER_ID, ...};
+			cnt_ItemContainerSlot		[ITM_MAX] = {-1, ...};
 
 
 static CNT_DEBUG = -1;
@@ -343,7 +319,7 @@ hook OnScriptInit()
 ==============================================================================*/
 
 
-stock CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID)
+stock CreateContainer(name[], size)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[CreateContainer] '%s' %d", name, size);
 	new id = Iter_Free(cnt_Index);
@@ -358,12 +334,6 @@ stock CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID)
 
 	strcpy(cnt_Data[id][cnt_name], name, CNT_MAX_NAME);
 	cnt_Data[id][cnt_size]			= size;
-	cnt_Data[id][cnt_buttonId]		= buttonid;
-
-	if(IsValidButton(buttonid))
-	{
-		cnt_ButtonContainer[buttonid] = id;
-	}
 
 	for(new i; i < CNT_MAX_SLOTS; i++)
 		cnt_Items[id][i] = INVALID_ITEM_ID;
@@ -375,7 +345,7 @@ stock CreateContainer(name[], size, buttonid = INVALID_BUTTON_ID)
 	return id;
 }
 
-stock DestroyContainer(containerid, destroyitems = true, destroybutton = true)
+stock DestroyContainer(containerid, destroyitems = true)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[DestroyContainer] %d", containerid);
 	if(!Iter_Contains(cnt_Index, containerid))
@@ -396,17 +366,8 @@ stock DestroyContainer(containerid, destroyitems = true, destroybutton = true)
 		}
 	}
 
-	if(IsValidButton(cnt_Data[containerid][cnt_buttonId]))
-	{
-		cnt_ButtonContainer[cnt_Data[containerid][cnt_buttonId]] = INVALID_CONTAINER_ID;
-
-		if(destroybutton)
-			DestroyButton(cnt_Data[containerid][cnt_buttonId]);
-	}
-
 	cnt_Data[containerid][cnt_name][0]	= EOS;
 	cnt_Data[containerid][cnt_size]		= 0;
-	cnt_Data[containerid][cnt_buttonId]	= INVALID_BUTTON_ID;
 
 	Iter_Remove(cnt_Index, containerid);
 
@@ -565,17 +526,6 @@ stock IsValidContainer(containerid)
 		return 0;
 
 	return 1;
-}
-
-// cnt_buttonId
-stock GetContainerButton(containerid)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerButton] %d", containerid);
-
-	if(!Iter_Contains(cnt_Index, containerid))
-		return 0;
-
-	return cnt_Data[containerid][cnt_buttonId];
 }
 
 // cnt_name
@@ -750,16 +700,6 @@ stock GetItemContainerSlot(itemid)
 	return cnt_ItemContainerSlot[itemid];
 }
 
-stock GetButtonContainer(buttonid)
-{
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetButtonContainer] %d", buttonid);
-
-	if(!IsValidButton(buttonid))
-		return INVALID_CONTAINER_ID;
-
-	return cnt_ButtonContainer[buttonid];
-}
-
 
 /*==============================================================================
 
@@ -785,26 +725,3 @@ hook OnItemCreateInWorld(itemid)
 		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
 	}
 }
-
-hook OnButtonPress(playerid, buttonid)
-{
-	new containerid = GetButtonContainer(buttonid);
-
-	if(IsValidContainer(containerid))
-	{
-		ClearAnimations(playerid, 1);
-		DisplayContainerInventory(playerid, containerid);
-	}
-}
-
-
-/*==============================================================================
-
-	Testing
-
-==============================================================================*/
-
-
-#if defined RUN_TESTS
-	#include <SIF\testing\Container.pwn>
-#endif

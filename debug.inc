@@ -14,8 +14,8 @@ Basic debugging that can be activated/deactivated during runtime.
 
 ## Dependencies
 
-- YSI\y_hooks
-- YSI\y_va
+- YSI/y_hooks
+- YSI/y_va
 
 ## Hooks
 
@@ -35,8 +35,8 @@ Basic debugging that can be activated/deactivated during runtime.
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
 #include <YSI\y_va>
+#include <YSI\y_hooks>
 
 #define _SIF_DEBUG_INCLUDED
 
@@ -89,7 +89,7 @@ Prints a debug message on the specified handler for the specified level. If the
 level is higher than the active level for the handler, nothing will happen.
 */
 
-forward sif_debug_printf(handler, level, playerid, string[], va_args<>);
+forward sif_debug_printf(handler, level, playerid, string[], {Float,_}:...);
 /*
 # Description
 Prints a formatted debug message on the specified handler for the specified
@@ -219,7 +219,7 @@ stock sif_debug_print(handler, level, playerid, msg[])
 	return 1;
 }
 
-stock sif_debug_printf(handler, level, playerid, string[], va_args<>)
+stock sif_debug_printf(handler, level, playerid, string[], {Float,_}:...)
 {
 	if(!SIF_IS_VALID_HANDLER(handler))
 		return 0;
@@ -231,7 +231,7 @@ stock sif_debug_printf(handler, level, playerid, string[], va_args<>)
 		return 0;
 
 	new str[256];
-	va_format(str, sizeof(str), string, va_start<4>);
+	format(str, sizeof(str), string, ___(4));
 	sif_debug_print(handler, level, playerid, str);
 
 	return 1;

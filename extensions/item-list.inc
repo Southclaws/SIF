@@ -47,11 +47,11 @@ A basic example of using this script would be:
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #if !defined _SIF_CORE_INCLUDED
-	#include <SIF\Core.pwn>
+	#include "core.inc"
 #endif
 
 #define _SIF_ITEMLIST_INCLUDED

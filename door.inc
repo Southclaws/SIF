@@ -20,8 +20,8 @@ restrict the use of doors by returning 1.
 
 - SIF/Button
 - Streamer Plugin
-- YSI\y_hooks
-- YSI\y_timers
+- YSI/y_hooks
+- YSI/y_timers
 
 ## Credits
 
@@ -38,11 +38,11 @@ restrict the use of doors by returning 1.
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #if !defined _SIF_BUTTON_INCLUDED
-	#include <SIF\Button.pwn>
+	#include "button.inc"
 #endif
 
 #include <YSI\y_iterate>
@@ -818,15 +818,3 @@ hook OnDynamicObjectMoved(objectid)
 		}
 	}
 }
-
-
-/*==============================================================================
-
-	Testing
-
-==============================================================================*/
-
-
-#if defined RUN_TESTS
-	#include <SIF\testing\Door.pwn>
-#endif

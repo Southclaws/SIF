@@ -35,23 +35,23 @@ players to combine two items into one new item.
 #endif
 
 #if !defined _SIF_GEID_INCLUDED
-	#include <SIF\GEID.pwn>
+	#include "geid.pwn"
 #endif
 
 #if !defined _SIF_INVENTORY_INCLUDED
-	#include <SIF\Inventory.pwn>
+	#include "inventory.pwn"
 #endif
 
 #if !defined _SIF_CONTAINER_INCLUDED
-	#include <SIF\Container.pwn>
+	#include "container.pwn"
 #endif
 
 #if !defined _SIF_INVENTORY_DIALOG_INCLUDED
-	#include <SIF\extensions\InventoryDialog.pwn>
+	#include "extensions/inventory-dialog.pwn"
 #endif
 
 #if !defined _SIF_CONTAINER_DIALOG_INCLUDED
-	#include <SIF\extensions\ContainerDialog.pwn>
+	#include "extensions/container-dialog.pwn"
 #endif
 
 #include <YSI\y_hooks>

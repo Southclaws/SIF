@@ -15,19 +15,19 @@ maintaining quality front-end gameplay for players.
 ==============================================================================*/
 
 
-// Dependencies
+#include "debug.inc"
+#include "core.inc"
+#include "button.inc"
+#include "door.inc"
+#include "item.inc"
+#include "inventory.inc"
+#include "container.inc"
 
-#include <streamer>
-#include <YSI\y_hooks>
-#include <YSI\y_timers>
-#include <YSI\y_iterate>
 
+// Tests
 
-// SIF
+#if defined RUN_TESTS
 
-#include "SIF\Core.pwn"
-#include "SIF\Button.pwn"
-#include "SIF\Door.pwn"
-#include "SIF\Item.pwn"
-#include "SIF\Inventory.pwn"
-#include "SIF\Container.pwn"
+#include "tests/button.pwn"
+
+#endif

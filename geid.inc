@@ -36,7 +36,7 @@ numbers for SIF entities so their state may be identified and stored elsewhere.
 #endif
 
 #if !defined _SIF_DEBUG_INCLUDED
-	#include <SIF\Debug.pwn>
+	#include "debug.inc"
 #endif
 
 #define _SIF_GEID_INCLUDED

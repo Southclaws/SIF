@@ -1,5 +1,5 @@
 # SIF - Southclaw's Interaction Framework
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/Southclaw/SIF?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 SIF is a collection of high-level include scripts to make the development of
 interactive features easy for the developer while maintaining quality front-end
 gameplay for players.
@@ -15,7 +15,7 @@ There is also a debug library with some basic runtime debugging functions that
 are used in all SIF libraries.
 
 
-## Button
+## `button.inc`
 A simple framework using streamer areas and key checks to give the in-game
 effect of physical buttons that players must press instead of using a command.
 It was created as an alternative to the default GTA:SA spinning pickups for a
@@ -32,7 +32,7 @@ near the button area and seeing the textdraw. (or spamming F!)
 environment!
 
 
-## Door
+## `door.inc`
 A simple object movement manager that supports buttons as the default method of
 interacting. Doors support multiple buttons, so a button on the inside and
 outside of a door is possible. Doors can be opened and closed manually by
@@ -40,7 +40,7 @@ calling OpenDoor or CloseDoor. The door state change callbacks can be used to
 restrict the use of doors by returning 1.
 
 
-## Item
+## `item.inc`
 A complex and flexible script to replace the use of pickups as a means of
 displaying objects that the player can pick up and use. Item offers picking up,
 dropping and even giving items to other players. Items in the game world consist
@@ -58,14 +58,14 @@ already in the game with the scriptable versatility of server created and
 scriptable entities.
 
 
-## Inventory
+## `inventory.inc`
 Offers extended item functionality using the virtual item feature in SIF/Item.
 This enables multiple items to be stored by players and retrieved when needed.
 It contains functions and callbacks for complete control from external scripts
 over inventory actions by players.
 
 
-## Container
+## `container.inc`
 A complex script that allows 'virtual inventories' to be created in order to
 store items in. Containers can be interacted with just like anything else with a
 button or a virtual container can be created without a way of interacting in the
@@ -76,10 +76,10 @@ to allow players to switch between a container item list and their own inventory
 to make swapping items or looting quick and easy.
 
 
-## Core
+## `core.inc`
 A fundamental library with features used by multiple SIF scripts.
 
-## Debug
+## `debug.inc`
 Basic debugging library offering runtime debug functions used throughout SIF.
 
 
@@ -100,10 +100,6 @@ items then the rest is done through container menu options.
 Entity labelling library used throughout SIF. Debug labels can be enabled and
 disabled in runtime and display various pieces of useful information.
 
-## Dispenser
-A basic item dispenser. Constructor function takes an item type and a price,
-players can interact with a dispenser to buy items.
-
 ## InventoryDialog
 Offers a method of viewing player inventory contents with dialogs. Also contains
 dynamic menu options for each item in the inventory.
@@ -119,29 +115,19 @@ setting, getting and appending the data.
 Data library for compacting a list of items into a long string of item's types
 and array data as well as other pieces of information. Used mainly for storage.
 
-## Notebook
-Basic example of how to use the dynamic menu options. Uses inventory options
-feature to add a notebook to the inventory dialog.
 
+# Usage
+`git clone` the repo into your includes path then:
 
-# Installation
-Then dump all the files from the repository into ```/pawno/includes/```.
-Use this line in scripts to start using SIF:
-
-	#include <SIF>
+```c
+#include <SIF/SIF>
+```
 
 Or you can include individual scripts:
 
-	#include <SIF\Item.pwn>
-	#include <SIF\extensions\Dispenser.pwn>
-
-Internal dependencies are automatically included. SIF/Item depends on SIF/Button
-so the above example will automatically include SIF/Button if it hasn't already
-been included beforehand.
-
-Note that the <SIF> include line will not include any extensions.
-
+```c
+#include <SIF\item>
+#include <SIF\extensions\item-array0data>
+```
 
 You are welcome to fork, submit issues and improve the code any way you like!
-
-Contact: SouthclawJK@gmail.com
