@@ -394,7 +394,7 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 	return 1;
 }
 
-Dialog:SIF_PlayerInvOptions(playerid, dialogid, response, listitem, string:inputtext[])
+Dialog:SIF_PlayerInvOptions(playerid, response, listitem, inputtext[])
 {
 	if(!response)
 	{
