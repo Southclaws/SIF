@@ -1,0 +1,11 @@
+{
+	"user": "Southclaws",
+	"repo": "SIF",
+	"entry": "tests\\button.pwn",
+	"output": "tests\\button.amx",
+	"dependencies": [
+		"pawn-lang/YSI-Includes",
+		"samp-incognito/samp-streamer-plugin",
+		"ScavengeSurvive/action-text"
+	]
+}

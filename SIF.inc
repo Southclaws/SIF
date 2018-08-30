@@ -14,7 +14,7 @@ maintaining quality front-end gameplay for players.
 
 ==============================================================================*/
 
-
+#include "action-text"
 #include "SIF/debug"
 #include "SIF/core"
 #include "SIF/button"
