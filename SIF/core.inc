@@ -61,24 +61,6 @@ forward IsPlayerInPlayerArea(playerid, targetid);
 Checks if a player is standing next to another player.
 */
 
-forward ShowActionText(playerid, message[], time=0, width=200);
-/*
-# Description
-Display a small message in the center of the player's screen.
-*/
-
-forward HideActionText(playerid);
-/*
-# Description
-Hide the message displayed by ShowActionText.
-*/
-
-forward bool:IsPlayerViewingActionText(playerid);
-/*
-# Description
-True if a player has a message from ShowActionText on their screen.
-*/
-
 forward Float:sif_absoluteangle(Float:angle);
 /*
 # Description
@@ -146,10 +128,7 @@ When a player leaves the 2m boundary of another player.
 
 
 new
-			gPlayerArea				[MAX_PLAYERS],
-PlayerText:	ActionText				[MAX_PLAYERS],
-bool:		gViewingActionText		[MAX_PLAYERS],
-Timer:		gPlayerActionTextTimer	[MAX_PLAYERS];
+			gPlayerArea				[MAX_PLAYERS];
 
 
 /*==============================================================================
@@ -188,26 +167,12 @@ sif_SetUpPlayer(playerid)
 {
 	if(!IsValidDynamicArea(gPlayerArea[playerid]))
 		gPlayerArea[playerid] = CreateDynamicSphere(0.0, 0.0, 0.0, 2.0);
-
-	ActionText[playerid]			=CreatePlayerTextDraw(playerid, 320.000000, 320.000000, "_");
-	PlayerTextDrawAlignment			(playerid, ActionText[playerid], 2);
-	PlayerTextDrawBackgroundColor	(playerid, ActionText[playerid], 255);
-	PlayerTextDrawFont				(playerid, ActionText[playerid], 1);
-	PlayerTextDrawLetterSize		(playerid, ActionText[playerid], 0.300000, 1.499999);
-	PlayerTextDrawColor				(playerid, ActionText[playerid], -1);
-	PlayerTextDrawSetOutline		(playerid, ActionText[playerid], 1);
 }
 
 sif_UnloadPlayer(playerid, doTD = false)
 {
 	DestroyDynamicArea(gPlayerArea[playerid]);
 	gPlayerArea[playerid] = -1;
-
-	if(doTD)
-	{
-		PlayerTextDrawHide(playerid, ActionText[playerid]);
-		PlayerTextDrawDestroy(playerid, ActionText[playerid]);
-	}
 }
 
 hook OnPlayerDisconnect(playerid)
@@ -300,46 +265,6 @@ stock IsPlayerInPlayerArea(playerid, targetid)
 		return 0;
 
 	return IsPlayerInDynamicArea(playerid, gPlayerArea[targetid]);
-}
-
-
-/*==============================================================================
-
-	Message Box
-
-==============================================================================*/
-
-
-stock ShowActionText(playerid, message[], time=0, width=200)
-{
-	PlayerTextDrawSetString(playerid, ActionText[playerid], message);
-	PlayerTextDrawTextSize(playerid, ActionText[playerid], width, 300);
-	PlayerTextDrawShow(playerid, ActionText[playerid]);
-	if(time != 0)
-	{
-	    stop gPlayerActionTextTimer[playerid];
-		gPlayerActionTextTimer[playerid] = defer Internal_HideActionText(playerid, time);
-	}
-	gViewingActionText[playerid] = true;
-}
-timer Internal_HideActionText[time](playerid, time)
-{
-#pragma unused time
-	HideActionText(playerid);
-}
-
-stock HideActionText(playerid)
-{
-	PlayerTextDrawHide(playerid, ActionText[playerid]);
-	gViewingActionText[playerid] = false;
-}
-
-stock bool:IsPlayerViewingActionText(playerid)
-{
-	if(!IsPlayerConnected(playerid))
-		return false;
-
-	return gViewingActionText[playerid];
 }
 
 
