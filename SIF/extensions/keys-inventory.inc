@@ -27,7 +27,7 @@ inventory using key presses.
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_Coding\y_hooks>
 
 #define _SIF_INVENTORY_KEYS_INCLUDED
 

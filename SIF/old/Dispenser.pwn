@@ -2,7 +2,7 @@
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_Coding\y_hooks>
 
 #define _SIF_DISPENSER_INCLUDED
 

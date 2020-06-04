@@ -66,9 +66,9 @@ scriptable entities.
 #include "SIF/button.inc"
 #include "SIF/extensions/debug-labels.inc"
 
-#include <YSI\y_iterate>
-#include <YSI\y_timers>
-#include <YSI\y_hooks>
+#include <YSI_Coding\y_iterate>
+#include <YSI_Coding\y_timers>
+#include <YSI_Coding\y_hooks>
 #include <streamer>
 
 #define _SIF_ITEM_INCLUDED

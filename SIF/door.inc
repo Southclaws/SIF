@@ -40,9 +40,9 @@ restrict the use of doors by returning 1.
 #include "SIF/debug.inc"
 #include "SIF/button.inc"
 
-#include <YSI\y_iterate>
-#include <YSI\y_timers>
-#include <YSI\y_hooks>
+#include <YSI_Coding\y_iterate>
+#include <YSI_Coding\y_timers>
+#include <YSI_Coding\y_hooks>
 #include <streamer>
 
 #define _SIF_DOOR_INCLUDED

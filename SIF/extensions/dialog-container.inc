@@ -36,7 +36,7 @@ work together.
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_Coding\y_hooks>
 #include <easyDialog>
 
 #define _SIF_CONTAINER_DIALOG_INCLUDED

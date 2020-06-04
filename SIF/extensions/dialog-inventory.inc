@@ -27,7 +27,7 @@ interaction with their inventory items.
 	#endinput
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_Coding\y_hooks>
 #include <easyDialog>
 
 #define _SIF_INVENTORY_DIALOG_INCLUDED

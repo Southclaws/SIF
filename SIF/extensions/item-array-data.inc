@@ -39,7 +39,7 @@ functions for setting, appending and getting array data.
 	#include "core.inc"
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_Coding\y_hooks>
 
 #define _SIF_ITEMARRAYDATA_INCLUDED
 

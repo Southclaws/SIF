@@ -1,5 +1,7 @@
-#include <YSI\y_hooks>
-#include <YSI\y_testing>
+#include <a_samp>
+
+#include <YSI_Coding\y_hooks>
+#include <YSI_Core\y_testing>
 
 
 hook OnScriptInit()

@@ -54,7 +54,7 @@ players to combine two items into one new item.
 	#include "extensions/container-dialog.pwn"
 #endif
 
-#include <YSI\y_hooks>
+#include <YSI_Coding\y_hooks>
 
 #define _SIF_CRAFT_INCLUDED
 
