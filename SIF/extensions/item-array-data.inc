@@ -130,7 +130,7 @@ forward GetItemTypeArrayDataMax(ItemType:itemtype);
 -
 */
 
-forward AppendItemArray(itemid, data[], length);
+forward AppendItemArray(itemid, const data[], length);
 /*
 # Description:
 -
@@ -414,7 +414,7 @@ stock GetItemTypeArrayDataMax(ItemType:itemtype)
 	return itm_arr_ItemTypeArrayMax[itemtype];
 }
 
-stock AppendItemArray(itemid, data[], length)
+stock AppendItemArray(itemid, const data[], length)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[AppendItemArray] %d %d", itemid, length);
 	if(!IsValidItem(itemid))

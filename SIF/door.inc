@@ -87,7 +87,7 @@ restrict the use of doors by returning 1.
 // Functions
 
 
-forward CreateDoor(model, buttonids[], Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz, Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz, Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids), movesound = 1186, stopsound = 1186, worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED);
+forward CreateDoor(model, const buttonids[], Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz, Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz, Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids), movesound = 1186, stopsound = 1186, worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED);
 /*
 # Description
 Creates a world object that is assigned a move position and a set of buttons
@@ -374,7 +374,7 @@ static
 ==============================================================================*/
 
 
-stock CreateDoor(model, buttonids[], Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz, Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz, Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids), movesound = 1186, stopsound = 1186, worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED)
+stock CreateDoor(model, const buttonids[], Float:px,  Float:py,  Float:pz,  Float:rx,  Float:ry,  Float:rz, Float:mpx, Float:mpy, Float:mpz, Float:mrx, Float:mry, Float:mrz, Float:movespeed = 1.0, closedelay = 3000, maxbuttons = sizeof(buttonids), movesound = 1186, stopsound = 1186, worldid = 0, interiorid = 0, initstate = DR_STATE_CLOSED)
 {
 	new id = Iter_Free(dr_Index);
 

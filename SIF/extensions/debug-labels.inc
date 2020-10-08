@@ -66,13 +66,13 @@ Generic debug label module that allows adding debug labels to any entity.
 // Functions
 
 
-forward DefineDebugLabelType(name[], colour = 0xFFFFFFFF);
+forward DefineDebugLabelType(const name[], colour = 0xFFFFFFFF);
 /*
 # Description:
 -
 */
 
-forward CreateDebugLabel(type, entityid, Float:x, Float:y, Float:z, string[] = "", worldid = -1, interiorid = -1);
+forward CreateDebugLabel(type, entityid, Float:x, Float:y, Float:z, const string[] = "", worldid = -1, interiorid = -1);
 /*
 # Description:
 -
@@ -108,7 +108,7 @@ forward HideAllDebugLabelsForPlayer(playerid);
 -
 */
 
-forward UpdateDebugLabelString(labelid, string[]);
+forward UpdateDebugLabelString(labelid, const string[]);
 /*
 # Description:
 -
@@ -181,7 +181,7 @@ static
 ==============================================================================*/
 
 
-stock DefineDebugLabelType(name[], colour = 0xFFFFFFFF)
+stock DefineDebugLabelType(const name[], colour = 0xFFFFFFFF)
 {
 	if(dbl_TypeCount == MAX_DEBUG_LABEL_TYPES)
 		return -1;
@@ -194,7 +194,7 @@ stock DefineDebugLabelType(name[], colour = 0xFFFFFFFF)
 	return dbl_TypeCount++;
 }
 
-stock CreateDebugLabel(type, entityid, Float:x, Float:y, Float:z, string[] = "", worldid = -1, interiorid = -1)
+stock CreateDebugLabel(type, entityid, Float:x, Float:y, Float:z, const string[] = "", worldid = -1, interiorid = -1)
 {
 	new id = Iter_Free(dbl_Index);
 
@@ -316,7 +316,7 @@ stock HideAllDebugLabelsForPlayer(playerid)
 	return 1;
 }
 
-stock UpdateDebugLabelString(labelid, string[])
+stock UpdateDebugLabelString(labelid, const string[])
 {
 	if(!Iter_Contains(dbl_Index, labelid))
 		return 0;

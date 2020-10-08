@@ -125,7 +125,7 @@ scriptable entities.
 // Functions
 
 
-forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1);
+forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, const geid[] = "", hitpoints = -1);
 /*
 # Description
 Creates an item in the game world at the specified coordinates with the
@@ -158,7 +158,7 @@ Destroys an item.
 Boolean to indicate success or failure.
 */
 
-forward ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET, maxhitpoints = 5);
+forward ItemType:DefineItemType(const name[], const uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET, maxhitpoints = 5);
 /*
 # Description
 Defines a new item type with the specified name and model. Item types are the
@@ -253,7 +253,7 @@ it doesn't exist physically in the game world.
 Boolean to indicate success or failure.
 */
 
-forward AllocNextItemID(ItemType:type, geid[] = "");
+forward AllocNextItemID(ItemType:type, const geid[] = "");
 /*
 # Description
 Preallocates an item ID for a specific item type. This doesn't actually create
@@ -297,7 +297,7 @@ forward GetItemButtonID(itemid);
 Returns the button ID of a world item. Cannot be a virtual item.
 */
 
-forward SetItemLabel(itemid, text[], colour = 0xFFFF00FF, Float:range = 10.0);
+forward SetItemLabel(itemid, const text[], colour = 0xFFFF00FF, Float:range = 10.0);
 /*
 # Description
 Creates or updates a 3D text label above the item. This is actually the label
@@ -419,7 +419,7 @@ forward GetItemExtraData(itemid);
 Retrieves the integer assigned to the item set with SetItemExtraData.
 */
 
-forward SetItemNameExtra(itemid, string[]);
+forward SetItemNameExtra(itemid, const string[]);
 /*
 # Description
 Gives the item a unique string of text to be appended to the name in brackets.
@@ -461,7 +461,7 @@ Gets the unique name for an item type.
 Boolean to indicate success or failure.
 */
 
-forward ItemType:GetItemTypeFromUniqueName(string[], bool:ignorecase = false);
+forward ItemType:GetItemTypeFromUniqueName(const string[], bool:ignorecase = false);
 /*
 # Description
 Returns an item type for the specified unique item type name via lookup.
@@ -887,7 +887,7 @@ hook OnPlayerDisconnect(playerid, reason)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, geid[] = "", hitpoints = -1)
+stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, const geid[] = "", hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem] %d %f %f %f");
 	new itemid = Iter_Free(itm_Index);
@@ -994,7 +994,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	return 1;
 }
 
-stock ItemType:DefineItemType(name[], uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET, maxhitpoints = 5)
+stock ItemType:DefineItemType(const name[], const uname[], model, size, Float:rotx = 0.0, Float:roty = 0.0, Float:rotz = 0.0, Float:modelz = 0.0, Float:attx = 0.0, Float:atty = 0.0, Float:attz = 0.0, Float:attrx = 0.0, Float:attry = 0.0, Float:attrz = 0.0, bool:usecarryanim = false, colour = -1, boneid = 6, longpickup = false, Float:buttonz = FLOOR_OFFSET, maxhitpoints = 5)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DefineItemType] '%s' '%s' %d %d", name, uname, model, size);
 	new ItemType:id = ItemType:itm_TypeTotal;
@@ -1290,7 +1290,7 @@ stock RemoveItemFromWorld(itemid)
 	return 1;
 }
 
-stock AllocNextItemID(ItemType:type, geid[] = "")
+stock AllocNextItemID(ItemType:type, const geid[] = "")
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[AllocNextItemID]");
 	new id = Iter_Free(itm_Index);
@@ -1388,7 +1388,7 @@ stock GetItemButtonID(itemid)
 
 	return itm_Data[itemid][itm_button];
 }
-stock SetItemLabel(itemid, text[], colour = 0xFFFF00FF, Float:range = 10.0)
+stock SetItemLabel(itemid, const text[], colour = 0xFFFF00FF, Float:range = 10.0)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemLabel]");
 
@@ -1617,7 +1617,7 @@ stock GetItemExtraData(itemid)
 }
 
 // itm_nameEx
-stock SetItemNameExtra(itemid, string[])
+stock SetItemNameExtra(itemid, const string[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemNameExtra]");
 
@@ -1695,7 +1695,7 @@ stock GetItemTypeUniqueName(ItemType:itemtype, string[])
 	return 1;
 }
 
-stock ItemType:GetItemTypeFromUniqueName(string[], bool:ignorecase = false)
+stock ItemType:GetItemTypeFromUniqueName(const string[], bool:ignorecase = false)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemTypeFromUniqueName]");
 

@@ -111,7 +111,7 @@ DEFINE_HOOK_REPLACEMENT(Button , Btn);
 // Functions
 
 
-forward CreateButton(Float:x, Float:y, Float:z, text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true);
+forward CreateButton(Float:x, Float:y, Float:z, const text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, const labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true);
 /*
 # Description
 Creates an interactive button players can activate by pressing F.
@@ -183,7 +183,7 @@ area from memory.
 Boolean to indicate success or failure.
 */
 
-forward SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true);
+forward SetButtonLabel(buttonid, const text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true);
 /*
 # Description
 Creates a 3D Text Label at the specified button ID handle, if a label already
@@ -277,7 +277,7 @@ forward GetButtonText(buttonid, text[]);
 Returns the text assigned to a button that appears on-screen when a player walks near it.
 */
 
-forward SetButtonText(buttonid, text[]);
+forward SetButtonText(buttonid, const text[]);
 /*
 # Description
 Updates the text that appears on-screen when a player walks near the button.
@@ -467,9 +467,9 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateButton(Float:x, Float:y, Float:z, text[],
+stock CreateButton(Float:x, Float:y, Float:z, const text[],
 	world = 0, interior = 0, Float:areasize = 1.0, label = 0,
-	labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true) {
+	const labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true) {
 
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[CreateButton]");
 	new buttonid = Iter_Free(btn_Index);
@@ -627,7 +627,7 @@ stock SetButtonArea(buttonid, areaid)
 
 
 // btn_label
-stock SetButtonLabel(buttonid, text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true)
+stock SetButtonLabel(buttonid, const text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonLabel]");
 	if(!Iter_Contains(btn_Index, buttonid))
@@ -812,7 +812,7 @@ stock GetButtonText(buttonid, text[])
 
 	return 1;
 }
-stock SetButtonText(buttonid, text[])
+stock SetButtonText(buttonid, const text[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonText]");
 	if(!Iter_Contains(btn_Index, buttonid))

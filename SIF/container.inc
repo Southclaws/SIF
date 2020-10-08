@@ -84,7 +84,7 @@ external calls to the API.
 // Functions
 
 
-forward CreateContainer(name[], size);
+forward CreateContainer(const name[], size);
 /*
 # Description
 Creates a container to store items in with a static size.
@@ -311,7 +311,7 @@ hook OnScriptInit()
 ==============================================================================*/
 
 
-stock CreateContainer(name[], size)
+stock CreateContainer(const name[], size)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[CreateContainer] '%s' %d", name, size);
 	new id = Iter_Free(cnt_Index);

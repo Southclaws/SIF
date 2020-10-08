@@ -64,7 +64,7 @@ forward mkgeid(id, result[]);
 Generates a GEID from a given entity ID
 */
 
-forward b64_encode(data[], data_len, result[], &result_len);
+forward b64_encode(const data[], data_len, result[], &result_len);
 /*
 # Description
 Encodes the given string using base64url standard.
@@ -107,7 +107,7 @@ stock mkgeid(id, result[])
 	return rlen;
 }
 
-stock b64_encode(data[], data_len, result[], &result_len)
+stock b64_encode(const data[], data_len, result[], &result_len)
 {
 	new
 		rc = 0,

@@ -76,7 +76,7 @@ A basic example of using this module would be:
 // Functions
 
 
-forward SerialiseItems(items[], maxitems = sizeof(items));
+forward SerialiseItems(const items[], maxitems = sizeof(items));
 /*
 # Description:
 -
@@ -262,7 +262,7 @@ hook OnScriptInit()
 ==============================================================================*/
 
 
-stock SerialiseItems(items[], maxitems = sizeof(items))
+stock SerialiseItems(const items[], maxitems = sizeof(items))
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[SerialiseItems] maxitems:%d", maxitems);
 	if(itm_list_Lock)

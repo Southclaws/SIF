@@ -62,7 +62,7 @@ Basic debugging that can be activated/deactivated during runtime.
 // Functions
 
 
-forward sif_debug_register_handler(name[], initstate = 0);
+forward sif_debug_register_handler(const name[], initstate = 0);
 /*
 # Description
 Registers a new debug handler. A debug handler is an identifier for a collection
@@ -82,14 +82,14 @@ forward sif_debug_plevel(playerid, handler, level);
 (scheduled for depreciation)
 */
 
-forward sif_debug_print(handler, level, playerid, msg[]);
+forward sif_debug_print(handler, level, playerid, const msg[]);
 /*
 # Description
 Prints a debug message on the specified handler for the specified level. If the
 level is higher than the active level for the handler, nothing will happen.
 */
 
-forward sif_debug_printf(handler, level, playerid, string[], {Float,_}:...);
+forward sif_debug_printf(handler, level, playerid, const string[], {Float,_}:...);
 /*
 # Description
 Prints a formatted debug message on the specified handler for the specified
@@ -97,7 +97,7 @@ level. If the level is higher than the active level for the handler, nothing
 will happen.
 */
 
-forward sif_debug_handler_search(name[]);
+forward sif_debug_handler_search(const name[]);
 /*
 # Description
 Searches for a debug handler name and returns the ID.
@@ -167,7 +167,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock sif_debug_register_handler(name[], initstate = 0)
+stock sif_debug_register_handler(const name[], initstate = 0)
 {
 	strcat(dbg_Name[dbg_Total], name);
 	dbg_Level[dbg_Total] = initstate;
@@ -194,7 +194,7 @@ stock sif_debug_plevel(playerid, handler, level)
 	return 1;
 }
 
-stock sif_debug_print(handler, level, playerid, msg[])
+stock sif_debug_print(handler, level, playerid, const msg[])
 {
 	if(!SIF_IS_VALID_HANDLER(handler))
 		return 0;
@@ -219,7 +219,7 @@ stock sif_debug_print(handler, level, playerid, msg[])
 	return 1;
 }
 
-stock sif_debug_printf(handler, level, playerid, string[], {Float,_}:...)
+stock sif_debug_printf(handler, level, playerid, const string[], {Float,_}:...)
 {
 	if(!SIF_IS_VALID_HANDLER(handler))
 		return 0;
@@ -237,7 +237,7 @@ stock sif_debug_printf(handler, level, playerid, string[], {Float,_}:...)
 	return 1;
 }
 
-stock sif_debug_handler_search(name[])
+stock sif_debug_handler_search(const name[])
 {
 	new bestmatch = -1;
 
