@@ -169,7 +169,7 @@ sif_SetUpPlayer(playerid)
 		gPlayerArea[playerid] = CreateDynamicSphere(0.0, 0.0, 0.0, 2.0);
 }
 
-sif_UnloadPlayer(playerid, doTD = false)
+sif_UnloadPlayer(playerid)
 {
 	DestroyDynamicArea(gPlayerArea[playerid]);
 	gPlayerArea[playerid] = -1;
