@@ -182,8 +182,7 @@ static
 	itm_arr_ItemTypeArrayMax[ITM_MAX_TYPES],
 	bool:itm_arr_ItemTypeArrayProtect[ITM_MAX_TYPES],
 	itm_arr_Data[ITM_MAX][ITM_ARR_MAX_ARRAY_DATA],
-	itm_arr_Length[ITM_MAX],
-	itm_arr_NoResetOnCreate[ITM_MAX];
+	itm_arr_Length[ITM_MAX];
 
 static
 	ITEM_ARRAY_DATA = -1;
@@ -199,23 +198,6 @@ static
 hook OnScriptInit()
 {
 	ITEM_ARRAY_DATA = sif_debug_register_handler("SIF/ItemArrayData");
-}
-
-hook OnItemCreate(itemid)
-{
-	if(!itm_arr_NoResetOnCreate[itemid])
-	{
-		for(new i; i < itm_arr_ItemTypeArrayMax[GetItemType(itemid)]; i++)
-			itm_arr_Data[itemid][i] = 0;
-
-		itm_arr_Length[itemid] = 0;
-	}
-	else
-	{
-		itm_arr_NoResetOnCreate[itemid] = 0;
-	}
-
-	return 1;
 }
 
 
@@ -473,11 +455,8 @@ stock RemoveItemArrayData(itemid)
 
 stock SetItemNoResetArrayData(itemid, bool:toggle)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemNoResetArrayData] %d %d", itemid, toggle);
-	if(!IsValidItem(itemid))
-		return 0;
-
-	itm_arr_NoResetOnCreate[itemid] = toggle;
-
+	#pragma unused itemid
+	#pragma unused toggle
+	// no-op
 	return 1;
 }
