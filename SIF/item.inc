@@ -1320,19 +1320,13 @@ stock AllocNextItemID(ItemType:type, const geid[] = "")
 	return id;
 }
 
-stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, const geid[] = "", hitpoints = -1)
+stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItem_ExplicitID]");
 	if(!Iter_Contains(itm_Index, itemid))
 		return 0;
 
 	itm_TypeCount[itm_Data[itemid][itm_type]]++;
-
-	if(geid[0] == EOS)
-		mkgeid(itemid, itm_Data[itemid][itm_geid]);
-
-	else
-		strcat(itm_Data[itemid][itm_geid], geid, GEID_LEN);
 
 	CallLocalFunction("OnItemCreate", "d", itemid);
 
