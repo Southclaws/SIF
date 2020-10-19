@@ -73,7 +73,7 @@ GTA:SA spinning pickups for a few reasons:
 
 // Maximum amount of buttons that can be created.
 #if !defined BTN_MAX
-	#define BTN_MAX (8192)
+	#define BTN_MAX (Button:8192)
 #endif
 
 // Maximum string length for labels and action-text strings.
@@ -102,7 +102,7 @@ GTA:SA spinning pickups for a few reasons:
 #endif
 
 // Validity check constant
-#define INVALID_BUTTON_ID (-1)
+#define INVALID_BUTTON_ID (Button:-1)
 
 
 DEFINE_HOOK_REPLACEMENT(Button , Btn);
@@ -111,7 +111,7 @@ DEFINE_HOOK_REPLACEMENT(Button , Btn);
 // Functions
 
 
-forward CreateButton(Float:x, Float:y, Float:z, const text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, const labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true);
+forward Button:CreateButton(Float:x, Float:y, Float:z, const text[], world = 0, interior = 0, Float:areasize = 1.0, label = 0, const labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true);
 /*
 # Description
 Creates an interactive button players can activate by pressing F.
@@ -133,7 +133,7 @@ Button ID handle of the newly created button or INVALID_BUTTON_ID if another
 button cannot be created due to BTN_MAX limit.
 */
 
-forward DestroyButton(buttonid);
+forward DestroyButton(Button:buttonid);
 /*
 # Description
 Destroys a button.
@@ -142,7 +142,7 @@ Destroys a button.
 Boolean to indicate success or failure.
 */
 
-forward LinkTP(buttonid1, buttonid2);
+forward LinkTP(Button:buttonid1, Button:buttonid2);
 /*
 # Description
 Links two buttons to be teleport buttons, if a user presses buttonid1 he will be
@@ -152,7 +152,7 @@ teleported to the position of buttonid2 and vice versa.
 Boolean to indicate success or failure.
 */
 
-forward UnLinkTP(buttonid1, buttonid2);
+forward UnLinkTP(Button:buttonid1, Button:buttonid2);
 /*
 # Description
 Un-links two linked buttons
@@ -161,19 +161,19 @@ Un-links two linked buttons
 -1 if buttons are not linked at all. -2 if either is linked to another button.
 */
 
-forward bool:IsValidButton(buttonid);
+forward bool:IsValidButton(Button:buttonid);
 /*
 # Description
 Checks if buttonid is a valid button ID handle.
 */
 
-forward GetButtonArea(buttonid);
+forward GetButtonArea(Button:buttonid);
 /*
 # Description
 Returns the streamer area ID used by a button.
 */
 
-forward SetButtonArea(buttonid, areaid);
+forward SetButtonArea(Button:buttonid, areaid);
 /*
 # Description
 Updates a button's streamer area ID. Note that this does not remove the existing
@@ -183,14 +183,14 @@ area from memory.
 Boolean to indicate success or failure.
 */
 
-forward SetButtonLabel(buttonid, const text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true);
+forward SetButtonLabel(Button:buttonid, const text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true);
 /*
 # Description
 Creates a 3D Text Label at the specified button ID handle, if a label already
 exists it updates the text, colour and range.
 */
 
-forward DestroyButtonLabel(buttonid);
+forward DestroyButtonLabel(Button:buttonid);
 /*
 # Description
 Removes the label from a button.
@@ -199,7 +199,7 @@ Removes the label from a button.
 Boolean to indicate success or failure. -1 if the button did not have a label.
 */
 
-forward GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z);
+forward GetButtonPos(Button:buttonid, &Float:x, &Float:y, &Float:z);
 /*
 # Description
 Stores the button's X, Y and Z into parameters.
@@ -208,7 +208,7 @@ Stores the button's X, Y and Z into parameters.
 Boolean to indicate success or failure.
 */
 
-forward SetButtonPos(buttonid, Float:x, Float:y, Float:z);
+forward SetButtonPos(Button:buttonid, Float:x, Float:y, Float:z);
 /*
 # Description
 Changes the button position (area, label, etc).
@@ -217,7 +217,7 @@ Changes the button position (area, label, etc).
 Boolean to indicate success or failure.
 */
 
-forward Float:GetButtonSize(buttonid);
+forward Float:GetButtonSize(Button:buttonid);
 /*
 # Description
 Returns the size of the specified button's dynamic area.
@@ -226,7 +226,7 @@ Returns the size of the specified button's dynamic area.
 0.0 if the specified button ID handle is invalid.
 */
 
-forward SetButtonSize(buttonid, Float:size);
+forward SetButtonSize(Button:buttonid, Float:size);
 /*
 # Description
 Sets a button's detection area size.
@@ -235,13 +235,13 @@ Sets a button's detection area size.
 Boolean to indicate success or failure.
 */
 
-forward GetButtonWorld(buttonid);
+forward GetButtonWorld(Button:buttonid);
 /*
 # Description
 Returns the virtual world that a button exists in.
 */
 
-forward SetButtonWorld(buttonid, world);
+forward SetButtonWorld(Button:buttonid, world);
 /*
 # Description
 Updates a button's virtual world. Moves all streamer entities to the world too.
@@ -250,13 +250,13 @@ Updates a button's virtual world. Moves all streamer entities to the world too.
 Boolean to indicate success or failure.
 */
 
-forward GetButtonInterior(buttonid);
+forward GetButtonInterior(Button:buttonid);
 /*
 # Description
 Returns the interior that a button exists in.
 */
 
-forward SetButtonInterior(buttonid, interior);
+forward SetButtonInterior(Button:buttonid, interior);
 /*
 # Description
 Updates a button's interior. Moves all streamer entities to the interior too.
@@ -265,19 +265,19 @@ Updates a button's interior. Moves all streamer entities to the interior too.
 Boolean to indicate success or failure.
 */
 
-forward GetButtonLinkedID(buttonid);
+forward GetButtonLinkedID(Button:buttonid);
 /*
 # Description
 Returns the linked button of buttonid.
 */
 
-forward GetButtonText(buttonid, text[]);
+forward GetButtonText(Button:buttonid, text[]);
 /*
 # Description
 Returns the text assigned to a button that appears on-screen when a player walks near it.
 */
 
-forward SetButtonText(buttonid, const text[]);
+forward SetButtonText(Button:buttonid, const text[]);
 /*
 # Description
 Updates the text that appears on-screen when a player walks near the button.
@@ -286,7 +286,7 @@ Updates the text that appears on-screen when a player walks near the button.
 Boolean to indicate success or failure.
 */
 
-forward SetButtonExtraData(buttonid, data);
+forward SetButtonExtraData(Button:buttonid, data);
 /*
 # Description
 Sets the button's extra data field, this is one cell of blank space allocated for each button.
@@ -295,7 +295,7 @@ Sets the button's extra data field, this is one cell of blank space allocated fo
 Boolean to indicate success or failure.
 */
 
-forward GetButtonExtraData(buttonid);
+forward GetButtonExtraData(Button:buttonid);
 /*
 # Description
 Retrieves the integer assigned to the button set with SetButtonExtraData.
@@ -308,13 +308,13 @@ Returns the ID of the button that the player is currently pressing. This will
 only return a value while playerid is holding down the interact key at a button.
 */
 
-forward GetPlayerButtonID(playerid);
+forward Button:GetPlayerButtonID(playerid);
 /*
 # Description
 Returns the closest button that a player is standing within the area of.
 */
 
-forward GetPlayerButtonList(playerid, list[], &size, bool:validate = false);
+forward GetPlayerButtonList(playerid, Button:list[], &size, bool:validate = false);
 /*
 # Description
 Returns a list of buttons that a player is standing in the areas of.
@@ -335,13 +335,13 @@ Returns a list of buttons that a player is standing in the areas of.
 Boolean to indicate success or failure.
 */
 
-forward Float:GetPlayerAngleToButton(playerid, buttonid);
+forward Float:GetPlayerAngleToButton(playerid, Button:buttonid);
 /*
 # Description
 Returns the angle in degrees from a player to a button.
 */
 
-forward Float:GetButtonAngleToPlayer(playerid, buttonid);
+forward Float:GetButtonAngleToPlayer(playerid, Button:buttonid);
 /*
 # Description
 Returns the angle in degrees from a button to a player.
@@ -351,7 +351,7 @@ Returns the angle in degrees from a button to a player.
 // Events
 
 
-forward OnButtonPress(playerid, buttonid);
+forward OnButtonPress(playerid, Button:buttonid);
 /*
 # Called
 When a player presses the F/Enter key while at a button.
@@ -360,19 +360,19 @@ When a player presses the F/Enter key while at a button.
 If the button is a linked teleporter, return 1 to prevent teleporting.
 */
 
-forward OnButtonRelease(playerid, buttonid);
+forward OnButtonRelease(playerid, Button:buttonid);
 /*
 # Called
 When a player releases the F/Enter key after pressing it while at a button.
 */
 
-forward OnPlayerEnterButtonArea(playerid, buttonid);
+forward OnPlayerEnterButtonArea(playerid, Button:buttonid);
 /*
 # Called
 When a player enters the dynamic streamed area of a button.
 */
 
-forward OnPlayerLeaveButtonArea(playerid, buttonid);
+forward OnPlayerLeaveButtonArea(playerid, Button:buttonid);
 /*
 # Called
 When a player leaves the dynamic streamed area of a button.
@@ -396,7 +396,7 @@ Float:		btn_posZ,
 Float:		btn_size,
 			btn_world,
 			btn_interior,
-			btn_link,
+Button:		btn_link,
 			btn_text[BTN_MAX_TEXT],
 
 			btn_exData
@@ -404,25 +404,20 @@ Float:		btn_size,
 
 enum e_button_range_data
 {
-			btn_buttonId,
+Button:		btn_buttonId,
 Float:		btn_distance
 }
 
+const _BTN_ITER_SIZE = _:BTN_MAX;
 
 new
 			btn_Data[BTN_MAX][E_BTN_DATA],
-   Iterator:btn_Index<BTN_MAX>
-	#if defined DEBUG_LABELS_BUTTON
-		,
-			btn_DebugLabelType,
-			btn_DebugLabelID[BTN_MAX]
-	#endif
-		;
+   Iterator:btn_Index<_BTN_ITER_SIZE>;
 
 static
-			btn_Near[MAX_PLAYERS][BTN_MAX_INRANGE],
+     Button:btn_Near[MAX_PLAYERS][BTN_MAX_INRANGE],
    Iterator:btn_NearIndex[MAX_PLAYERS]<BTN_MAX_INRANGE>,
-			btn_Pressing[MAX_PLAYERS];
+     Button:btn_Pressing[MAX_PLAYERS];
 
 
 static BUTTON_DEBUG = -1;
@@ -446,10 +441,6 @@ hook OnScriptInit()
 	{
 		btn_Pressing[i] = INVALID_BUTTON_ID;
 	}
-
-	#if defined DEBUG_LABELS_BUTTON
-		btn_DebugLabelType = DefineDebugLabelType("BUTTON", 0xFF0000FF);
-	#endif
 }
 
 hook OnPlayerConnect(playerid)
@@ -467,14 +458,14 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock CreateButton(Float:x, Float:y, Float:z, const text[],
+stock Button:CreateButton(Float:x, Float:y, Float:z, const text[],
 	world = 0, interior = 0, Float:areasize = 1.0, label = 0,
 	const labeltext[] = "", labelcolour = 0xFFFF00FF, Float:streamdist = BTN_DEFAULT_STREAMDIST, testlos = true) {
 
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[CreateButton]");
-	new buttonid = Iter_Free(btn_Index);
+	new Button:buttonid = Button:Iter_Free(btn_Index);
 
-	if(buttonid == -1) {
+	if(_:buttonid == ITER_NONE) {
 		print("ERROR: BTN_MAX reached, please increase this constant!");
 		return INVALID_BUTTON_ID;
 	}
@@ -498,24 +489,19 @@ stock CreateButton(Float:x, Float:y, Float:z, const text[],
 	new data[2];
 
 	data[0] = BTN_STREAMER_AREA_IDENTIFIER;
-	data[1] = buttonid;
+	data[1] = _:buttonid;
 
 	Streamer_SetArrayData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_EXTRA_ID, data, 2);
 
-	Iter_Add(btn_Index, buttonid);
-
-	#if defined DEBUG_LABELS_BUTTON
-		btn_DebugLabelID[buttonid] = CreateDebugLabel(btn_DebugLabelType, buttonid, x, y, z);
-		UpdateButtonDebugLabel(buttonid);
-	#endif
+	Iter_Add(btn_Index, _:buttonid);
 
 	return buttonid;
 }
 
-stock DestroyButton(buttonid)
+stock DestroyButton(Button:buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[DestroyButton]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:BUTTON_DEBUG("[DestroyButton] process_LeaveDynamicArea calls");
@@ -546,38 +532,30 @@ stock DestroyButton(buttonid)
 	btn_Data[buttonid][btn_text][0]		= EOS;
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:BUTTON_DEBUG("[DestroyButton] Removing from button index");
-	Iter_Remove(btn_Index, buttonid);
+	Iter_Remove(btn_Index, _:buttonid);
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:BUTTON_DEBUG("[DestroyButton] Destroying debug label");
-	#if defined DEBUG_LABELS_BUTTON
-		DestroyDebugLabel(btn_DebugLabelID[buttonid]);
-	#endif
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:BUTTON_DEBUG("[DestroyButton] End of function");
 	return 1;
 }
 
-stock LinkTP(buttonid1, buttonid2)
+stock LinkTP(Button:buttonid1, Button:buttonid2)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[LinkTP]");
-	if(!Iter_Contains(btn_Index, buttonid1) || !Iter_Contains(btn_Index, buttonid2))
+	if(!Iter_Contains(btn_Index, _:buttonid1) || !Iter_Contains(btn_Index, _:buttonid2))
 		return 0;
 
 	btn_Data[buttonid1][btn_link] = buttonid2;
 	btn_Data[buttonid2][btn_link] = buttonid1;
 
-	#if defined DEBUG_LABELS_BUTTON
-		UpdateButtonDebugLabel(buttonid1);
-		UpdateButtonDebugLabel(buttonid2);
-	#endif
-
 	return 1;
 }
 
-stock UnLinkTP(buttonid1, buttonid2)
+stock UnLinkTP(Button:buttonid1, Button:buttonid2)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:BUTTON_DEBUG("[UnLinkTP]");
-	if(!Iter_Contains(btn_Index, buttonid1) || !Iter_Contains(btn_Index, buttonid2))
+	if(!Iter_Contains(btn_Index, _:buttonid1) || !Iter_Contains(btn_Index, _:buttonid2))
 		return 0;
 
 	if(btn_Data[buttonid1][btn_link] == INVALID_BUTTON_ID || btn_Data[buttonid1][btn_link] == INVALID_BUTTON_ID)
@@ -589,35 +567,30 @@ stock UnLinkTP(buttonid1, buttonid2)
 	btn_Data[buttonid1][btn_link] = INVALID_BUTTON_ID;
 	btn_Data[buttonid2][btn_link] = INVALID_BUTTON_ID;
 
-	#if defined DEBUG_LABELS_BUTTON
-		UpdateButtonDebugLabel(buttonid1);
-		UpdateButtonDebugLabel(buttonid2);
-	#endif
-
 	return 1;
 }
 
-stock bool:IsValidButton(buttonid)
+stock bool:IsValidButton(Button:buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[IsValidButton]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return false;
 
 	return true;
 }
 // btn_area
-stock GetButtonArea(buttonid)
+stock GetButtonArea(Button:buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonWorld]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return -1;
 
 	return btn_Data[buttonid][btn_area];
 }
-stock SetButtonArea(buttonid, areaid)
+stock SetButtonArea(Button:buttonid, areaid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonWorld]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	btn_Data[buttonid][btn_area] = areaid;
@@ -627,10 +600,10 @@ stock SetButtonArea(buttonid, areaid)
 
 
 // btn_label
-stock SetButtonLabel(buttonid, const text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true)
+stock SetButtonLabel(Button:buttonid, const text[], colour = 0xFFFF00FF, Float:range = BTN_DEFAULT_STREAMDIST, testlos = true)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonLabel]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	if(IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
@@ -648,10 +621,10 @@ stock SetButtonLabel(buttonid, const text[], colour = 0xFFFF00FF, Float:range = 
 
 	return 1;
 }
-stock DestroyButtonLabel(buttonid)
+stock DestroyButtonLabel(Button:buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[DestroyButtonLabel]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	if(!IsValidDynamic3DTextLabel(btn_Data[buttonid][btn_label]))
@@ -666,10 +639,10 @@ stock DestroyButtonLabel(buttonid)
 // btn_posX
 // btn_posY
 // btn_posZ
-stock GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z)
+stock GetButtonPos(Button:buttonid, &Float:x, &Float:y, &Float:z)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonPos] %d", buttonid);
-	if(!Iter_Contains(btn_Index, buttonid))
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonPos] %d", _:buttonid);
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	x = btn_Data[buttonid][btn_posX];
@@ -678,10 +651,10 @@ stock GetButtonPos(buttonid, &Float:x, &Float:y, &Float:z)
 
 	return 1;
 }
-stock SetButtonPos(buttonid, Float:x, Float:y, Float:z)
+stock SetButtonPos(Button:buttonid, Float:x, Float:y, Float:z)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonPos] %d, %f, %f, %f", buttonid, x, y, z);
-	if(!Iter_Contains(btn_Index, buttonid))
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonPos] %d, %f, %f, %f", _:buttonid, x, y, z);
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_X, x);
@@ -706,43 +679,39 @@ stock SetButtonPos(buttonid, Float:x, Float:y, Float:z)
 }
 
 // btn_size
-stock Float:GetButtonSize(buttonid)
+stock Float:GetButtonSize(Button:buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonSize] %d", buttonid);
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0.0;
 
 	return btn_Data[buttonid][btn_size];
 }
-stock SetButtonSize(buttonid, Float:size)
+stock SetButtonSize(Button:buttonid, Float:size)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonSize] %d, %f", buttonid, size);
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	Streamer_SetFloatData(STREAMER_TYPE_AREA, btn_Data[buttonid][btn_area], E_STREAMER_SIZE, size);
 	btn_Data[buttonid][btn_size] = size;
 
-	#if defined DEBUG_LABELS_BUTTON
-		UpdateButtonDebugLabel(buttonid);
-	#endif
-
 	return 1;
 }
 
 // btn_world
-stock GetButtonWorld(buttonid)
+stock GetButtonWorld(Button:buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonWorld]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return -1;
 
 	return btn_Data[buttonid][btn_world];
 }
-stock SetButtonWorld(buttonid, world)
+stock SetButtonWorld(Button:buttonid, world)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonWorld]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	if(btn_Data[buttonid][btn_world] != world)
@@ -761,18 +730,18 @@ stock SetButtonWorld(buttonid, world)
 }
 
 // btn_interior
-stock GetButtonInterior(buttonid)
+stock GetButtonInterior(Button:buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonInterior]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return -1;
 
 	return btn_Data[buttonid][btn_interior];
 }
-stock SetButtonInterior(buttonid, interior)
+stock SetButtonInterior(Button:buttonid, interior)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonInterior]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	if(btn_Data[buttonid][btn_interior] != interior)
@@ -791,20 +760,20 @@ stock SetButtonInterior(buttonid, interior)
 }
 
 // btn_link
-stock GetButtonLinkedID(buttonid)
+stock GetButtonLinkedID(Button:buttonid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonLinkedID]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return INVALID_BUTTON_ID;
 
 	return btn_Data[buttonid][btn_link];
 }
 
 // btn_text
-stock GetButtonText(buttonid, text[])
+stock GetButtonText(Button:buttonid, text[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonText]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	text[0] = EOS;
@@ -812,10 +781,10 @@ stock GetButtonText(buttonid, text[])
 
 	return 1;
 }
-stock SetButtonText(buttonid, const text[])
+stock SetButtonText(Button:buttonid, const text[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[SetButtonText]");
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	btn_Data[buttonid][btn_text][0] = EOS;
@@ -825,22 +794,18 @@ stock SetButtonText(buttonid, const text[])
 }
 
 // btn_exData
-stock SetButtonExtraData(buttonid, data)
+stock SetButtonExtraData(Button:buttonid, data)
 {
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	btn_Data[buttonid][btn_exData] = data;
 
-	#if defined DEBUG_LABELS_BUTTON
-		UpdateButtonDebugLabel(buttonid);
-	#endif
-
 	return 1;
 }
-stock GetButtonExtraData(buttonid)
+stock GetButtonExtraData(Button:buttonid)
 {
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
 	return btn_Data[buttonid][btn_exData];
@@ -856,7 +821,7 @@ stock GetPlayerPressingButton(playerid)
 	return btn_Pressing[playerid];
 }
 
-stock GetPlayerButtonID(playerid)
+stock Button:GetPlayerButtonID(playerid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetPlayerButtonID]")<playerid>;
 
@@ -870,8 +835,8 @@ stock GetPlayerButtonID(playerid)
 		Float:x,
 		Float:y,
 		Float:z,
-		curid,
-		closestid,
+		Button:curid,
+		Button:closestid,
 		Float:curdistance,
 		Float:closetsdistance = 99999.9;
 
@@ -893,7 +858,7 @@ stock GetPlayerButtonID(playerid)
 	return closestid;
 }
 
-stock GetPlayerButtonList(playerid, list[], &size, bool:validate = false)
+stock GetPlayerButtonList(playerid, Button:list[], &size, bool:validate = false)
 {
 	if(!IsPlayerConnected(playerid))
 		return 0;
@@ -909,7 +874,7 @@ stock GetPlayerButtonList(playerid, list[], &size, bool:validate = false)
 		{
 			if(!IsPlayerInDynamicArea(playerid, btn_Data[btn_Near[playerid][i]][btn_area]))
 			{
-				printf("ERROR: Player %d incorrectly flagged as inside button %d area, removing.", playerid, btn_Near[playerid][i]);
+				printf("ERROR: Player %d incorrectly flagged as inside button %d area, removing.", playerid, _:btn_Near[playerid][i]);
 				Iter_SafeRemove(btn_NearIndex[playerid], i, i);
 				continue;
 			}
@@ -925,10 +890,10 @@ stock GetPlayerButtonList(playerid, list[], &size, bool:validate = false)
 	return 1;
 }
 
-stock Float:GetPlayerAngleToButton(playerid, buttonid)
+stock Float:GetPlayerAngleToButton(playerid, Button:buttonid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetPlayerAngleToButton]")<playerid>;
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0.0;
 
 	if(!IsPlayerConnected(playerid))
@@ -944,10 +909,10 @@ stock Float:GetPlayerAngleToButton(playerid, buttonid)
 	return sif_GetAngleToPoint(x, y, btn_Data[buttonid][btn_posX], btn_Data[buttonid][btn_posY]);
 }
 
-stock Float:GetButtonAngleToPlayer(playerid, buttonid)
+stock Float:GetButtonAngleToPlayer(playerid, Button:buttonid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERFACE:BUTTON_DEBUG("[GetButtonAngleToPlayer]")<playerid>;
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0.0;
 
 	if(!IsPlayerConnected(playerid))
@@ -985,7 +950,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			}
 
 			new
-				buttonid,
+				Button:buttonid,
 				Float:x,
 				Float:y,
 				Float:z,
@@ -1030,7 +995,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 		{
 			if(btn_Pressing[playerid] != INVALID_BUTTON_ID)
 			{
-				CallLocalFunction("OnButtonRelease", "dd", playerid, btn_Pressing[playerid]);
+				CallLocalFunction("OnButtonRelease", "dd", playerid, _:btn_Pressing[playerid]);
 				btn_Pressing[playerid] = INVALID_BUTTON_ID;
 			}
 		}
@@ -1044,7 +1009,7 @@ _btn_SortButtons(array[][e_button_range_data], left, right)
 		tmp_left = left,
 		tmp_right = right,
 		Float:pivot = array[(left + right) / 2][btn_distance],
-		buttonid,
+		Button:buttonid,
 		Float:distance;
 
 	while(tmp_left <= tmp_right)
@@ -1057,9 +1022,9 @@ _btn_SortButtons(array[][e_button_range_data], left, right)
 
 		if(tmp_left <= tmp_right)
 		{
-			buttonid = array[tmp_left][btn_buttonId];
+			buttonid = Button:array[tmp_left][btn_buttonId];
 			array[tmp_left][btn_buttonId] = array[tmp_right][btn_buttonId];
-			array[tmp_right][btn_buttonId] = buttonid;
+			array[tmp_right][btn_buttonId] = Button:buttonid;
 
 			distance = array[tmp_left][btn_distance];
 			array[tmp_left][btn_distance] = array[tmp_right][btn_distance];
@@ -1077,17 +1042,17 @@ _btn_SortButtons(array[][e_button_range_data], left, right)
 		_btn_SortButtons(array, tmp_left, right);
 }
 
-Internal_OnButtonPress(playerid, buttonid)
+Internal_OnButtonPress(playerid, Button:buttonid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:BUTTON_DEBUG("[Internal_OnButtonPress]")<playerid>;
-	if(!Iter_Contains(btn_Index, buttonid))
+	if(!Iter_Contains(btn_Index, _:buttonid))
 		return 0;
 
-	new linked = btn_Data[buttonid][btn_link];
+	new Button:linked = btn_Data[buttonid][btn_link];
 
-	if(Iter_Contains(btn_Index, linked))
+	if(Iter_Contains(btn_Index, _:linked))
 	{
-		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
+		if(CallLocalFunction("OnButtonPress", "dd", playerid, _:buttonid))
 			return 1;
 
 		TogglePlayerControllable(playerid, false);
@@ -1105,7 +1070,7 @@ Internal_OnButtonPress(playerid, buttonid)
 	{
 		btn_Pressing[playerid] = buttonid;
 
-		if(CallLocalFunction("OnButtonPress", "dd", playerid, buttonid))
+		if(CallLocalFunction("OnButtonPress", "dd", playerid, _:buttonid))
 			return 1;
 	}
 
@@ -1137,15 +1102,15 @@ hook OnPlayerEnterDynArea(playerid, areaid)
 		if(data[0] == BTN_STREAMER_AREA_IDENTIFIER)
 		{
 			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] area is valid")<playerid>;
-			if(Iter_Contains(btn_Index, data[1]))
+			if(Iter_Contains(btn_Index, _:data[1]))
 			{
 				sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerEnterDynamicArea] in index")<playerid>;
 				new cell = Iter_Free(btn_NearIndex[playerid]);
 
-				btn_Near[playerid][cell] = data[1];
+				btn_Near[playerid][cell] = Button:data[1];
 				Iter_Add(btn_NearIndex[playerid], cell);
 
-				ShowActionText(playerid, btn_Data[data[1]][btn_text]);
+				ShowActionText(playerid, btn_Data[Button:data[1]][btn_text]);
 				CallLocalFunction("OnPlayerEnterButtonArea", "dd", playerid, data[1]);
 			}
 		}
@@ -1198,7 +1163,7 @@ process_LeaveDynamicArea(playerid, areaid)
 		return 3;
 	}
 
-	if(!Iter_Contains(btn_Index, data[1]))
+	if(!Iter_Contains(btn_Index, _:data[1]))
 	{
 		sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] button ID is invalid")<playerid>;
 		return 4;
@@ -1211,7 +1176,7 @@ process_LeaveDynamicArea(playerid, areaid)
 	{
 		sif_dp:SIF_DEBUG_LEVEL_LOOPS:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] looping player list")<playerid>;
 
-		if(btn_Near[playerid][i] == data[1])
+		if(btn_Near[playerid][i] == Button:data[1])
 		{
 			sif_dp:SIF_DEBUG_LEVEL_CALLBACKS_DEEP:BUTTON_DEBUG("[OnPlayerLeaveDynamicArea] removing from player list")<playerid>;
 			Iter_Remove(btn_NearIndex[playerid], i);
@@ -1221,14 +1186,3 @@ process_LeaveDynamicArea(playerid, areaid)
 
 	return 0;
 }
-
-#if defined DEBUG_LABELS_BUTTON
-	UpdateButtonDebugLabel(buttonid)
-	{
-		new string[64];
-
-		format(string, sizeof(string), "EXDATA: %d SIZE: %.1f LINK: %d", btn_Data[buttonid][btn_exData], btn_Data[buttonid][btn_size], btn_Data[buttonid][btn_link]);
-
-		UpdateDebugLabelString(btn_DebugLabelID[buttonid], string);
-	}
-#endif

@@ -291,7 +291,7 @@ forward GetItemObjectID(itemid);
 Returns the streamed object ID for a world item. Cannot be a virtual item.
 */
 
-forward GetItemButtonID(itemid);
+forward Button:GetItemButtonID(itemid);
 /*
 # Description
 Returns the button ID of a world item. Cannot be a virtual item.
@@ -545,7 +545,7 @@ exists at all (in other words, the function returning false gives no indication
 of whether or not the item is not in the world or just doesn't exist)
 */
 
-forward GetItemFromButtonID(buttonid);
+forward GetItemFromButtonID(Button:buttonid);
 /*
 # Description
 Returns the item ID associated with the specified button ID (if any).
@@ -747,7 +747,7 @@ When an item's hitpoints value is changed.
 enum E_ITEM_DATA
 {
 			itm_objId,
-			itm_button,
+Button:		itm_button,
 ItemType:	itm_type,
 
 Float:		itm_posX,
@@ -820,7 +820,7 @@ static
 			itm_Holding			[MAX_PLAYERS],
 			itm_LongPickupTick	[MAX_PLAYERS],
 			itm_Interacting		[MAX_PLAYERS],
-			itm_CurrentButton	[MAX_PLAYERS],
+Button:		itm_CurrentButton	[MAX_PLAYERS],
 Timer:		itm_InteractTimer	[MAX_PLAYERS],
 Timer:		itm_LongPickupTimer	[MAX_PLAYERS];
 
@@ -851,7 +851,7 @@ hook OnScriptInit()
 		itm_Holder[i] = INVALID_PLAYER_ID;
 	}
 
-	for(new i; i < BTN_MAX; i++)
+	for(new Button:i; i < BTN_MAX; i++)
 	{
 		itm_ButtonIndex[i] = INVALID_ITEM_ID;
 	}
@@ -970,7 +970,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	{
 		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
 		DestroyButton(itm_Data[itemid][itm_button]);
-		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
+		itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_ITEM_ID;
 	}
 
 	itm_TypeCount[itm_Data[itemid][itm_type]]--;
@@ -1274,7 +1274,7 @@ stock RemoveItemFromWorld(itemid)
 	DestroyButton(itm_Data[itemid][itm_button]);
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[RemoveItemFromWorld] Resetting array data");
-	itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_BUTTON_ID;
+	itm_ButtonIndex[itm_Data[itemid][itm_button]] = INVALID_ITEM_ID;
 	itm_Data[itemid][itm_objId] = -1;
 	itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
 
@@ -1376,7 +1376,7 @@ stock GetItemObjectID(itemid)
 }
 
 // itm_button
-stock GetItemButtonID(itemid)
+stock Button:GetItemButtonID(itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemButtonID]");
 
@@ -1853,7 +1853,7 @@ stock IsItemInWorld(itemid)
 }
 
 // itm_ButtonIndex
-stock GetItemFromButtonID(buttonid)
+stock GetItemFromButtonID(Button:buttonid)
 {
 	if(!IsValidButton(buttonid))
 		return INVALID_ITEM_ID;
@@ -1896,7 +1896,7 @@ stock GetPlayerInteractingItem(playerid)
 stock GetPlayerNearbyItems(playerid, list[])
 {
 	new
-		buttons[BTN_MAX_INRANGE],
+		Button:buttons[BTN_MAX_INRANGE],
 		buttoncount,
 		itemcount;
 
@@ -1936,7 +1936,7 @@ stock GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, items[], m
 		if(data[0] != BTN_STREAMER_AREA_IDENTIFIER)
 			continue;
 
-		itemid = GetItemFromButtonID(data[1]);
+		itemid = GetItemFromButtonID(Button:data[1]);
 
 		if(IsValidItem(itemid))
 			items[count++] = itemid;
@@ -2130,7 +2130,7 @@ _PlayerKeyHandle_Release(playerid)
 		if(itm_CurrentButton[playerid] != INVALID_BUTTON_ID)
 		{
 			sif_d:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[_PlayerKeyHandle_Release] itm_CurrentButton valid");
-			CallLocalFunction("OnPlayerRelButtonWithItem", "ddd", playerid, itm_CurrentButton[playerid], itm_Holding[playerid]);
+			CallLocalFunction("OnPlayerRelButtonWithItem", "ddd", playerid, _:itm_CurrentButton[playerid], itm_Holding[playerid]);
 			itm_CurrentButton[playerid] = INVALID_BUTTON_ID;
 		}
 
@@ -2182,14 +2182,14 @@ hook OnPlayerLeavePlayerArea(playerid, targetid)
 internal_OnPlayerUseItem(playerid, itemid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[internal_OnPlayerUseItem]")<playerid>;
-	new buttonid = GetPlayerButtonID(playerid);
+	new Button:buttonid = GetPlayerButtonID(playerid);
 
-	if(buttonid != -1)
+	if(buttonid != INVALID_BUTTON_ID)
 	{
 		sif_dp:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[internal_OnPlayerUseItem] Player at button")<playerid>;
 		itm_CurrentButton[playerid] = buttonid;
 
-		if(CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, buttonid, itm_Holding[playerid]))
+		if(CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, _:buttonid, itm_Holding[playerid]))
 		{
 			sif_dp:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[internal_OnPlayerUseItem] OnPlayerUseItemWithButton returned nonzero")<playerid>;
 			return 1;
@@ -2200,7 +2200,7 @@ internal_OnPlayerUseItem(playerid, itemid)
 }
 
 
-hook OnButtonPress(playerid, buttonid)
+hook OnButtonPress(playerid, Button:buttonid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnButtonPress]")<playerid>;
 
@@ -2407,7 +2407,7 @@ hook OnPlayerDeath(playerid, killerid, reason)
 			format(string, sizeof(string), "GEID:%s OBJ:%d BTN:%d TYPE:%d EXDATA:%d HP:%d",
 				itm_Data[itemid][itm_geid],
 				itm_Data[itemid][itm_objId],
-				itm_Data[itemid][itm_button],
+				_:itm_Data[itemid][itm_button],
 				_:itm_Data[itemid][itm_type],
 				itm_Data[itemid][itm_exData],
 				itm_Data[itemid][itm_hitPoints]);
