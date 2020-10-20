@@ -49,7 +49,7 @@ work together.
 ==============================================================================*/
 
 
-forward DisplayContainerInventory(playerid, containerid);
+forward DisplayContainerInventory(playerid, Container:containerid);
 /*
 # Description:
 -
@@ -61,7 +61,7 @@ forward ClosePlayerContainer(playerid, call = false);
 -
 */
 
-forward GetPlayerCurrentContainer(playerid);
+forward Container:GetPlayerCurrentContainer(playerid);
 /*
 # Description:
 -
@@ -83,37 +83,37 @@ forward AddContainerOption(playerid, const option[]);
 // Events
 
 
-forward OnPlayerOpenContainer(playerid, containerid);
+forward OnPlayerOpenContainer(playerid, Container:containerid);
 /*
 # Description:
 -
 */
 
-forward OnPlayerCloseContainer(playerid, containerid);
+forward OnPlayerCloseContainer(playerid, Container:containerid);
 /*
 # Description:
 -
 */
 
-forward OnPlayerViewContainerOpt(playerid, containerid);
+forward OnPlayerViewContainerOpt(playerid, Container:containerid);
 /*
 # Description:
 -
 */
 
-forward OnPlayerSelectContainerOpt(playerid, containerid, option);
+forward OnPlayerSelectContainerOpt(playerid, Container:containerid, option);
 /*
 # Description:
 -
 */
 
-forward OnMoveItemToContainer(playerid, Item:itemid, containerid);
+forward OnMoveItemToContainer(playerid, Item:itemid, Container:containerid);
 /*
 # Description:
 -
 */
 
-forward OnMoveItemToInventory(playerid, Item:itemid, containerid);
+forward OnMoveItemToInventory(playerid, Item:itemid, Container:containerid);
 /*
 # Description:
 -
@@ -129,7 +129,7 @@ forward OnMoveItemToInventory(playerid, Item:itemid, containerid);
 
 static
 			cnt_ItemListTotal			[MAX_PLAYERS],
-			cnt_CurrentContainer		[MAX_PLAYERS],
+Container:	cnt_CurrentContainer		[MAX_PLAYERS],
 			cnt_SelectedSlot			[MAX_PLAYERS],
 			cnt_InventoryString			[MAX_PLAYERS][CNT_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)],
 			cnt_OptionsList				[MAX_PLAYERS][128],
@@ -158,7 +158,7 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock DisplayContainerInventory(playerid, containerid)
+stock DisplayContainerInventory(playerid, Container:containerid)
 {
 	if(!IsValidContainer(containerid))
 		return 0;
@@ -195,7 +195,7 @@ stock DisplayContainerInventory(playerid, containerid)
 
 	cnt_CurrentContainer[playerid] = containerid;
 
-	if(CallLocalFunction("OnPlayerOpenContainer", "dd", playerid, containerid))
+	if(CallLocalFunction("OnPlayerOpenContainer", "dd", playerid, _:containerid))
 		return 0;
 
 	GetContainerName(containerid, containername);
@@ -262,7 +262,7 @@ stock ClosePlayerContainer(playerid, call = false)
 
 	if(call)
 	{
-		if(CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, cnt_CurrentContainer[playerid]))
+		if(CallLocalFunction("OnPlayerCloseContainer", "dd", playerid, _:cnt_CurrentContainer[playerid]))
 		{
 			DisplayContainerInventory(playerid, cnt_CurrentContainer[playerid]);
 			return 1;
@@ -275,7 +275,7 @@ stock ClosePlayerContainer(playerid, call = false)
 	return 1;
 }
 
-stock GetPlayerCurrentContainer(playerid)
+stock Container:GetPlayerCurrentContainer(playerid)
 {
 	if(!IsPlayerConnected(playerid))
 		return INVALID_CONTAINER_ID;
@@ -320,7 +320,7 @@ DisplayContainerOptions(playerid, slotid)
 	cnt_OptionsList[playerid] = "Equip\nMove to inventory\n";
 	cnt_OptionsCount[playerid] = 0;
 
-	CallLocalFunction("OnPlayerViewContainerOpt", "dd", playerid, cnt_CurrentContainer[playerid]);
+	CallLocalFunction("OnPlayerViewContainerOpt", "dd", playerid, _:cnt_CurrentContainer[playerid]);
 
 	inline Response(pid, dialogid, response, listitem, string:inputtext[])
 	{
@@ -360,7 +360,7 @@ DisplayContainerOptions(playerid, slotid)
 					return 0;
 				}
 
-				if(CallLocalFunction("OnMoveItemToInventory", "ddd", playerid, _:itemid, cnt_CurrentContainer[playerid]))
+				if(CallLocalFunction("OnMoveItemToInventory", "ddd", playerid, _:itemid, _:cnt_CurrentContainer[playerid]))
 					return 0;
 
 				new required = AddItemToInventory(playerid, itemid);
@@ -382,7 +382,7 @@ DisplayContainerOptions(playerid, slotid)
 			}
 			default:
 			{
-				CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, cnt_CurrentContainer[playerid], listitem - 2);
+				CallLocalFunction("OnPlayerSelectContainerOpt", "ddd", playerid, _:cnt_CurrentContainer[playerid], listitem - 2);
 			}
 		}
 
@@ -429,7 +429,7 @@ hook OnPlayerSelectInvOpt(playerid, option)
 
 			if(required == 0)
 			{
-				if(CallLocalFunction("OnMoveItemToContainer", "ddd", playerid, _:itemid, cnt_CurrentContainer[playerid]))
+				if(CallLocalFunction("OnMoveItemToContainer", "ddd", playerid, _:itemid, _:cnt_CurrentContainer[playerid]))
 					return 0;
 			}
 

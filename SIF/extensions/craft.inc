@@ -491,7 +491,7 @@ hook OnPlayerViewCntOpt(playerid, containerid)
 	return 0;
 }
 
-hook OnPlayerSelectCntOpt(playerid, containerid, option)
+hook OnPlayerSelectCntOpt(playerid, Container:containerid, option)
 {
 	if(option == cft_MenuOptionID[playerid])
 	{
@@ -600,7 +600,7 @@ _cft_CraftSelected(playerid, craftset)
 	}
 	else
 	{
-		new containerid = GetPlayerCurrentContainer(playerid);
+		new Container:containerid = GetPlayerCurrentContainer(playerid);
 
 		if(!IsValidContainer(containerid))
 			return 0;
@@ -629,7 +629,7 @@ _cft_CraftSelected(playerid, craftset)
 		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Created result item %d (%d)", _:itemid, _:cft_Result[craftset]);
 
 		AddItemToContainer(containerid, itemid);
-		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to container %d", _:itemid, containerid);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to container %d", _:itemid, _:containerid);
 
 		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, _:itemid);
 	}
