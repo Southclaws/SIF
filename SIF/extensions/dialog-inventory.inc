@@ -119,7 +119,7 @@ forward OnPlayerCloseInventory(playerid);
 -
 */
 
-forward OnPlayerSelectExtraItem(playerid, item);
+forward OnPlayerSelectExtraItem(playerid, Item:item);
 /*
 # Called:
 -
@@ -209,7 +209,7 @@ stock DisplayPlayerInventory(playerid)
 	new
 		title[18],
 		list[(INV_MAX_SLOTS * (ITM_MAX_NAME + ITM_MAX_TEXT + 1)) + 32],
-		itemid,
+		Item:itemid,
 		tmp[5 + ITM_MAX_NAME + ITM_MAX_TEXT + 1];
 
 	inv_ItemListTotal[playerid] = 0;
@@ -407,7 +407,7 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 			{
 				if(GetPlayerItem(playerid) == INVALID_ITEM_ID)
 				{
-					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
+					new Item:itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
 					RemoveItemFromInventory(playerid, inv_SelectedSlot[playerid]);
 					GiveWorldItemToPlayer(playerid, itemid, 1);
@@ -423,7 +423,7 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 			{
 				if(GetPlayerItem(playerid) == INVALID_ITEM_ID)
 				{
-					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
+					new Item:itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
 					RemoveItemFromInventory(playerid, inv_SelectedSlot[playerid]);
 					GiveWorldItemToPlayer(playerid, itemid, 1);
@@ -442,7 +442,7 @@ DisplayPlayerInventoryOptions(playerid, slotid)
 			{
 				if(GetPlayerItem(playerid) == INVALID_ITEM_ID)
 				{
-					new itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
+					new Item:itemid = GetInventorySlotItem(playerid, inv_SelectedSlot[playerid]);
 
 					RemoveItemFromInventory(playerid, inv_SelectedSlot[playerid]);
 					GiveWorldItemToPlayer(playerid, itemid, 1);

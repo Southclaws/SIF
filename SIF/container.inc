@@ -107,7 +107,7 @@ Removes a container from memory and frees the ID.
 - destroyitems: If true, items inside will also be deleted.
 */
 
-forward AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID);
+forward AddItemToContainer(containerid, Item:itemid, playerid = INVALID_PLAYER_ID);
 /*
 # Description
 Adds an item to a container list, calls OnItemAddToContainer.
@@ -170,7 +170,7 @@ forward GetContainerItemCount(containerid);
 Returns the amount of items inside a container.
 */
 
-forward GetContainerSlotItem(containerid, slotid);
+forward Item:GetContainerSlotItem(containerid, slotid);
 /*
 # Description
 Returns the item stored in the specified slot.
@@ -206,13 +206,13 @@ forward GetContainerFreeSlots(containerid);
 Returns the number of free item slots in a container.
 */
 
-forward GetItemContainer(itemid);
+forward GetItemContainer(Item:itemid);
 /*
 # Description
 Returns the ID of the container that itemid is stored in.
 */
 
-forward GetItemContainerSlot(itemid);
+forward GetItemContainerSlot(Item:itemid);
 /*
 # Description
 Returns the container slot that the item is stored in if inside a container.
@@ -234,7 +234,7 @@ forward OnContainerDestroy(containerid);
 Upon the destruction of a container.
 */
 
-forward OnItemAddToContainer(containerid, itemid, playerid);
+forward OnItemAddToContainer(containerid, Item:itemid, playerid);
 /*
 # Called
 When an item is added to a container. Note that the item won't actually be in the container list when this is called.
@@ -243,7 +243,7 @@ When an item is added to a container. Note that the item won't actually be in th
 1 to cancel the item being added.
 */
 
-forward OnItemAddedToContainer(containerid, itemid, playerid);
+forward OnItemAddedToContainer(containerid, Item:itemid, playerid);
 /*
 # Called
 After an item has been added to a container.
@@ -281,7 +281,7 @@ enum E_CONTAINER_DATA
 
 new
 			cnt_Data					[CNT_MAX][E_CONTAINER_DATA],
-			cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
+       Item:cnt_Items					[CNT_MAX][CNT_MAX_SLOTS],
    Iterator:cnt_Index<CNT_MAX>,
 			cnt_ItemContainer			[ITM_MAX] = {INVALID_CONTAINER_ID, ...},
 			cnt_ItemContainerSlot		[ITM_MAX] = {-1, ...};
@@ -366,9 +366,9 @@ stock DestroyContainer(containerid, destroyitems = true)
 	return 1;
 }
 
-stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
+stock AddItemToContainer(containerid, Item:itemid, playerid = INVALID_PLAYER_ID)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[AddItemToContainer] %d %d %d", containerid, itemid, playerid);
+	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[AddItemToContainer] %d %d %d", containerid, _:itemid, playerid);
 	if(!Iter_Contains(cnt_Index, containerid))
 	{
 		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[AddItemToContainer] ERROR: Invalid container ID");
@@ -387,7 +387,7 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 
 	while(idx < cnt_Data[containerid][cnt_size])
 	{
-		sif_d:SIF_DEBUG_LEVEL_LOOPS:CNT_DEBUG("[AddItemToContainer] Looping %d/%d item: %d", idx, cnt_Data[containerid][cnt_size], cnt_Items[containerid][idx]);
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:CNT_DEBUG("[AddItemToContainer] Looping %d/%d item: %d", idx, cnt_Data[containerid][cnt_size], _:cnt_Items[containerid][idx]);
 		if(!IsValidItem(cnt_Items[containerid][idx]))
 			break;
 
@@ -409,7 +409,7 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 		return (itemsize + slots) - cnt_Data[containerid][cnt_size];
 	}
 
-	if(CallLocalFunction("OnItemAddToContainer", "ddd", containerid, itemid, playerid))
+	if(CallLocalFunction("OnItemAddToContainer", "ddd", containerid, _:itemid, playerid))
 	{
 		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:CNT_DEBUG("[AddItemToContainer] ERROR: OnItemAddToContainer event returned 1");
 		return -4;
@@ -435,12 +435,12 @@ stock AddItemToContainer(containerid, itemid, playerid = INVALID_PLAYER_ID)
 	cnt_ItemContainer[itemid] = containerid;
 	cnt_ItemContainerSlot[itemid] = idx;
 
-	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[AddItemToContainer] Added item %d to container %d at slot %d", itemid, containerid, idx);
+	sif_d:SIF_DEBUG_LEVEL_CORE:CNT_DEBUG("[AddItemToContainer] Added item %d to container %d at slot %d", _:itemid, containerid, idx);
 
 	RemoveItemFromWorld(itemid);
 	RemoveCurrentItem(GetItemHolder(itemid));
 
-	CallLocalFunction("OnItemAddedToContainer", "ddd", containerid, itemid, playerid);
+	CallLocalFunction("OnItemAddedToContainer", "ddd", containerid, _:itemid, playerid);
 	
 	return 0;
 }
@@ -577,7 +577,7 @@ stock GetContainerItemCount(containerid)
 }
 
 // cnt_Items
-stock GetContainerSlotItem(containerid, slotid)
+stock Item:GetContainerSlotItem(containerid, slotid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetContainerSlotItem] %d %d", containerid, slotid);
 
@@ -672,9 +672,9 @@ stock GetContainerFreeSlots(containerid)
 	return cnt_Data[containerid][cnt_size] - slots;
 }
 
-stock GetItemContainer(itemid)
+stock GetItemContainer(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetItemContainer] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetItemContainer] %d", _:itemid);
 
 	if(!IsValidItem(itemid))
 		return INVALID_CONTAINER_ID;
@@ -682,9 +682,9 @@ stock GetItemContainer(itemid)
 	return cnt_ItemContainer[itemid];
 }
 
-stock GetItemContainerSlot(itemid)
+stock GetItemContainerSlot(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetItemContainerSlot] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:CNT_DEBUG("[GetItemContainerSlot] %d", _:itemid);
 
 	if(!IsValidItem(itemid))
 		return INVALID_CONTAINER_ID;
@@ -700,18 +700,18 @@ stock GetItemContainerSlot(itemid)
 ==============================================================================*/
 
 
-hook OnItemDestroy(itemid)
+hook OnItemDestroy(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemDestroy] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemDestroy] %d", _:itemid);
 	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
 	{
 		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);
 	}
 }
 
-hook OnItemCreateInWorld(itemid)
+hook OnItemCreateInWorld(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemCreateInWorld] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:CNT_DEBUG("[OnItemCreateInWorld] %d", _:itemid);
 	if(cnt_ItemContainer[itemid] != INVALID_CONTAINER_ID)
 	{
 		RemoveItemFromContainer(cnt_ItemContainer[itemid], cnt_ItemContainerSlot[itemid]);

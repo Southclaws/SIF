@@ -69,7 +69,7 @@ over inventory actions by players.
 // Functions
 
 
-forward AddItemToInventory(playerid, itemid, call = 1);
+forward AddItemToInventory(playerid, Item:itemid, call = 1);
 /*
 # Description
 Adds specified item to players inventory and removes item from world.
@@ -95,7 +95,7 @@ Removes the item from the specified slot if there is one.
 - call: If true, will call OnItemRemoveFromInventory.
 */
 
-forward GetInventorySlotItem(playerid, slotid);
+forward Item:GetInventorySlotItem(playerid, slotid);
 /*
 # Description
 Returns the ID handle of the item stored in the specified slot.
@@ -127,13 +127,13 @@ forward GetInventoryFreeSlots(playerid);
 Returns the amount of free slots in a player's inventory.
 */
 
-forward GetItemPlayerInventory(itemid);
+forward GetItemPlayerInventory(Item:itemid);
 /*
 # Description
 Returns the ID of a player if itemid is stored in their inventory.
 */
 
-forward GetItemPlayerInventorySlot(itemid);
+forward GetItemPlayerInventorySlot(Item:itemid);
 /*
 # Description
 Returns inventory slot of an item if it's stored inside a player's inventory.
@@ -155,7 +155,7 @@ Returns the capacity of a player's inventory.
 // Events
 
 
-forward OnItemAddToInventory(playerid, itemid, slot);
+forward OnItemAddToInventory(playerid, Item:itemid, slot);
 /*
 # Called
 Before an item is added to a player's inventory by the function AddItemToInventory.
@@ -164,13 +164,13 @@ Before an item is added to a player's inventory by the function AddItemToInvento
 1 to cancel item being added.
 */
 
-forward OnItemAddedToInventory(playerid, itemid, slot);
+forward OnItemAddedToInventory(playerid, Item:itemid, slot);
 /*
 # Called
 After an item is added to a player's inventory by the function AddItemToInventory.
 */
 
-forward OnItemRemoveFromInventory(playerid, itemid, slot);
+forward OnItemRemoveFromInventory(playerid, Item:itemid, slot);
 /*
 # Called
 Before an item is removed from a player's inventory by the function RemoveItemFromInventory.
@@ -179,7 +179,7 @@ Before an item is removed from a player's inventory by the function RemoveItemFr
 1 to cancel item being removed.
 */
 
-forward OnItemRemovedFromInventory(playerid, itemid, slot);
+forward OnItemRemovedFromInventory(playerid, Item:itemid, slot);
 /*
 # Called
 After an item is removed from a player's inventory by the function RemoveItemFromInventory.
@@ -194,7 +194,7 @@ After an item is removed from a player's inventory by the function RemoveItemFro
 
 
 static
-		inv_Data			[MAX_PLAYERS][INV_MAX_SLOTS],
+Item:	inv_Data			[MAX_PLAYERS][INV_MAX_SLOTS],
 		inv_Size			[MAX_PLAYERS] = {INV_MAX_SLOTS, ...},
 		inv_ItemPlayer		[ITM_MAX] = {INVALID_PLAYER_ID, ...},
 		inv_ItemPlayerSlot	[ITM_MAX] = {-1, ...};
@@ -242,9 +242,9 @@ hook OnPlayerConnect(playerid)
 ==============================================================================*/
 
 
-stock AddItemToInventory(playerid, itemid, call = 1)
+stock AddItemToInventory(playerid, Item:itemid, call = 1)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:INV_DEBUG("[AddItemToInventory] %d %d %d", playerid, itemid, call);
+	sif_d:SIF_DEBUG_LEVEL_CORE:INV_DEBUG("[AddItemToInventory] %d %d %d", playerid, _:itemid, call);
 	if(!IsValidItem(itemid))
 		return -1;
 
@@ -256,7 +256,7 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 
 	while(idx < inv_Size[playerid])
 	{
-		sif_d:SIF_DEBUG_LEVEL_LOOPS:INV_DEBUG("[AddItemToInventory] Looping %d/%d item: %d", idx, inv_Size[playerid], inv_Data[playerid][idx]);
+		sif_d:SIF_DEBUG_LEVEL_LOOPS:INV_DEBUG("[AddItemToInventory] Looping %d/%d item: %d", idx, inv_Size[playerid], _:inv_Data[playerid][idx]);
 		if(!IsValidItem(inv_Data[playerid][idx]))
 			break;
 
@@ -278,7 +278,7 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 
 	if(call)
 	{
-		if(CallLocalFunction("OnItemAddToInventory", "ddd", playerid, itemid, idx))
+		if(CallLocalFunction("OnItemAddToInventory", "ddd", playerid, _:itemid, idx))
 		{
 			sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:INV_DEBUG("[AddItemToInventory] ERROR: OnItemAddToInventory event returned 1");
 			return -4;
@@ -305,13 +305,13 @@ stock AddItemToInventory(playerid, itemid, call = 1)
 	inv_ItemPlayer[itemid] = playerid;
 	inv_ItemPlayerSlot[itemid] = idx;
 
-	sif_d:SIF_DEBUG_LEVEL_CORE:INV_DEBUG("[AddItemToInventory] Added item %d to player inventory %d at slot %d", itemid, playerid, idx);
+	sif_d:SIF_DEBUG_LEVEL_CORE:INV_DEBUG("[AddItemToInventory] Added item %d to player inventory %d at slot %d", _:itemid, playerid, idx);
 
 	RemoveItemFromWorld(itemid);
 	RemoveCurrentItem(GetItemHolder(itemid));
 
 	if(call)
-		CallLocalFunction("OnItemAddedToInventory", "ddd", playerid, itemid, idx);
+		CallLocalFunction("OnItemAddedToInventory", "ddd", playerid, _:itemid, idx);
 
 	return 0;
 }
@@ -345,11 +345,11 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 		return -1;
 	}
 
-	new itemid = inv_Data[playerid][slotid];
+	new Item:itemid = inv_Data[playerid][slotid];
 
 	if(call)
 	{
-		if(CallLocalFunction("OnItemRemoveFromInventory", "ddd", playerid, itemid, slotid))
+		if(CallLocalFunction("OnItemRemoveFromInventory", "ddd", playerid, _:itemid, slotid))
 			return 0;
 	}
 
@@ -371,12 +371,12 @@ stock RemoveItemFromInventory(playerid, slotid, call = 1)
 	}
 
 	if(call)
-		CallLocalFunction("OnItemRemovedFromInventory", "ddd", playerid, itemid, slotid);
+		CallLocalFunction("OnItemRemovedFromInventory", "ddd", playerid, _:itemid, slotid);
 
 	return 1;
 }
 
-stock GetInventorySlotItem(playerid, slotid)
+stock Item:GetInventorySlotItem(playerid, slotid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetInventorySlotItem] %d %d", playerid, slotid);
 	if(!(0 <= slotid < inv_Size[playerid]))
@@ -453,18 +453,18 @@ stock GetInventoryFreeSlots(playerid)
 	return inv_Size[playerid] - slots;
 }
 
-stock GetItemPlayerInventory(itemid)
+stock GetItemPlayerInventory(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetItemPlayerInventory] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetItemPlayerInventory] %d", _:itemid);
 	if(!IsValidItem(itemid))
 		return INVALID_PLAYER_ID;
 
 	return inv_ItemPlayer[itemid];
 }
 
-stock GetItemPlayerInventorySlot(itemid)
+stock GetItemPlayerInventorySlot(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetItemPlayerInventorySlot] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_INTERFACE:INV_DEBUG("[GetItemPlayerInventorySlot] %d", _:itemid);
 	if(!IsValidItem(itemid))
 		return INVALID_PLAYER_ID;
 
@@ -499,9 +499,9 @@ stock GetPlayerInventorySize(playerid)
 ==============================================================================*/
 
 
-hook OnItemDestroy(itemid)
+hook OnItemDestroy(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:INV_DEBUG("[OnItemDestroy] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_CALLBACKS:INV_DEBUG("[OnItemDestroy] %d", _:itemid);
 	if(inv_ItemPlayer[itemid] != INVALID_PLAYER_ID)
 	{
 		RemoveItemFromInventory(inv_ItemPlayer[itemid], inv_ItemPlayerSlot[itemid]);

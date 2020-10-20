@@ -76,7 +76,7 @@ A basic example of using this module would be:
 // Functions
 
 
-forward SerialiseItems(const items[], maxitems = sizeof(items));
+forward SerialiseItems(const Item:items[], maxitems = sizeof(items));
 /*
 # Description:
 -
@@ -148,13 +148,13 @@ forward GetStoredItemArrayDataSize(index);
 -
 */
 
-forward CreateItemFromStored(index);
+forward Item:CreateItemFromStored(index);
 /*
 # Description:
 -
 */
 
-forward SetItemArrayDataFromStored(itemid, index);
+forward SetItemArrayDataFromStored(Item:itemid, index);
 /*
 # Description:
 -
@@ -262,7 +262,7 @@ hook OnScriptInit()
 ==============================================================================*/
 
 
-stock SerialiseItems(const items[], maxitems = sizeof(items))
+stock SerialiseItems(const Item:items[], maxitems = sizeof(items))
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[SerialiseItems] maxitems:%d", maxitems);
 	if(itm_list_Lock)
@@ -513,7 +513,7 @@ stock GetStoredItemArrayDataSize(index)
 	return itm_list_ArraySize[index];
 }
 
-stock CreateItemFromStored(index)
+stock Item:CreateItemFromStored(index)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[CreateItemFromStored] index:%d", index);
 	if(!(0 <= index < itm_list_Count))
@@ -522,15 +522,15 @@ stock CreateItemFromStored(index)
 		return 0;
 	}
 
-	new itemid = CreateItem(itm_list_Items[index]);
+	new Item:itemid = CreateItem(itm_list_Items[index]);
 	SetItemArrayData(itemid, itm_list_Array[index], itm_list_ArraySize[index]);
 
-	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[CreateItemFromStored] -> %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_SERIALIZER_DEBUG("[CreateItemFromStored] -> %d", _:itemid);
 	return itemid;
 }
 
-stock SetItemArrayDataFromStored(itemid, index)
+stock SetItemArrayDataFromStored(Item:itemid, index)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[SetItemArrayDataFromStored] itemid:%d index:%d", itemid, index);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_SERIALIZER_DEBUG("[SetItemArrayDataFromStored] itemid:%d index:%d", _:itemid, index);
 	return SetItemArrayData(itemid, itm_list_Array[index], itm_list_ArraySize[index]);
 }

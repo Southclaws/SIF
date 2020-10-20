@@ -41,13 +41,13 @@ inventory using key presses.
 
 // Events
 
-forward OnPlayerAddToInventory(playerid, itemid, success);
+forward OnPlayerAddToInventory(playerid, Item:itemid, success);
 /*
 # Called:
 When a player adds an item to their inventory using a key.
 */
 
-forward OnPlayerAddedToInventory(playerid, itemid);
+forward OnPlayerAddedToInventory(playerid, Item:itemid);
 /*
 # Called:
 After a player has added an item to their inventory.
@@ -96,7 +96,7 @@ _HandlePutItemAway(playerid)
 	if(sif_GetTickCountDiff(GetTickCount(), inv_PutAwayTick[playerid]) < 1000)
 		return;
 
-	new itemid = GetPlayerItem(playerid);
+	new Item:itemid = GetPlayerItem(playerid);
 
 	if(!IsValidItem(itemid))
 		return;
@@ -107,24 +107,24 @@ _HandlePutItemAway(playerid)
 
 	if(itemsize > freeslots)
 	{
-		CallLocalFunction("OnPlayerAddToInventory", "ddd", playerid, itemid, 0);
+		CallLocalFunction("OnPlayerAddToInventory", "ddd", playerid, _:itemid, 0);
 		return;
 	}
 
-	if(CallLocalFunction("OnPlayerAddToInventory", "ddd", playerid, itemid, 1))
+	if(CallLocalFunction("OnPlayerAddToInventory", "ddd", playerid, _:itemid, 1))
 		return;
 
 	inv_PutAwayTick[playerid] = GetTickCount();
 
 	ApplyAnimation(playerid, "PED", "PHONE_IN", 4.0, 1, 0, 0, 0, 300);
 	stop inv_PutAwayTimer[playerid];
-	inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, itemid);
+	inv_PutAwayTimer[playerid] = defer PlayerPutItemInInventory(playerid, _:itemid);
 
 	return;
 }
 
 timer PlayerPutItemInInventory[300](playerid, itemid)
 {
-	AddItemToInventory(playerid, itemid);
+	AddItemToInventory(playerid, Item:itemid);
 	CallLocalFunction("OnPlayerAddedToInventory", "dd", playerid, itemid);
 }

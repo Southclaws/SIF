@@ -107,13 +107,13 @@ forward OnPlayerSelectContainerOpt(playerid, containerid, option);
 -
 */
 
-forward OnMoveItemToContainer(playerid, itemid, containerid);
+forward OnMoveItemToContainer(playerid, Item:itemid, containerid);
 /*
 # Description:
 -
 */
 
-forward OnMoveItemToInventory(playerid, itemid, containerid);
+forward OnMoveItemToInventory(playerid, Item:itemid, containerid);
 /*
 # Description:
 -
@@ -166,7 +166,7 @@ stock DisplayContainerInventory(playerid, containerid)
 	new
 		title[CNT_MAX_NAME + 9],
 		containername[CNT_MAX_NAME],
-		itemid,
+		Item:itemid,
 		tmp[ITM_MAX_NAME + ITM_MAX_TEXT];
 
 	cnt_InventoryString[playerid][0] = EOS;
@@ -338,7 +338,7 @@ DisplayContainerOptions(playerid, slotid)
 			{
 				if(GetPlayerItem(playerid) == INVALID_ITEM_ID)
 				{
-					new id = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
+					new Item:id = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
 
 					RemoveItemFromContainer(cnt_CurrentContainer[playerid], cnt_SelectedSlot[playerid], playerid);
 					GiveWorldItemToPlayer(playerid, id);
@@ -352,7 +352,7 @@ DisplayContainerOptions(playerid, slotid)
 			}
 			case 1:
 			{
-				new itemid = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
+				new Item:itemid = cnt_Items[cnt_CurrentContainer[playerid]][cnt_SelectedSlot[playerid]];
 
 				if(!IsValidItem(itemid))
 				{
@@ -360,7 +360,7 @@ DisplayContainerOptions(playerid, slotid)
 					return 0;
 				}
 
-				if(CallLocalFunction("OnMoveItemToInventory", "ddd", playerid, itemid, cnt_CurrentContainer[playerid]))
+				if(CallLocalFunction("OnMoveItemToInventory", "ddd", playerid, _:itemid, cnt_CurrentContainer[playerid]))
 					return 0;
 
 				new required = AddItemToInventory(playerid, itemid);
@@ -414,7 +414,7 @@ hook OnPlayerSelectInvOpt(playerid, option)
 		{
 			new
 				slot,
-				itemid;
+				Item:itemid;
 
 			slot = GetPlayerSelectedInventorySlot(playerid);
 			itemid = GetInventorySlotItem(playerid, slot);
@@ -429,7 +429,7 @@ hook OnPlayerSelectInvOpt(playerid, option)
 
 			if(required == 0)
 			{
-				if(CallLocalFunction("OnMoveItemToContainer", "ddd", playerid, itemid, cnt_CurrentContainer[playerid]))
+				if(CallLocalFunction("OnMoveItemToContainer", "ddd", playerid, _:itemid, cnt_CurrentContainer[playerid]))
 					return 0;
 			}
 

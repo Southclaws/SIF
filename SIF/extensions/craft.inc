@@ -83,7 +83,7 @@ bool:		cft_keepItem
 enum e_selected_item_data
 {
 ItemType:	cft_selectedItemType,
-			cft_selectedItemID
+Item:		cft_selectedItemID
 }
 
 
@@ -184,7 +184,7 @@ forward OnPlayerCraft(playerid, craftset);
 -
 */
 
-forward OnPlayerCrafted(playerid, craftset, result);
+forward OnPlayerCrafted(playerid, craftset, Item:result);
 /*
 # Called:
 -
@@ -216,7 +216,6 @@ ItemType:	cft_Result[CFT_MAX_CRAFT_SET],
 static
 			cft_SelectedItems[MAX_PLAYERS][CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data],
 			cft_SelectedItemCount[MAX_PLAYERS],
-			cft_SelectedSlot[MAX_PLAYERS],
 			cft_SelectionEnvironment[MAX_PLAYERS],
 			cft_MenuOptionID[MAX_PLAYERS];
 
@@ -452,7 +451,7 @@ hook OnPlayerSelectInvOpt(playerid, option)
 		// Get selected item ID, store it.
 		// make the item yellow.
 		// If there are more than 1 items selected, perform craft table check.
-		_cft_AddItemToCraftList(playerid, cft_SelectedSlot[playerid] = GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid)));
+		_cft_AddItemToCraftList(playerid, GetInventorySlotItem(playerid, GetPlayerSelectedInventorySlot(playerid)));
 		cft_SelectionEnvironment[playerid] = CRAFT_ENVIRONMENT_INVENTORY;
 
 		DisplayPlayerInventory(playerid);
@@ -499,7 +498,7 @@ hook OnPlayerSelectCntOpt(playerid, containerid, option)
 		// Get selected item ID, store it.
 		// make the item yellow.
 		// If there are more than 1 items selected, perform craft table check.
-		_cft_AddItemToCraftList(playerid, cft_SelectedSlot[playerid] = GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid)));
+		_cft_AddItemToCraftList(playerid, GetContainerSlotItem(containerid, GetPlayerContainerSlot(playerid)));
 		cft_SelectionEnvironment[playerid] = CRAFT_ENVIRONMENT_CONTAINER;
 
 		DisplayContainerInventory(playerid, containerid);
@@ -522,11 +521,11 @@ hook OnPlayerCloseContainer(playerid, containerid)
 	return 0;
 }
 
-_cft_AddItemToCraftList(playerid, itemid)
+_cft_AddItemToCraftList(playerid, Item:itemid)
 {
 	new itemname[ITM_MAX_NAME];
 	GetItemTypeName(GetItemType(itemid), itemname);
-	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_AddItemToCraftList] %d added %d (type %d, %s)", playerid, itemid, _:GetItemType(itemid), itemname);
+	sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_AddItemToCraftList] %d added %d (type %d, %s)", playerid, _:itemid, _:GetItemType(itemid), itemname);
 
 	cft_SelectedItems[playerid][cft_SelectedItemCount[playerid]][cft_selectedItemType] = GetItemType(itemid);
 	cft_SelectedItems[playerid][cft_SelectedItemCount[playerid]][cft_selectedItemID] = itemid;
@@ -582,22 +581,22 @@ _cft_CraftSelected(playerid, craftset)
 
 		for(new i; i < cft_SelectedItemCount[playerid]; i++)
 		{
-			sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Looping ingredient item %d (%d)", cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
+			sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Looping ingredient item %d (%d)", _:cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
 			if(!cft_Ingredients[craftset][i][cft_keepItem])
 			{
-				sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Destroying ingredient item %d (%d)", cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
+				sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Destroying ingredient item %d (%d)", _:cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
 				RemoveItemFromInventory(playerid, GetItemPlayerInventorySlot(cft_SelectedItems[playerid][i][cft_selectedItemID]), 0);
 				DestroyItem(cft_SelectedItems[playerid][i][cft_selectedItemID]);
 			}
 		}
 
-		new itemid = CreateItem(cft_Result[craftset]);
-		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Created result item %d (%d)", itemid, _:cft_Result[craftset]);
+		new Item:itemid = CreateItem(cft_Result[craftset]);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Created result item %d (%d)", _:itemid, _:cft_Result[craftset]);
 
 		AddItemToInventory(playerid, itemid, false);
-		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to player %d", itemid, playerid);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to player %d", _:itemid, playerid);
 
-		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, itemid);
+		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, _:itemid);
 	}
 	else
 	{
@@ -617,22 +616,22 @@ _cft_CraftSelected(playerid, craftset)
 
 		for(new i; i < cft_SelectedItemCount[playerid]; i++)
 		{
-			sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Looping ingredient item %d (%d)", cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
+			sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Looping ingredient item %d (%d)", _:cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
 			if(!cft_Ingredients[craftset][i][cft_keepItem])
 			{
-				sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Destroying ingredient item %d (%d)", cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
+				sif_d:SIF_DEBUG_LEVEL_LOOPS:CRAFT_DEBUG("[_cft_CraftSelected] Destroying ingredient item %d (%d)", _:cft_SelectedItems[playerid][i][cft_selectedItemID], _:GetItemType(cft_SelectedItems[playerid][i][cft_selectedItemID]));
 				RemoveItemFromContainer(containerid, GetItemContainerSlot(cft_SelectedItems[playerid][i][cft_selectedItemID]), .call = 0);
 				DestroyItem(cft_SelectedItems[playerid][i][cft_selectedItemID]);
 			}
 		}
 
-		new itemid = CreateItem(cft_Result[craftset]);
-		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Created result item %d (%d)", itemid, _:cft_Result[craftset]);
+		new Item:itemid = CreateItem(cft_Result[craftset]);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Created result item %d (%d)", _:itemid, _:cft_Result[craftset]);
 
 		AddItemToContainer(containerid, itemid);
-		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to container %d", itemid, containerid);
+		sif_d:SIF_DEBUG_LEVEL_INTERNAL:CRAFT_DEBUG("[_cft_CraftSelected] Added result item %d to container %d", _:itemid, containerid);
 
-		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, itemid);
+		CallLocalFunction("OnPlayerCrafted", "ddd", playerid, craftset, _:itemid);
 	}
 
 	new
@@ -731,7 +730,7 @@ _btn_SortSelectedItems(array[CFT_MAX_CRAFT_SET_ITEMS][e_selected_item_data], lef
 		tmp_right = right,
 		ItemType:pivot = array[(left + right) / 2][cft_selectedItemType],
 		ItemType:itemtype,
-		itemid;
+		Item:itemid;
 
 	while(tmp_left <= tmp_right)
 	{

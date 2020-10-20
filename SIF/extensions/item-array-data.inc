@@ -88,37 +88,37 @@ forward GetItemTypeArrayDataSize(ItemType:itemtype);
 -
 */
 
-forward SetItemArrayData(itemid, data[], length, call = 1, bool:force = false);
+forward SetItemArrayData(Item:itemid, data[], length, call = 1, bool:force = false);
 /*
 # Description:
 -
 */
 
-forward GetItemArrayData(itemid, data[]);
+forward GetItemArrayData(Item:itemid, data[]);
 /*
 # Description:
 -
 */
 
-forward SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0, call = 1, bool:force = false);
+forward SetItemArrayDataAtCell(Item:itemid, data, cell, autoadjustsize = 0, call = 1, bool:force = false);
 /*
 # Description:
 -
 */
 
-forward GetItemArrayDataAtCell(itemid, cell);
+forward GetItemArrayDataAtCell(Item:itemid, cell);
 /*
 # Description:
 -
 */
 
-forward SetItemArrayDataSize(itemid, size, bool:force = false);
+forward SetItemArrayDataSize(Item:itemid, size, bool:force = false);
 /*
 # Description:
 -
 */
 
-forward GetItemArrayDataSize(itemid);
+forward GetItemArrayDataSize(Item:itemid);
 /*
 # Description:
 -
@@ -130,31 +130,31 @@ forward GetItemTypeArrayDataMax(ItemType:itemtype);
 -
 */
 
-forward AppendItemArray(itemid, const data[], length);
+forward AppendItemArray(Item:itemid, const data[], length);
 /*
 # Description:
 -
 */
 
-forward AppendItemArrayCell(itemid, data);
+forward AppendItemArrayCell(Item:itemid, data);
 /*
 # Description:
 -
 */
 
-forward SetItemArrayDataLength(itemid, length, bool:force = false);
+forward SetItemArrayDataLength(Item:itemid, length, bool:force = false);
 /*
 # Description:
 -
 */
 
-forward RemoveItemArrayData(itemid);
+forward RemoveItemArrayData(Item:itemid);
 /*
 # Description:
 -
 */
 
-forward SetItemNoResetArrayData(itemid, bool:toggle);
+forward SetItemNoResetArrayData(Item:itemid, bool:toggle);
 /*
 # Description:
 -
@@ -164,7 +164,7 @@ forward SetItemNoResetArrayData(itemid, bool:toggle);
 // Events
 
 
-forward OnItemArrayDataChanged(itemid);
+forward OnItemArrayDataChanged(Item:itemid);
 /*
 # Called:
 -
@@ -232,9 +232,9 @@ stock GetItemTypeArrayDataSize(ItemType:itemtype)
 	return itm_arr_ItemTypeArrayMax[itemtype];
 }
 
-stock SetItemArrayData(itemid, data[], length, call = 1, bool:force = false)
+stock SetItemArrayData(Item:itemid, data[], length, call = 1, bool:force = false)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayData] %d %d", itemid, length);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayData] %d %d", _:itemid, length);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -262,14 +262,14 @@ stock SetItemArrayData(itemid, data[], length, call = 1, bool:force = false)
 	}
 
 	if(call)
-		CallLocalFunction("OnItemArrayDataChanged", "d", itemid);
+		CallLocalFunction("OnItemArrayDataChanged", "d", _:itemid);
 
 	return 1;
 }
 
-stock GetItemArrayData(itemid, data[])
+stock GetItemArrayData(Item:itemid, data[])
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayData] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayData] %d", _:itemid);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -283,9 +283,9 @@ stock GetItemArrayData(itemid, data[])
 	return 1;
 }
 
-stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0, call = 1, bool:force = false)
+stock SetItemArrayDataAtCell(Item:itemid, data, cell, autoadjustsize = 0, call = 1, bool:force = false)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] %d %d", itemid, cell);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataAtCell] %d %d", _:itemid, cell);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -325,14 +325,14 @@ stock SetItemArrayDataAtCell(itemid, data, cell, autoadjustsize = 0, call = 1, b
 	itm_arr_Data[itemid][cell] = data;
 
 	if(call)
-		CallLocalFunction("OnItemArrayDataChanged", "d", itemid);
+		CallLocalFunction("OnItemArrayDataChanged", "d", _:itemid);
 
 	return 1;
 }
 
-stock GetItemArrayDataAtCell(itemid, cell)
+stock GetItemArrayDataAtCell(Item:itemid, cell)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayDataAtCell] %d %d", itemid, cell);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayDataAtCell] %d %d", _:itemid, cell);
 	if(!IsValidItem(itemid))
 	{
 		sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_ARRAY_DATA("[GetItemArrayDataAtCell] ERROR: Invalid item ID");
@@ -361,9 +361,9 @@ stock GetItemArrayDataAtCell(itemid, cell)
 	return itm_arr_Data[itemid][cell];
 }
 
-stock SetItemArrayDataSize(itemid, size, bool:force = false)
+stock SetItemArrayDataSize(Item:itemid, size, bool:force = false)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataSize] %d %d", itemid, size);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataSize] %d %d", _:itemid, size);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -378,9 +378,9 @@ stock SetItemArrayDataSize(itemid, size, bool:force = false)
 	return 1;
 }
 
-stock GetItemArrayDataSize(itemid)
+stock GetItemArrayDataSize(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayDataSize] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[GetItemArrayDataSize] %d", _:itemid);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -396,9 +396,9 @@ stock GetItemTypeArrayDataMax(ItemType:itemtype)
 	return itm_arr_ItemTypeArrayMax[itemtype];
 }
 
-stock AppendItemArray(itemid, const data[], length)
+stock AppendItemArray(Item:itemid, const data[], length)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[AppendItemArray] %d %d", itemid, length);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[AppendItemArray] %d %d", _:itemid, length);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -411,9 +411,9 @@ stock AppendItemArray(itemid, const data[], length)
 	return 1;
 }
 
-stock AppendItemArrayCell(itemid, data)
+stock AppendItemArrayCell(Item:itemid, data)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[AppendItemArrayCell] %d %d", itemid, data);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[AppendItemArrayCell] %d %d", _:itemid, data);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -425,9 +425,9 @@ stock AppendItemArrayCell(itemid, data)
 	return 1;
 }
 
-stock SetItemArrayDataLength(itemid, length, bool:force = false)
+stock SetItemArrayDataLength(Item:itemid, length, bool:force = false)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataLength] %d %d", itemid, length);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[SetItemArrayDataLength] %d %d", _:itemid, length);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -442,9 +442,9 @@ stock SetItemArrayDataLength(itemid, length, bool:force = false)
 	return 1;
 }
 
-stock RemoveItemArrayData(itemid)
+stock RemoveItemArrayData(Item:itemid)
 {
-	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[RemoveItemArrayData] %d", itemid);
+	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_ARRAY_DATA("[RemoveItemArrayData] %d", _:itemid);
 	if(!IsValidItem(itemid))
 		return 0;
 
@@ -453,7 +453,7 @@ stock RemoveItemArrayData(itemid)
 	return 1;
 }
 
-stock SetItemNoResetArrayData(itemid, bool:toggle)
+stock SetItemNoResetArrayData(Item:itemid, bool:toggle)
 {
 	#pragma unused itemid
 	#pragma unused toggle

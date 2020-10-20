@@ -83,7 +83,7 @@ scriptable entities.
 
 // Maximum amount of items that can be created.
 #if !defined ITM_MAX
-	#define ITM_MAX				(8192)
+	#define ITM_MAX				(Item:8192)
 #endif
 
 // Maximum amount of item types that can be defined.
@@ -116,7 +116,7 @@ scriptable entities.
 #define FLOOR_OFFSET		(0.96)
 
 // Item validity check constant
-#define INVALID_ITEM_ID		(-1)
+#define INVALID_ITEM_ID		(Item:-1)
 
 // Item type validity check constant
 #define INVALID_ITEM_TYPE	(ItemType:-1)
@@ -125,7 +125,7 @@ scriptable entities.
 // Functions
 
 
-forward CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, const geid[] = "", hitpoints = -1);
+forward Item:CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, const geid[] = "", hitpoints = -1);
 /*
 # Description
 Creates an item in the game world at the specified coordinates with the
@@ -149,7 +149,7 @@ Item ID handle of the newly created item or INVALID_ITEM_ID If the item index is
 full and no more items can be created.
 */
 
-forward DestroyItem(itemid, &indexid = -1, &worldindexid = -1);
+forward DestroyItem(Item:itemid, &indexid = -1, &worldindexid = -1);
 /*
 # Description
 Destroys an item.
@@ -185,7 +185,7 @@ Item Type ID handle of the newly defined item type. INVALID_ITEM_TYPE If the
 item type definition index is full and no more item types can be defined.
 */
 
-forward PlayerPickUpItem(playerid, itemid);
+forward PlayerPickUpItem(playerid, Item:itemid);
 /*
 # Description
 A function to directly make a player pick up an item, regardless of whether he
@@ -218,7 +218,7 @@ forward PlayerUseItem(playerid);
 Forces a player to use their current item, resulting in a call to OnPlayerUseItem.
 */
 
-forward GiveWorldItemToPlayer(playerid, itemid, call = 1);
+forward GiveWorldItemToPlayer(playerid, Item:itemid, call = 1);
 /*
 # Description
 Give a world item to a player.
@@ -232,7 +232,7 @@ Give a world item to a player.
 Boolean to indicate success or failure.
 */
 
-forward RemoveCurrentItem(playerid);
+forward Item:RemoveCurrentItem(playerid);
 /*
 # Description
 Removes the player's currently held item and places it in the world.
@@ -241,7 +241,7 @@ Removes the player's currently held item and places it in the world.
 INVALID_ITEM_ID If the player ID is invalid or the player isn't holding an item.
 */
 
-forward RemoveItemFromWorld(itemid);
+forward RemoveItemFromWorld(Item:itemid);
 /*
 # Description
 Removes an item from the world. Deletes all physical elements but keeps the item
@@ -253,7 +253,7 @@ it doesn't exist physically in the game world.
 Boolean to indicate success or failure.
 */
 
-forward AllocNextItemID(ItemType:type, const geid[] = "");
+forward Item:AllocNextItemID(ItemType:type, const geid[] = "");
 /*
 # Description
 Preallocates an item ID for a specific item type. This doesn't actually create
@@ -266,7 +266,7 @@ The allocated ID of the item or INVALID_ITEM_ID If there are no more free item
 slots or -2 If the specified type is invalid.
 */
 
-forward CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1);
+forward CreateItem_ExplicitID(Item:itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1);
 /*
 # Description
 Creates an item using an ID allocated from AllocNextItemID. This is the only
@@ -279,25 +279,25 @@ Apart from the explicit item ID, parameters are the same as CreateItem.
 1 On success or 0 if the ID is invalid or is destroyed in OnItemCreate.
 */
 
-forward IsValidItem(itemid);
+forward IsValidItem(Item:itemid);
 /*
 # Description
 Returns whether the entered value is a valid item ID handle.
 */
 
-forward GetItemObjectID(itemid);
+forward GetItemObjectID(Item:itemid);
 /*
 # Description
 Returns the streamed object ID for a world item. Cannot be a virtual item.
 */
 
-forward Button:GetItemButtonID(itemid);
+forward Button:GetItemButtonID(Item:itemid);
 /*
 # Description
 Returns the button ID of a world item. Cannot be a virtual item.
 */
 
-forward SetItemLabel(itemid, const text[], colour = 0xFFFF00FF, Float:range = 10.0);
+forward SetItemLabel(Item:itemid, const text[], colour = 0xFFFF00FF, Float:range = 10.0);
 /*
 # Description
 Creates or updates a 3D text label above the item. This is actually the label
@@ -314,13 +314,13 @@ forward GetItemTypeCount(ItemType:itemtype);
 Returns the amount of created items of the given type.
 */
 
-forward ItemType:GetItemType(itemid);
+forward ItemType:GetItemType(Item:itemid);
 /*
 # Description
 Returns the item type of an item.
 */
 
-forward GetItemPos(itemid, &Float:x, &Float:y, &Float:z);
+forward GetItemPos(Item:itemid, &Float:x, &Float:y, &Float:z);
 /*
 # Description
 Returns the position of a world item. If used on a non-world item such as an
@@ -330,7 +330,7 @@ item being held by a player, it will return the last position of the item.
 Boolean to indicate success or failure.
 */
 
-forward SetItemPos(itemid, Float:x, Float:y, Float:z);
+forward SetItemPos(Item:itemid, Float:x, Float:y, Float:z);
 /*
 # Description
 Changes the position of an item. This includes the associated object and button.
@@ -339,7 +339,7 @@ Changes the position of an item. This includes the associated object and button.
 Boolean to indicate success or failure.
 */
 
-forward GetItemRot(itemid, &Float:rx, &Float:ry, &Float:rz);
+forward GetItemRot(Item:itemid, &Float:rx, &Float:ry, &Float:rz);
 /*
 # Description
 Returns the rotation of a world item.
@@ -348,7 +348,7 @@ Returns the rotation of a world item.
 Boolean to indicate success or failure.
 */
 
-forward SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults = false);
+forward SetItemRot(Item:itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults = false);
 /*
 # Description
 Sets the rotation of a world item object.
@@ -360,7 +360,7 @@ Sets the rotation of a world item object.
 Boolean to indicate success or failure.
 */
 
-forward SetItemWorld(itemid, world);
+forward SetItemWorld(Item:itemid, world);
 /*
 # Description
 Sets an item's virtual world.
@@ -369,13 +369,13 @@ Sets an item's virtual world.
 Boolean to indicate success or failure.
 */
 
-forward GetItemWorld(itemid);
+forward GetItemWorld(Item:itemid);
 /*
 # Description
 Returns an item's virtual world.
 */
 
-forward SetItemInterior(itemid, interior);
+forward SetItemInterior(Item:itemid, interior);
 /*
 # Description
 Sets an item's interior ID.
@@ -384,25 +384,25 @@ Sets an item's interior ID.
 Boolean to indicate success or failure.
 */
 
-forward GetItemInterior(itemid);
+forward GetItemInterior(Item:itemid);
 /*
 # Description
 Returns an item's interior ID.
 */
 
-forward SetItemHitPoints(itemid, hitpoints);
+forward SetItemHitPoints(Item:itemid, hitpoints);
 /*
 # Description
 Sets an item's hitpoint value, destroys the item if 0.
 */
 
-forward GetItemHitPoints(itemid);
+forward GetItemHitPoints(Item:itemid);
 /*
 # Description
 Returns an item's hitpoint value.
 */
 
-forward SetItemExtraData(itemid, data);
+forward SetItemExtraData(Item:itemid, data);
 /*
 # Description
 Sets the item's extra data field, this is one cell of data space allocated for
@@ -413,13 +413,13 @@ set of data to act as extra characteristics for items.
 Boolean to indicate success or failure.
 */
 
-forward GetItemExtraData(itemid);
+forward GetItemExtraData(Item:itemid);
 /*
 # Description
 Retrieves the integer assigned to the item set with SetItemExtraData.
 */
 
-forward SetItemNameExtra(itemid, const string[]);
+forward SetItemNameExtra(Item:itemid, const string[]);
 /*
 # Description
 Gives the item a unique string of text to be appended to the name in brackets.
@@ -428,7 +428,7 @@ Gives the item a unique string of text to be appended to the name in brackets.
 Boolean to indicate success or failure.
 */
 
-forward GetItemNameExtra(itemid, string[]);
+forward GetItemNameExtra(Item:itemid, string[]);
 /*
 # Description
 Retrieves the unique string of text assigned to an item.
@@ -513,13 +513,13 @@ forward GetItemTypeBone(ItemType:itemtype);
 Returns the bone that an item type will attach the mesh to.
 */
 
-forward bool:IsItemDestroying(itemid);
+forward bool:IsItemDestroying(Item:itemid);
 /*
 # Description
 Returns true in OnItemDestroy calls, use to prevent unwanted recursion.
 */
 
-forward GetItemHolder(itemid);
+forward GetItemHolder(Item:itemid);
 /*
 # Description
 Returns the ID of the player who is holding an item.
@@ -528,7 +528,7 @@ Returns the ID of the player who is holding an item.
 INVALID_PLAYER_ID if the item isn't being held by anyone.
 */
 
-forward GetPlayerItem(playerid);
+forward Item:GetPlayerItem(playerid);
 /*
 # Description
 Returns the item ID handle of the item a player is holding.
@@ -537,7 +537,7 @@ Returns the item ID handle of the item a player is holding.
 INVALID_ITEM_ID if the player isn't holding an item.
 */
 
-forward IsItemInWorld(itemid);
+forward IsItemInWorld(Item:itemid);
 /*
 # Description
 Checks if an item is in the game world regardless of whether or not the item
@@ -545,7 +545,7 @@ exists at all (in other words, the function returning false gives no indication
 of whether or not the item is not in the world or just doesn't exist)
 */
 
-forward GetItemFromButtonID(Button:buttonid);
+forward Item:GetItemFromButtonID(Button:buttonid);
 /*
 # Description
 Returns the item ID associated with the specified button ID (if any).
@@ -554,7 +554,7 @@ Returns the item ID associated with the specified button ID (if any).
 INVALID_ITEM_ID if the button is not associated with any item.
 */
 
-forward GetItemName(itemid, string[]);
+forward GetItemName(Item:itemid, string[]);
 /*
 # Description
 Returns the name of the type of the specified item ID and appends the unique
@@ -564,14 +564,14 @@ text assigned to the item to the end.
 Boolean to indicate success or failure.
 */
 
-forward GetPlayerInteractingItem(playerid);
+forward Item:GetPlayerInteractingItem(playerid);
 /*
 # Description
 Returns the ID handle of the item that <playerid> is interacting with. This
 means either picking up, dropping or giving.
 */
 
-forward GetPlayerNearbyItems(playerid, list[]);
+forward GetPlayerNearbyItems(playerid, Item:list[]);
 /*
 # Description:
 Stores a list of items the player is within interaction range of into <list>.
@@ -584,7 +584,7 @@ Returns the next item ID in the index that is unused. Useful for determining
 what ID an item will have before calling CreateItem and thus OnItemCreated.
 */
 
-forward GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, items[], maxitems = sizeof(items));
+forward GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, Item:items[], maxitems = sizeof(items));
 /*
 # Description:
 Returns a list of items in range of the specified point. Uses streamer cells so
@@ -601,67 +601,67 @@ forward OnItemTypeDefined(uname[]);
 After an item type is defined.
 */
 
-forward OnItemCreate(itemid);
+forward OnItemCreate(Item:itemid);
 /*
 # Called
 As an item is created.
 */
 
-forward OnItemCreated(itemid);
+forward OnItemCreated(Item:itemid);
 /*
 # Called
 After an item is created.
 */
 
-forward OnItemDestroy(itemid);
+forward OnItemDestroy(Item:itemid);
 /*
 # Called
 Before an item is destroyed, the itemid is still valid and existing.
 */
 
-forward OnItemDestroyed(itemid);
+forward OnItemDestroyed(Item:itemid);
 /*
 # Called
 After an item is destroyed, itemid is now invalid.
 */
 
-forward OnItemCreateInWorld(itemid);
+forward OnItemCreateInWorld(Item:itemid);
 /*
 # Called
 After an existing (already created with CreateItem) item is created in the game world (for instance, after a player drops the item, or directly after it is created with CreateItem)
 */
 
-forward OnItemRemoveFromWorld(itemid);
+forward OnItemRemoveFromWorld(Item:itemid);
 /*
 # Called
 After an item is removed from the world either by being given to a player or by calling RemoveItemFromWorld
 */
 
-forward OnPlayerUseItem(playerid, itemid);
+forward OnPlayerUseItem(playerid, Item:itemid);
 /*
 # Called
 When a player presses F/Enter while holding an item.
 */
 
-forward OnPlayerUseItemWithItem(playerid, itemid, withitemid);
+forward OnPlayerUseItemWithItem(playerid, Item:itemid, withitemid);
 /*
 # Called
 When a player uses a held item with an item in the world.
 */
 
-forward OnPlayerUseItemWithButton(playerid, buttonid, itemid);
+forward OnPlayerUseItemWithButton(playerid, buttonid, Item:itemid);
 /*
 # Called
 When a player uses an item while in the area of a button from an item that is in the game world.
 */
 
-forward OnPlayerRelButtonWithItem(playerid, buttonid, itemid);
+forward OnPlayerRelButtonWithItem(playerid, buttonid, Item:itemid);
 /*
 # Called
 When a player releases the interact key after calling OnPlayerUseItemWithButton.
 */
 
-forward OnPlayerPickUpItem(playerid, itemid);
+forward OnPlayerPickUpItem(playerid, Item:itemid);
 /*
 # Called
 When a player presses the button to pick up an item.
@@ -670,7 +670,7 @@ When a player presses the button to pick up an item.
 1 To cancel the pickup request, no animation will play.
 */
 
-forward OnPlayerPickedUpItem(playerid, itemid);
+forward OnPlayerPickedUpItem(playerid, Item:itemid);
 /*
 # Called
 When a player finishes the picking up animation.
@@ -679,13 +679,13 @@ When a player finishes the picking up animation.
 1 To cancel giving the item ID to the player.
 */
 
-forward OnPlayerGetItem(playerid, itemid);
+forward OnPlayerGetItem(playerid, Item:itemid);
 /*
 # Called
 When a player acquires an item from any source.
 */
 
-forward OnPlayerDropItem(playerid, itemid);
+forward OnPlayerDropItem(playerid, Item:itemid);
 /*
 # Called
 When a player presses the button to drop an item.
@@ -694,13 +694,13 @@ When a player presses the button to drop an item.
 1 To cancel the drop, no animation will play and the player will keep their item.
 */
 
-forward OnPlayerDroppedItem(playerid, itemid);
+forward OnPlayerDroppedItem(playerid, Item:itemid);
 /*
 # Called
 When a player finishes the animation for dropping an item.
 */
 
-forward OnPlayerGiveItem(playerid, targetid, itemid);
+forward OnPlayerGiveItem(playerid, targetid, Item:itemid);
 /*
 # Called
 When a player presses the button to give an item to another player.
@@ -709,7 +709,7 @@ When a player presses the button to give an item to another player.
 1 To cancel the give request, no animations will play.
 */
 
-forward OnPlayerGivenItem(playerid, targetid, itemid);
+forward OnPlayerGivenItem(playerid, targetid, Item:itemid);
 /*
 # Called
 When a player finishes the animation for giving an item to another player.
@@ -718,19 +718,19 @@ When a player finishes the animation for giving an item to another player.
 1 To cancel removing the item from the giver and the target receiving the item.
 */
 
-forward OnItemRemovedFromPlayer(playerid, itemid);
+forward OnItemRemovedFromPlayer(playerid, Item:itemid);
 /*
 # Called
 When an item is removed from a player's hands without him dropping it (through a script action)
 */
 
-forward OnItemNameRender(itemid, ItemType:itemtype);
+forward OnItemNameRender(Item:itemid, ItemType:itemtype);
 /*
 # Called
 When the function GetItemName is called, so an additional piece of text can be added to items giving more information unique to that specific item.
 */
 
-forward OnItemHitPointsUpdate(itemid, oldvalue, newvalue);
+forward OnItemHitPointsUpdate(Item:itemid, oldvalue, newvalue);
 /*
 # Called
 When an item's hitpoints value is changed.
@@ -799,10 +799,13 @@ static
 bool:		itm_Destroying		[ITM_MAX],
 			itm_Interactor		[ITM_MAX],
 			itm_Holder			[ITM_MAX];
+
+const ITM_ITER_SIZE = _:ITM_MAX;
+
 new
-   Iterator:itm_Index<ITM_MAX>,
-   Iterator:itm_WorldIndex<ITM_MAX>,
-			itm_ButtonIndex[BTN_MAX]
+   Iterator:itm_Index<ITM_ITER_SIZE>,
+   Iterator:itm_WorldIndex<ITM_ITER_SIZE>,
+       Item:itm_ButtonIndex[BTN_MAX]
 	#if defined DEBUG_LABELS_ITEM
 		,
 			itm_DebugLabelType,
@@ -817,9 +820,9 @@ static
 			itm_TypeTotal;
 
 static
-			itm_Holding			[MAX_PLAYERS],
+Item:		itm_Holding			[MAX_PLAYERS],
 			itm_LongPickupTick	[MAX_PLAYERS],
-			itm_Interacting		[MAX_PLAYERS],
+Item:		itm_Interacting		[MAX_PLAYERS],
 Button:		itm_CurrentButton	[MAX_PLAYERS],
 Timer:		itm_InteractTimer	[MAX_PLAYERS],
 Timer:		itm_LongPickupTimer	[MAX_PLAYERS];
@@ -846,7 +849,7 @@ hook OnScriptInit()
 		itm_Interacting[i] = INVALID_ITEM_ID;
 	}
 
-	for(new i; i < ITM_MAX; i++)
+	for(new Item:i; i < ITM_MAX; i++)
 	{
 		itm_Holder[i] = INVALID_PLAYER_ID;
 	}
@@ -887,12 +890,12 @@ hook OnPlayerDisconnect(playerid, reason)
 ==============================================================================*/
 
 
-stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, const geid[] = "", hitpoints = -1)
+stock Item:CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, const geid[] = "", hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[CreateItem] %d %f %f %f");
-	new itemid = Iter_Free(itm_Index);
+	new Item:itemid = Item:Iter_Free(itm_Index);
 
-	if(itemid == -1)
+	if(_:itemid == ITER_NONE)
 	{
 		print("ERROR: ITM_MAX reached, please increase this constant!");
 		return INVALID_ITEM_ID;
@@ -905,10 +908,10 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	}
 
 
-	Iter_Add(itm_Index, itemid);
+	Iter_Add(itm_Index, _:itemid);
 
 	if(geid[0] == EOS)
-		mkgeid(itemid, itm_Data[itemid][itm_geid]);
+		mkgeid(_:itemid, itm_Data[itemid][itm_geid]);
 
 	else
 		strcat(itm_Data[itemid][itm_geid], geid, GEID_LEN);
@@ -919,22 +922,22 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[CreateItem] GEID: '%s' Type: '%s' Pos: %f, %f, %f", itm_Data[itemid][itm_geid], itm_TypeData[itm_Data[itemid][itm_type]][itm_uname], x, y, z);
 
-	CallLocalFunction("OnItemCreate", "d", itemid);
+	CallLocalFunction("OnItemCreate", "d", _:itemid);
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return INVALID_ITEM_ID;
 
 	if(x == 0.0 && y == 0.0 && z == 0.0)
 		virtual = 1;
 
 	#if defined DEBUG_LABELS_ITEM
-		itm_DebugLabelID[itemid] = CreateDebugLabel(itm_DebugLabelType, itemid, x, y, z);
+		itm_DebugLabelID[itemid] = CreateDebugLabel(itm_DebugLabelType, _:itemid, x, y, z);
 	#endif
 
 	if(!virtual)
 		CreateItemInWorld(itemid, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets, hitpoints);
 
-	CallLocalFunction("OnItemCreated", "d", itemid);
+	CallLocalFunction("OnItemCreated", "d", _:itemid);
 
 	#if defined DEBUG_LABELS_ITEM
 		UpdateItemDebugLabel(itemid);
@@ -943,10 +946,10 @@ stock CreateItem(ItemType:type, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Flo
 	return itemid;
 }
 
-stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
+stock DestroyItem(Item:itemid, &indexid = -1, &worldindexid = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[DestroyItem]");
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	if(itm_Destroying[itemid])
@@ -954,7 +957,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 
 	itm_Destroying[itemid] = true;
 
-	CallLocalFunction("OnItemDestroy", "d", itemid);
+	CallLocalFunction("OnItemDestroy", "d", _:itemid);
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
@@ -966,7 +969,7 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 		itm_Interacting[itm_Holder[itemid]] = INVALID_ITEM_ID;
 		stop itm_InteractTimer[itm_Holder[itemid]];
 	}
-	else if(Iter_Contains(itm_WorldIndex, itemid))
+	else if(Iter_Contains(itm_WorldIndex, _:itemid))
 	{
 		DestroyDynamicObject(itm_Data[itemid][itm_objId]);
 		DestroyButton(itm_Data[itemid][itm_button]);
@@ -980,10 +983,10 @@ stock DestroyItem(itemid, &indexid = -1, &worldindexid = -1)
 	itm_Holder[itemid] = INVALID_PLAYER_ID;
 	itm_Interactor[itemid] = INVALID_PLAYER_ID;
 
-	Iter_SafeRemove(itm_Index, itemid, indexid);
-	Iter_SafeRemove(itm_WorldIndex, itemid, worldindexid);
+	Iter_SafeRemove(itm_Index, _:itemid, indexid);
+	Iter_SafeRemove(itm_WorldIndex, _:itemid, worldindexid);
 
-	CallLocalFunction("OnItemDestroyed", "d", itemid);
+	CallLocalFunction("OnItemDestroyed", "d", _:itemid);
 
 	#if defined DEBUG_LABELS_ITEM
 		UpdateItemDebugLabel(itemid);
@@ -1047,13 +1050,13 @@ stock ItemType:DefineItemType(const name[], const uname[], model, size, Float:ro
 	return id;
 }
 
-stock PlayerPickUpItem(playerid, itemid)
+stock PlayerPickUpItem(playerid, Item:itemid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[PlayerPickUpItem]")<playerid>;
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
-	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 		return 0;
 
 	new
@@ -1075,7 +1078,7 @@ stock PlayerPickUpItem(playerid, itemid)
 		else
 			ApplyAnimation(playerid, "CASINO", "SLOT_PLYR", 4.0, 0, 0, 0, 0, 0);
 
-		itm_InteractTimer[playerid] = defer PickUpItemDelay(playerid, itemid, 1);
+		itm_InteractTimer[playerid] = defer PickUpItemDelay(playerid, _:itemid, 1);
 	}
 	else
 	{
@@ -1085,7 +1088,7 @@ stock PlayerPickUpItem(playerid, itemid)
 		else
 			ApplyAnimation(playerid, "BOMBER", "BOM_PLANT_IN", 5.0, 0, 0, 0, 0, 450);
 
-		itm_InteractTimer[playerid] = defer PickUpItemDelay(playerid, itemid, 0);
+		itm_InteractTimer[playerid] = defer PickUpItemDelay(playerid, _:itemid, 0);
 	}
 
 	itm_Interacting[playerid] = itemid;
@@ -1097,10 +1100,10 @@ stock PlayerPickUpItem(playerid, itemid)
 stock PlayerDropItem(playerid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[PlayerDropItem]")<playerid>;
-	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(!Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 		return 0;
 
-	if(CallLocalFunction("OnPlayerDropItem", "dd", playerid, itm_Holding[playerid]))
+	if(CallLocalFunction("OnPlayerDropItem", "dd", playerid, _:itm_Holding[playerid]))
 		return 0;
 
 	if(itm_TypeData[itm_Data[itm_Holding[playerid]][itm_type]][itm_useCarryAnim])
@@ -1120,21 +1123,21 @@ stock PlayerGiveItem(playerid, targetid, call = true)
 	if(!(0 <= playerid < MAX_PLAYERS))
 		return 0;
 
-	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(!Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 		return 0;
 
-	new itemid = itm_Holding[playerid];
+	new Item:itemid = itm_Holding[playerid];
 
 	if(call)
 	{
-		if(CallLocalFunction("OnPlayerGiveItem", "ddd", playerid, targetid, itemid))
+		if(CallLocalFunction("OnPlayerGiveItem", "ddd", playerid, targetid, _:itemid))
 			return 0;
 	}
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
-	if(Iter_Contains(itm_Index, itm_Holding[targetid]))
+	if(Iter_Contains(itm_Index, _:itm_Holding[targetid]))
 		return 0;
 
 	new
@@ -1164,8 +1167,8 @@ stock PlayerGiveItem(playerid, targetid, call = true)
 		SetPlayerSpecialAction(targetid, SPECIAL_ACTION_CARRY);
 	}
 
-	itm_Interacting[playerid]	= targetid;
-	itm_Interacting[targetid]	= playerid;
+	itm_Interacting[playerid]	= itemid;
+	itm_Interacting[targetid]	= itemid;
 	itm_Holder[itemid]			= playerid;
 
 	itm_InteractTimer[playerid] = defer GiveItemDelay(playerid, targetid);
@@ -1179,10 +1182,10 @@ stock PlayerUseItem(playerid)
 	return internal_OnPlayerUseItem(playerid, itm_Holding[playerid]);
 }
 
-stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
+stock GiveWorldItemToPlayer(playerid, Item:itemid, call = 1)
 {
-	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[GiveWorldItemToPlayer] playerid: %d itemid: %d call: %d", playerid, itemid, call)<playerid>;
-	if(!Iter_Contains(itm_Index, itemid))
+	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[GiveWorldItemToPlayer] playerid: %d itemid: %d call: %d", playerid, _:itemid, call)<playerid>;
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	RemoveItemFromWorld(itemid);
@@ -1212,11 +1215,11 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 	if(call)
 	{
 		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Calling OnPlayerGetItem")<playerid>;
-		if(CallLocalFunction("OnPlayerGetItem", "dd", playerid, itemid))
+		if(CallLocalFunction("OnPlayerGetItem", "dd", playerid, _:itemid))
 			return 0;
 
 		sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Checking if item still exists")<playerid>;
-		if(!Iter_Contains(itm_Index, itemid))
+		if(!Iter_Contains(itm_Index, _:itemid))
 		{
 			sif_dp:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[GiveWorldItemToPlayer] Item does not exist, end of function")<playerid>;
 			return 0;
@@ -1227,16 +1230,16 @@ stock GiveWorldItemToPlayer(playerid, itemid, call = 1)
 	return 1;
 }
 
-stock RemoveCurrentItem(playerid)
+stock Item:RemoveCurrentItem(playerid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[RemoveCurrentItem]")<playerid>;
 	if(!(0 <= playerid < MAX_PLAYERS))
 		return INVALID_ITEM_ID;
 
-	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(!Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 		return INVALID_ITEM_ID;
 
-	new itemid = itm_Holding[playerid];
+	new Item:itemid = itm_Holding[playerid];
 
 	RemovePlayerAttachedObject(playerid, ITM_ATTACH_INDEX);
 	SetPlayerSpecialAction(playerid, SPECIAL_ACTION_NONE);
@@ -1246,13 +1249,13 @@ stock RemoveCurrentItem(playerid)
 	itm_Holder[itemid] = INVALID_PLAYER_ID;
 	itm_Interactor[itemid] = INVALID_PLAYER_ID;
 
-	CallLocalFunction("OnItemRemovedFromPlayer", "dd", playerid, itemid);
+	CallLocalFunction("OnItemRemovedFromPlayer", "dd", playerid, _:itemid);
 
 	return itemid;
 
 }
 
-stock RemoveItemFromWorld(itemid)
+stock RemoveItemFromWorld(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[RemoveItemFromWorld]");
 	if(!Iter_Contains(itm_Index, _:itemid))
@@ -1263,7 +1266,7 @@ stock RemoveItemFromWorld(itemid)
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 	{
-		printf("[RemoveItemFromWorld] ERROR: Player %d was holding item %d that was in the world.", itm_Holder[itemid], itemid);
+		printf("[RemoveItemFromWorld] ERROR: Player %d was holding item %d that was in the world.", itm_Holder[itemid], _:itemid);
 		RemoveCurrentItem(itm_Holder[itemid]);
 	}
 
@@ -1279,9 +1282,9 @@ stock RemoveItemFromWorld(itemid)
 	itm_Data[itemid][itm_button] = INVALID_BUTTON_ID;
 
 	sif_d:SIF_DEBUG_LEVEL_CORE_DEEP:ITEM_DEBUG("[RemoveItemFromWorld] Removing item from world index");
-	Iter_Remove(itm_WorldIndex, itemid);
+	Iter_Remove(itm_WorldIndex, _:itemid);
 
-	CallRemoteFunction("OnItemRemoveFromWorld", "d", itemid);
+	CallRemoteFunction("OnItemRemoveFromWorld", "d", _:itemid);
 
 	#if defined DEBUG_LABELS_ITEM
 		UpdateItemDebugLabel(itemid);
@@ -1290,12 +1293,12 @@ stock RemoveItemFromWorld(itemid)
 	return 1;
 }
 
-stock AllocNextItemID(ItemType:type, const geid[] = "")
+stock Item:AllocNextItemID(ItemType:type, const geid[] = "")
 {
 	sif_d:SIF_DEBUG_LEVEL_CORE:ITEM_DEBUG("[AllocNextItemID]");
-	new id = Iter_Free(itm_Index);
+	new Item:id = Item:Iter_Free(itm_Index);
 
-	if(id == -1)
+	if(_:id == ITER_NONE)
 	{
 		print("ERROR: ITM_MAX reached, please increase this constant!");
 		return INVALID_ITEM_ID;
@@ -1304,15 +1307,15 @@ stock AllocNextItemID(ItemType:type, const geid[] = "")
 	if(!IsValidItemType(type))
 	{
 		printf("ERROR: Item creation with undefined typeid (%d) failed.", _:type);
-		return -2;
+		return INVALID_ITEM_ID;
 	}
 
 	itm_Data[id][itm_type] = type;
 
-	Iter_Add(itm_Index, id);
+	Iter_Add(itm_Index, _:id);
 
 	if(geid[0] == EOS)
-		mkgeid(id, itm_Data[id][itm_geid]);
+		mkgeid(_:id, itm_Data[id][itm_geid]);
 
 	else
 		strcat(itm_Data[id][itm_geid], geid, GEID_LEN);
@@ -1320,17 +1323,17 @@ stock AllocNextItemID(ItemType:type, const geid[] = "")
 	return id;
 }
 
-stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1)
+stock CreateItem_ExplicitID(Item:itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0, Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0, world = 0, interior = 0, label = 1, applyrotoffsets = 1, virtual = 0, hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItem_ExplicitID]");
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	itm_TypeCount[itm_Data[itemid][itm_type]]++;
 
-	CallLocalFunction("OnItemCreate", "d", itemid);
+	CallLocalFunction("OnItemCreate", "d", _:itemid);
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	if(x == 0.0 && y == 0.0 && z == 0.0)
@@ -1341,58 +1344,58 @@ stock CreateItem_ExplicitID(itemid, Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	if(!virtual)
 		CreateItemInWorld(itemid, x, y, z, rx, ry, rz, world, interior, label, applyrotoffsets, hitpoints);
 
-	CallLocalFunction("OnItemCreated", "d", itemid);
+	CallLocalFunction("OnItemCreated", "d", _:itemid);
 
 	#if defined DEBUG_LABELS_ITEM
-		itm_DebugLabelID[itemid] = CreateDebugLabel(itm_DebugLabelType, itemid, x, y, z);
+		itm_DebugLabelID[itemid] = CreateDebugLabel(itm_DebugLabelType, _:itemid, x, y, z);
 		UpdateItemDebugLabel(itemid);
 	#endif
 
 	return 1;
 }
 
-stock IsValidItem(itemid)
+stock IsValidItem(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsValidItem]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	return 1;
 }
 
 // itm_objId
-stock GetItemObjectID(itemid)
+stock GetItemObjectID(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemObjectID]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return INVALID_OBJECT_ID;
 
-	if(!Iter_Contains(itm_WorldIndex, itemid))
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
 		return INVALID_OBJECT_ID;
 
 	return itm_Data[itemid][itm_objId];
 }
 
 // itm_button
-stock Button:GetItemButtonID(itemid)
+stock Button:GetItemButtonID(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemButtonID]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return INVALID_BUTTON_ID;
 
-	if(!Iter_Contains(itm_WorldIndex, itemid))
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
 		return INVALID_BUTTON_ID;
 
 	return itm_Data[itemid][itm_button];
 }
-stock SetItemLabel(itemid, const text[], colour = 0xFFFF00FF, Float:range = 10.0)
+stock SetItemLabel(Item:itemid, const text[], colour = 0xFFFF00FF, Float:range = 10.0)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemLabel]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	SetButtonLabel(itm_Data[itemid][itm_button], text, colour, range);
@@ -1411,11 +1414,11 @@ stock GetItemTypeCount(ItemType:itemtype)
 }
 
 // itm_type
-stock ItemType:GetItemType(itemid)
+stock ItemType:GetItemType(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemType]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return INVALID_ITEM_TYPE;
 
 	return itm_Data[itemid][itm_type];
@@ -1424,11 +1427,11 @@ stock ItemType:GetItemType(itemid)
 // itm_posX
 // itm_posY
 // itm_posZ
-stock GetItemPos(itemid, &Float:x, &Float:y, &Float:z)
+stock GetItemPos(Item:itemid, &Float:x, &Float:y, &Float:z)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemPos]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	x = itm_Data[itemid][itm_posX];
@@ -1437,11 +1440,11 @@ stock GetItemPos(itemid, &Float:x, &Float:y, &Float:z)
 
 	return 1;
 }
-stock SetItemPos(itemid, Float:x, Float:y, Float:z)
+stock SetItemPos(Item:itemid, Float:x, Float:y, Float:z)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemPos]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	itm_Data[itemid][itm_posX] = x;
@@ -1457,11 +1460,11 @@ stock SetItemPos(itemid, Float:x, Float:y, Float:z)
 
 	return 1;
 }
-stock GetItemRot(itemid, &Float:rx, &Float:ry, &Float:rz)
+stock GetItemRot(Item:itemid, &Float:rx, &Float:ry, &Float:rz)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemRot]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	rx = itm_Data[itemid][itm_rotX];
@@ -1470,14 +1473,14 @@ stock GetItemRot(itemid, &Float:rx, &Float:ry, &Float:rz)
 
 	return 1;
 }
-stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults = false)
+stock SetItemRot(Item:itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults = false)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemRot]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
-	if(!Iter_Contains(itm_WorldIndex, itemid))
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
 		return 0;
 
 	if(offsetfromdefaults)
@@ -1500,14 +1503,14 @@ stock SetItemRot(itemid, Float:rx, Float:ry, Float:rz, bool:offsetfromdefaults =
 }
 
 // itm_world
-stock SetItemWorld(itemid, world)
+stock SetItemWorld(Item:itemid, world)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemWorld]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return -1;
 
-	if(!Iter_Contains(itm_WorldIndex, itemid))
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
 		return -1;
 
 	SetButtonWorld(itm_Data[itemid][itm_button], world);
@@ -1515,28 +1518,28 @@ stock SetItemWorld(itemid, world)
 
 	return 1;
 }
-stock GetItemWorld(itemid)
+stock GetItemWorld(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemWorld]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return -1;
 
-	if(!Iter_Contains(itm_WorldIndex, itemid))
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
 		return -1;
 
 	return itm_Data[itemid][itm_world];
 }
 
 // itm_interior
-stock SetItemInterior(itemid, interior)
+stock SetItemInterior(Item:itemid, interior)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemInterior]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return -1;
 
-	if(!Iter_Contains(itm_WorldIndex, itemid))
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
 		return -1;
 
 	SetButtonInterior(itm_Data[itemid][itm_button], interior);
@@ -1544,32 +1547,32 @@ stock SetItemInterior(itemid, interior)
 
 	return 1;
 }
-stock GetItemInterior(itemid)
+stock GetItemInterior(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemInterior]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return -1;
 
-	if(!Iter_Contains(itm_WorldIndex, itemid))
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
 		return -1;
 
 	return itm_Data[itemid][itm_interior];
 }
 
 // itm_hitPoints
-stock SetItemHitPoints(itemid, hitpoints)
+stock SetItemHitPoints(Item:itemid, hitpoints)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemHitPoints]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	new old = itm_Data[itemid][itm_hitPoints];
 
 	itm_Data[itemid][itm_hitPoints] = hitpoints;
 
-	CallLocalFunction("OnItemHitPointsUpdate", "ddd", itemid, old, hitpoints);
+	CallLocalFunction("OnItemHitPointsUpdate", "ddd", _:itemid, old, hitpoints);
 
 	#if defined DEBUG_LABELS_ITEM
 		UpdateItemDebugLabel(itemid);
@@ -1580,22 +1583,22 @@ stock SetItemHitPoints(itemid, hitpoints)
 
 	return 1;
 }
-stock GetItemHitPoints(itemid)
+stock GetItemHitPoints(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemHitPoints]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	return itm_Data[itemid][itm_hitPoints];
 }
 
 // itm_exData
-stock SetItemExtraData(itemid, data)
+stock SetItemExtraData(Item:itemid, data)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemExtraData]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	#if defined DEBUG_LABELS_ITEM
@@ -1606,22 +1609,22 @@ stock SetItemExtraData(itemid, data)
 
 	return 1;
 }
-stock GetItemExtraData(itemid)
+stock GetItemExtraData(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemExtraData]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	return itm_Data[itemid][itm_exData];
 }
 
 // itm_nameEx
-stock SetItemNameExtra(itemid, const string[])
+stock SetItemNameExtra(Item:itemid, const string[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[SetItemNameExtra]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	itm_Data[itemid][itm_nameEx][0] = EOS;
@@ -1630,11 +1633,11 @@ stock SetItemNameExtra(itemid, const string[])
 	return 1;
 }
 
-stock GetItemNameExtra(itemid, string[])
+stock GetItemNameExtra(Item:itemid, string[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemNameExtra]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	string[0] = EOS;
@@ -1644,11 +1647,11 @@ stock GetItemNameExtra(itemid, string[])
 }
 
 // itm_geid
-stock GetItemGEID(itemid, string[])
+stock GetItemGEID(Item:itemid, string[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemGEID]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	string[0] = EOS;
@@ -1806,11 +1809,11 @@ stock GetItemTypeMaxHitPoints(ItemType:itemtype)
 }
 
 // itm_Destroying
-stock bool:IsItemDestroying(itemid)
+stock bool:IsItemDestroying(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsItemDestroying]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return false;
 
 
@@ -1818,22 +1821,22 @@ stock bool:IsItemDestroying(itemid)
 }
 
 // itm_Holder
-stock GetItemHolder(itemid)
+stock GetItemHolder(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemHolder]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return INVALID_PLAYER_ID;
 
 	return itm_Holder[itemid];
 }
 
 // itm_Holding
-stock GetPlayerItem(playerid)
+stock Item:GetPlayerItem(playerid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetPlayerItem]")<playerid>;
 
-	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(!Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 		return INVALID_ITEM_ID;
 
 	if(!(0 <= playerid < MAX_PLAYERS))
@@ -1842,18 +1845,18 @@ stock GetPlayerItem(playerid)
 	return itm_Holding[playerid];
 }
 
-stock IsItemInWorld(itemid)
+stock IsItemInWorld(Item:itemid)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[IsItemInWorld]");
 
-	if(!Iter_Contains(itm_WorldIndex, itemid))
+	if(!Iter_Contains(itm_WorldIndex, _:itemid))
 		return 0;
 
 	return 1;
 }
 
 // itm_ButtonIndex
-stock GetItemFromButtonID(Button:buttonid)
+stock Item:GetItemFromButtonID(Button:buttonid)
 {
 	if(!IsValidButton(buttonid))
 		return INVALID_ITEM_ID;
@@ -1861,17 +1864,17 @@ stock GetItemFromButtonID(Button:buttonid)
 	return itm_ButtonIndex[buttonid];
 }
 
-stock GetItemName(itemid, string[])
+stock GetItemName(Item:itemid, string[])
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetItemName]");
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	string[0] = EOS;
 	strcat(string, itm_TypeData[itm_Data[itemid][itm_type]][itm_name], ITM_MAX_NAME);
 
-	CallLocalFunction("OnItemNameRender", "dd", itemid, _:itm_Data[itemid][itm_type]);
+	CallLocalFunction("OnItemNameRender", "dd", _:itemid, _:itm_Data[itemid][itm_type]);
 
 	if(!isnull(itm_Data[itemid][itm_nameEx]))
 	{
@@ -1883,7 +1886,7 @@ stock GetItemName(itemid, string[])
 	return 1;
 }
 
-stock GetPlayerInteractingItem(playerid)
+stock Item:GetPlayerInteractingItem(playerid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetPlayerInteractingItem]")<playerid>;
 
@@ -1893,7 +1896,7 @@ stock GetPlayerInteractingItem(playerid)
 	return itm_Interacting[playerid];
 }
 
-stock GetPlayerNearbyItems(playerid, list[])
+stock GetPlayerNearbyItems(playerid, Item:list[])
 {
 	new
 		Button:buttons[BTN_MAX_INRANGE],
@@ -1904,7 +1907,7 @@ stock GetPlayerNearbyItems(playerid, list[])
 
 	for(new i; i < buttoncount; ++i)
 	{
-		if(Iter_Contains(itm_Index, itm_ButtonIndex[buttons[i]]))
+		if(Iter_Contains(itm_Index, _:itm_ButtonIndex[buttons[i]]))
 			list[itemcount++] = itm_ButtonIndex[buttons[i]];
 	}
 
@@ -1918,13 +1921,13 @@ stock GetNextItemID()
 	return Iter_Free(itm_Index);
 }
 
-stock GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, items[], maxitems = sizeof(items))
+stock GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, Item:items[], maxitems = sizeof(items))
 {
 	new
 		streamer_items[256],
 		streamer_count,
 		data[2],
-		itemid,
+		Item:itemid,
 		count;
 
 	streamer_count = Streamer_GetNearbyItems(x, y, z, STREAMER_TYPE_AREA, streamer_items, .range = range);
@@ -1953,16 +1956,16 @@ stock GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, items[], m
 ==============================================================================*/
 
 
-CreateItemInWorld(itemid,
+CreateItemInWorld(Item:itemid,
 	Float:x = 0.0, Float:y = 0.0, Float:z = 0.0,
 	Float:rx = 0.0, Float:ry = 0.0, Float:rz = 0.0,
 	world = 0, interior = 0, label = 1, applyrotoffsets = 1, hitpoints = -1)
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[CreateItemInWorld]");
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
-	if(Iter_Contains(itm_WorldIndex, itemid))
+	if(Iter_Contains(itm_WorldIndex, _:itemid))
 		return -1;
 
 	new ItemType:itemtype = itm_Data[itemid][itm_type];
@@ -2012,7 +2015,7 @@ CreateItemInWorld(itemid,
 
 	if(itm_Data[itemid][itm_button] == INVALID_BUTTON_ID)
 	{
-		printf("ERROR: Invalid button ID created for item %d.", itemid);
+		printf("ERROR: Invalid button ID created for item %d.", _:itemid);
 		return -3;
 	}
 
@@ -2024,9 +2027,9 @@ CreateItemInWorld(itemid,
 	if(label)
 		SetButtonLabel(itm_Data[itemid][itm_button], itm_TypeData[itemtype][itm_name], .range = 2.0, .testlos = false);
 
-	Iter_Add(itm_WorldIndex, itemid);
+	Iter_Add(itm_WorldIndex, _:itemid);
 
-	CallLocalFunction("OnItemCreateInWorld", "d", itemid);
+	CallLocalFunction("OnItemCreateInWorld", "d", _:itemid);
 
 	#if defined DEBUG_LABELS_ITEM
 		UpdateItemDebugLabel(itemid);
@@ -2069,7 +2072,7 @@ _PlayerKeyHandle_Drop(playerid)
 	if(itm_Interacting[playerid] != INVALID_ITEM_ID)
 		return -1;
 
-	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(!Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 		return -2;
 
 	// TODO: Replace this bit with some more abstracted code
@@ -2112,7 +2115,7 @@ _PlayerKeyHandle_Use(playerid)
 	if(itm_Interacting[playerid] != INVALID_ITEM_ID)
 		return 0;
 
-	if(!Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(!Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 		return 0;
 
 	return PlayerUseItem(playerid);
@@ -2130,7 +2133,7 @@ _PlayerKeyHandle_Release(playerid)
 		if(itm_CurrentButton[playerid] != INVALID_BUTTON_ID)
 		{
 			sif_d:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[_PlayerKeyHandle_Release] itm_CurrentButton valid");
-			CallLocalFunction("OnPlayerRelButtonWithItem", "ddd", playerid, _:itm_CurrentButton[playerid], itm_Holding[playerid]);
+			CallLocalFunction("OnPlayerRelButtonWithItem", "ddd", playerid, _:itm_CurrentButton[playerid], _:itm_Holding[playerid]);
 			itm_CurrentButton[playerid] = INVALID_BUTTON_ID;
 		}
 
@@ -2149,7 +2152,7 @@ _PlayerKeyHandle_Release(playerid)
 
 	// If the interval is below 200 it's a tap event, counts as using an item.
 	if(interval < 200)
-		CallLocalFunction("OnPlayerUseItem", "dd", playerid, itm_Interacting[playerid]);
+		CallLocalFunction("OnPlayerUseItem", "dd", playerid, _:itm_Interacting[playerid]);
 
 	itm_LongPickupTick[playerid] = 0;
 	itm_Interacting[playerid] = INVALID_ITEM_ID;
@@ -2160,7 +2163,7 @@ _PlayerKeyHandle_Release(playerid)
 hook OnPlayerEnterPlayerArea(playerid, targetid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerEnterPlayerArea]")<playerid>;
-	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 	{
 		ShowActionText(playerid, "Press N to give item");
 	}
@@ -2171,7 +2174,7 @@ hook OnPlayerEnterPlayerArea(playerid, targetid)
 hook OnPlayerLeavePlayerArea(playerid, targetid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerLeavePlayerArea]")<playerid>;
-	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
+	if(Iter_Contains(itm_Index, _:itm_Holding[playerid]))
 	{
 		HideActionText(playerid);
 	}
@@ -2179,7 +2182,7 @@ hook OnPlayerLeavePlayerArea(playerid, targetid)
 	return 1;
 }
 
-internal_OnPlayerUseItem(playerid, itemid)
+internal_OnPlayerUseItem(playerid, Item:itemid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[internal_OnPlayerUseItem]")<playerid>;
 	new Button:buttonid = GetPlayerButtonID(playerid);
@@ -2189,14 +2192,14 @@ internal_OnPlayerUseItem(playerid, itemid)
 		sif_dp:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[internal_OnPlayerUseItem] Player at button")<playerid>;
 		itm_CurrentButton[playerid] = buttonid;
 
-		if(CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, _:buttonid, itm_Holding[playerid]))
+		if(CallLocalFunction("OnPlayerUseItemWithButton", "ddd", playerid, _:buttonid, _:itm_Holding[playerid]))
 		{
 			sif_dp:SIF_DEBUG_LEVEL_INTERNAL_DEEP:ITEM_DEBUG("[internal_OnPlayerUseItem] OnPlayerUseItemWithButton returned nonzero")<playerid>;
 			return 1;
 		}
 	}
 
-	return CallLocalFunction("OnPlayerUseItem", "dd", playerid, itemid);
+	return CallLocalFunction("OnPlayerUseItem", "dd", playerid, _:itemid);
 }
 
 
@@ -2210,10 +2213,10 @@ hook OnButtonPress(playerid, Button:buttonid)
 	if(itm_ButtonIndex[buttonid] == INVALID_ITEM_ID)
 		return Y_HOOKS_CONTINUE_RETURN_0;
 
-	if(!Iter_Contains(itm_Index, itm_ButtonIndex[buttonid]))
+	if(!Iter_Contains(itm_Index, _:itm_ButtonIndex[buttonid]))
 		return Y_HOOKS_CONTINUE_RETURN_0;
 
-	new itemid = itm_ButtonIndex[buttonid];
+	new Item:itemid = itm_ButtonIndex[buttonid];
 
 	if(itm_Holder[itemid] != INVALID_PLAYER_ID)
 		return Y_HOOKS_CONTINUE_RETURN_0;
@@ -2221,8 +2224,8 @@ hook OnButtonPress(playerid, Button:buttonid)
 	if(itm_Interactor[itemid] != INVALID_PLAYER_ID)
 		return Y_HOOKS_CONTINUE_RETURN_0;
 
-	if(Iter_Contains(itm_Index, itm_Holding[playerid]))
-		return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, itm_Holding[playerid], itemid);
+	if(Iter_Contains(itm_Index, _:itm_Holding[playerid]))
+		return CallLocalFunction("OnPlayerUseItemWithItem", "ddd", playerid, _:itm_Holding[playerid], _:itemid);
 
 	if(itm_TypeData[itm_Data[itemid][itm_type]][itm_longPickup])
 	{
@@ -2230,7 +2233,7 @@ hook OnButtonPress(playerid, Button:buttonid)
 		return Y_HOOKS_BREAK_RETURN_1;
 	}
 
-	if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, itemid))
+	if(CallLocalFunction("OnPlayerPickUpItem", "dd", playerid, _:itemid))
 		return Y_HOOKS_BREAK_RETURN_0;
 
 	PlayerPickUpItem(playerid, itemid);
@@ -2238,14 +2241,14 @@ hook OnButtonPress(playerid, Button:buttonid)
 	return Y_HOOKS_BREAK_RETURN_1;
 }
 
-_LongPickupItem(playerid, itemid)
+_LongPickupItem(playerid, Item:itemid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[_LongPickupItem]")<playerid>;
 	itm_LongPickupTick[playerid] = GetTickCount();
 	itm_Interacting[playerid] = itemid;
 
 	stop itm_LongPickupTimer[playerid];
-	itm_LongPickupTimer[playerid] = defer _LongPickupItemDelay(playerid, itemid);
+	itm_LongPickupTimer[playerid] = defer _LongPickupItemDelay(playerid, _:itemid);
 }
 
 timer _LongPickupItemDelay[500](playerid, itemid)
@@ -2255,7 +2258,7 @@ timer _LongPickupItemDelay[500](playerid, itemid)
 
 	itm_LongPickupTick[playerid] = 0;
 	itm_Interacting[playerid] = INVALID_ITEM_ID;
-	PlayerPickUpItem(playerid, itemid);
+	PlayerPickUpItem(playerid, Item:itemid);
 }
 
 timer PickUpItemDelay[400](playerid, id, animtype)
@@ -2271,7 +2274,7 @@ timer PickUpItemDelay[400](playerid, id, animtype)
 	if(CallLocalFunction("OnPlayerPickedUpItem", "dd", playerid, id))
 		return 1;
 
-	GiveWorldItemToPlayer(playerid, id, 1);
+	GiveWorldItemToPlayer(playerid, Item:id, 1);
 	
 	return 1;
 }
@@ -2280,13 +2283,13 @@ timer DropItemDelay[400](playerid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[DropItemDelay]")<playerid>;
 	new
-		itemid = itm_Holding[playerid],
+		Item:itemid = itm_Holding[playerid],
 		Float:x,
 		Float:y,
 		Float:z,
 		Float:r;
 
-	if(!Iter_Contains(itm_Index, itemid))
+	if(!Iter_Contains(itm_Index, _:itemid))
 		return 0;
 
 	RemovePlayerAttachedObject(playerid, ITM_ATTACH_INDEX);
@@ -2311,7 +2314,7 @@ timer DropItemDelay[400](playerid)
 
 	Streamer_Update(playerid);
 
-	CallLocalFunction("OnPlayerDroppedItem", "dd", playerid, itemid);
+	CallLocalFunction("OnPlayerDroppedItem", "dd", playerid, _:itemid);
 
 	return 1;
 }
@@ -2319,19 +2322,19 @@ timer DropItemDelay[400](playerid)
 timer GiveItemDelay[500](playerid, targetid)
 {
 	sif_dp:SIF_DEBUG_LEVEL_INTERNAL:ITEM_DEBUG("[GiveItemDelay]")<playerid>;
-	if(Iter_Contains(itm_Index, itm_Holding[targetid]))
+	if(Iter_Contains(itm_Index, _:itm_Holding[targetid]))
 		return;
 
 	if(!IsPlayerConnected(targetid)) // In case the 'receiver' quits within the 500ms time window.
 		return;
 
 	new
-		itemid,
+		Item:itemid,
 		ItemType:type;
 
 	itemid = itm_Holding[playerid];
 
-	if(itemid == -1)
+	if(itemid == INVALID_ITEM_ID)
 		return;
 
 	type = itm_Data[itemid][itm_type];
@@ -2352,8 +2355,8 @@ timer GiveItemDelay[500](playerid, targetid)
 	itm_Holding[targetid] = itemid;
 	itm_Holder[itemid] = targetid;
 
-	CallLocalFunction("OnPlayerGivenItem", "ddd", playerid, targetid, itemid);
-	CallLocalFunction("OnItemRemovedFromPlayer", "dd", playerid, itemid);
+	CallLocalFunction("OnPlayerGivenItem", "ddd", playerid, targetid, _:itemid);
+	CallLocalFunction("OnItemRemovedFromPlayer", "dd", playerid, _:itemid);
 
 	return;
 }
@@ -2363,8 +2366,8 @@ timer GiveItemDelay[500](playerid, targetid)
 hook OnPlayerDeath(playerid, killerid, reason)
 {
 	sif_dp:SIF_DEBUG_LEVEL_CALLBACKS:ITEM_DEBUG("[OnPlayerDeath]")<playerid>;
-	new itemid = itm_Holding[playerid];
-	if(Iter_Contains(itm_Index, itemid))
+	new Item:itemid = itm_Holding[playerid];
+	if(Iter_Contains(itm_Index, _:itemid))
 	{
 		new
 			Float:x,
@@ -2383,7 +2386,7 @@ hook OnPlayerDeath(playerid, killerid, reason)
 			0.0, 0.0, r,
 			GetPlayerVirtualWorld(playerid), GetPlayerInterior(playerid), 1);
 
-		CallLocalFunction("OnPlayerDropItem", "dd", playerid, itemid);
+		CallLocalFunction("OnPlayerDropItem", "dd", playerid, _:itemid);
 	}
 
 	return 0;
@@ -2391,9 +2394,9 @@ hook OnPlayerDeath(playerid, killerid, reason)
 #endif
 
 #if defined DEBUG_LABELS_ITEM
-	UpdateItemDebugLabel(itemid)
+	UpdateItemDebugLabel(Item:itemid)
 	{
-		if(Iter_Contains(itm_WorldIndex, itemid))
+		if(Iter_Contains(itm_WorldIndex, _:itemid))
 		{
 			new
 				Float:x,
