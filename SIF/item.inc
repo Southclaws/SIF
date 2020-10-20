@@ -577,7 +577,7 @@ forward GetPlayerNearbyItems(playerid, Item:list[]);
 Stores a list of items the player is within interaction range of into <list>.
 */
 
-forward GetNextItemID();
+forward Item:GetNextItemID();
 /*
 # Description:
 Returns the next item ID in the index that is unused. Useful for determining
@@ -1914,11 +1914,11 @@ stock GetPlayerNearbyItems(playerid, Item:list[])
 	return itemcount;
 }
 
-stock GetNextItemID()
+stock Item:GetNextItemID()
 {
 	sif_d:SIF_DEBUG_LEVEL_INTERFACE:ITEM_DEBUG("[GetNextItemID]");
 
-	return Iter_Free(itm_Index);
+	return Item:Iter_Free(itm_Index);
 }
 
 stock GetItemsInRange(Float:x, Float:y, Float:z, Float:range = 300.0, Item:items[], maxitems = sizeof(items))
