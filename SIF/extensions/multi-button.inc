@@ -38,7 +38,7 @@ Multi-button trigger system for puzzles and the like.
 	#include "button.inc"
 #endif
 
-#include <YSI_Coding\y_iterate>
+#include <YSI_Data\y_iterate>
 #include <YSI_Coding\y_hooks>
 
 #define _SIF_MULTI_BUTTON_INCLUDED
