@@ -45,7 +45,7 @@ over inventory actions by players.
 #include "SIF/debug.inc"
 #include "SIF/item.inc"
 
-#include <YSI_Coding\y_iterate>
+#include <YSI_Data\y_iterate>
 #include <YSI_Coding\y_timers>
 #include <YSI_Coding\y_hooks>
 #include <streamer>
