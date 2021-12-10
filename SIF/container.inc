@@ -47,7 +47,7 @@ external calls to the API.
 #include "SIF/item.inc"
 #include "SIF/inventory.inc"
 
-#include <YSI_Coding\y_iterate>
+#include <YSI_Data\y_iterate>
 #include <YSI_Coding\y_timers>
 #include <YSI_Coding\y_hooks>
 #include <streamer>
