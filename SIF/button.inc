@@ -56,7 +56,7 @@ GTA:SA spinning pickups for a few reasons:
 #include "SIF/core.inc"
 #include "SIF/extensions/debug-labels.inc"
 
-#include <YSI_Coding\y_iterate>
+#include <YSI_Data\y_iterate>
 #include <YSI_Coding\y_timers>
 #include <YSI_Coding\y_hooks>
 #include <streamer>
@@ -471,7 +471,7 @@ stock Button:CreateButton(Float:x, Float:y, Float:z, const text[],
 	}
 
 	btn_Data[buttonid][btn_area] = CreateDynamicSphere(x, y, z, areasize, world, interior);
-	strcpy(btn_Data[buttonid][btn_text], text, BTN_MAX_TEXT);
+	StrCpy(btn_Data[buttonid][btn_text], text, BTN_MAX_TEXT);
 	btn_Data[buttonid][btn_posX] = x;
 	btn_Data[buttonid][btn_posY] = y;
 	btn_Data[buttonid][btn_posZ] = z;
